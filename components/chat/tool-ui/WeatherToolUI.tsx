@@ -21,24 +21,13 @@ interface WeatherToolUIProps {
  * - CombinedWeatherCard: Shows both METAR and TAF
  */
 export function WeatherToolUI({ result }: WeatherToolUIProps) {
-  // Debug logging
-  console.log('🌤️ WeatherToolUI received:', {
-    result,
-    hasData: !!result.data,
-    dataType: typeof result.data,
-    isArray: Array.isArray(result.data),
-    keys: result.data ? Object.keys(result.data) : null
-  });
-
   // Handle both single airport and multiple airports
   const weatherData = (Array.isArray(result.data) ? result.data : [result.data]).filter((d): d is WeatherData => !!d);
-
-  console.log('🌤️ Processed weatherData:', weatherData);
 
   if (!weatherData.length) {
     console.error('❌ WeatherToolUI: No valid weather data', { result });
     return (
-      <div className="text-sm text-muted-foreground border border-border rounded-lg p-3 max-w-2xl">
+      <div className="text-sm text-muted-foreground border border-border p-3 max-w-2xl">
         No weather data available
         <details className="mt-2 text-xs">
           <summary className="cursor-pointer">Debug Info</summary>
@@ -65,13 +54,6 @@ function SmartWeatherCard({ data, defaultExpanded = false }: { data: WeatherData
   const hasMetar = !!data.metar;
   const hasTaf = !!data.taf;
 
-  console.log('🎯 SmartWeatherCard routing:', {
-    icao: data.icao,
-    hasMetar,
-    hasTaf,
-    cardType: hasMetar && !hasTaf ? 'METAR-only' : !hasMetar && hasTaf ? 'TAF-only' : 'Combined'
-  });
-
   // Only METAR data - show current conditions card
   if (hasMetar && !hasTaf) {
     return <MetarCard data={data} defaultExpanded={defaultExpanded} />;
@@ -89,7 +71,7 @@ function SmartWeatherCard({ data, defaultExpanded = false }: { data: WeatherData
 
   // No data
   return (
-    <div className="text-sm text-muted-foreground border border-border rounded-lg p-3">
+    <div className="text-sm text-muted-foreground border border-border p-3">
       No weather data available for {data.icao?.toUpperCase()}
     </div>
   );
@@ -119,7 +101,7 @@ function CombinedWeatherCard({ data, defaultExpanded = false }: { data: WeatherD
   };
 
   return (
-    <div className="border border-border rounded-lg overflow-hidden bg-card max-w-2xl">
+    <div className="border border-border overflow-hidden bg-card max-w-2xl">
       {/* Header */}
       <div
         className="flex items-center justify-between p-3 cursor-pointer bg-muted hover:bg-muted/80 transition-colors"
@@ -138,7 +120,7 @@ function CombinedWeatherCard({ data, defaultExpanded = false }: { data: WeatherD
               <div className="flex items-center gap-2 mt-1">
                 <span
                   className={cn(
-                    "text-xs px-2 py-0.5 rounded-sm border font-medium",
+                    "text-xs px-2 py-0.5 border font-medium",
                     getFlightCategoryColor(metar.flight_category)
                   )}
                 >
@@ -239,7 +221,7 @@ function CombinedWeatherCard({ data, defaultExpanded = false }: { data: WeatherD
               <summary className="text-xs text-muted-foreground cursor-pointer hover:text-foreground transition-colors">
                 Show Raw METAR ▼
               </summary>
-              <div className="mt-2 text-xs font-mono bg-muted p-2 rounded border border-border overflow-x-auto">
+              <div className="mt-2 text-xs font-mono bg-muted p-2 border border-border overflow-x-auto">
                 {metar.raw_text}
               </div>
             </details>
@@ -259,7 +241,7 @@ function CombinedWeatherCard({ data, defaultExpanded = false }: { data: WeatherD
 
               {/* Validity Period */}
               {taf.timestamp && (
-                <div className="bg-muted border border-border rounded p-2 mb-3">
+                <div className="bg-muted border border-border p-2 mb-3">
                   <div className="text-xs text-foreground font-medium text-center">
                     Valid: {formatTafValidity(taf.timestamp.from || '', taf.timestamp.to || '')}
                   </div>
@@ -300,7 +282,7 @@ function CombinedWeatherCard({ data, defaultExpanded = false }: { data: WeatherD
                   <summary className="text-xs text-muted-foreground cursor-pointer hover:text-foreground transition-colors">
                     Show Raw TAF ▼
                   </summary>
-                  <div className="mt-2 text-xs font-mono bg-muted p-2 rounded border border-border overflow-x-auto">
+                  <div className="mt-2 text-xs font-mono bg-muted p-2 border border-border overflow-x-auto">
                     {taf.raw_text}
                   </div>
                 </details>

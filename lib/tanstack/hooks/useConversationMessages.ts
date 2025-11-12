@@ -11,6 +11,8 @@ export interface ConversationMessage {
   content: string;
   tokens_used: Record<string, any> | null;
   created_at: string;
+  thinking_content?: string;
+  thinking_tokens?: number;
   weather_tool_data?: Array<{
     icao: string;
     metar: any;

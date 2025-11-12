@@ -1,3 +1,4 @@
+import { memo } from"react"
 import {
  ChatMessage,
  type ChatMessageProps,
@@ -16,6 +17,13 @@ interface MessageListProps {
  | ((message: Message) => AdditionalMessageOptions)
 }
 
+// Memoized individual message component to prevent re-rendering all messages
+const MemoizedMessage = memo<Message & AdditionalMessageOptions & { showTimeStamp: boolean }>(
+ function MemoizedMessage(props) {
+ return <ChatMessage {...props} />
+ }
+)
+
 export function MessageList({
  messages,
  showTimeStamps = true,
@@ -23,16 +31,16 @@ export function MessageList({
  messageOptions,
 }: MessageListProps) {
  return (
- <div className="space-y-4 overflow-visible">
- {messages.map((message, index) => {
+ <div className="space-y-4 overflow-visible flex flex-col">
+ {messages.map((message) => {
  const additionalOptions =
  typeof messageOptions ==="function"
  ? messageOptions(message)
  : messageOptions
 
  return (
- <ChatMessage
- key={index}
+ <MemoizedMessage
+ key={message.id}
  showTimeStamp={showTimeStamps}
  {...message}
  {...additionalOptions}

@@ -2,7 +2,8 @@
 
 import { motion } from 'framer-motion';
 import { useState } from 'react';
-import { Check, Loader2 } from 'lucide-react';
+import { Check } from 'lucide-react';
+import { VerticalBarsLoader } from './minimal-loaders';
 
 interface ProcessingButtonProps {
  children: React.ReactNode;
@@ -58,14 +59,7 @@ export default function ProcessingButton({
  whileTap={state === 'idle' ? { scale: 0.98 } : {}}
  >
  <span className="flex items-center justify-center gap-2">
- {state === 'processing' && (
- <motion.div
- animate={{ rotate: 360 }}
- transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
- >
- <Loader2 size={16} />
- </motion.div>
- )}
+ {state === 'processing' && <VerticalBarsLoader size="sm" color="text-white" />}
  {state === 'success' && <Check size={16} />}
  <span>
  {state === 'idle' && children}

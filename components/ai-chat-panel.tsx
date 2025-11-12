@@ -1,36 +1,43 @@
 'use client';
 
-import { useState, useRef, useEffect, useMemo } from 'react';
+import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { ChevronRight, ChevronDown, Sparkles, Send, Loader2 } from 'lucide-react';
+import { ChevronRight, ChevronDown, Sparkles, Settings, Search } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAppStore } from '@/lib/store';
 import { useChatStore } from '@/lib/chat-store';
+import { useChatSettings } from '@/lib/chat-settings-store';
 import { usePremiumChat } from '@/hooks/usePremiumChat';
 import { useConversationMessages } from '@/lib/tanstack/hooks/useConversationMessages';
 import { useGeneralConversations } from '@/lib/tanstack/hooks/useGeneralConversations';
 import { Message as UIMessage } from '@/components/ui/chat-message';
 import { MessageList } from '@/components/ui/message-list';
 import { CopyButton } from '@/components/ui/copy-button';
-// (StatusBadge removed from header to reduce visual weight)
+import ChatModeSelector from '@/components/chat/ChatModeSelector';
+import ChatSettingsModal from '@/components/chat/ChatSettingsModal';
+import { useChatSessionStore } from '@/lib/chat-session-store';
+import { groupConversationsByRecency, sortConversationsByUpdatedAt } from '@/lib/conversations';
 
 export default function AiChatPanel() {
   const pathname = usePathname();
-  const { aiChatOpen, toggleAiChat } = useAppStore();
+  const { aiChatOpen, toggleAiChat, setSearchValue } = useAppStore();
   const { selectedContext } = useChatStore();
+  const { useSimpleChat, currentMode, setMode, showTimestamps, showThinkingProcess } = useChatSettings();
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLTextAreaElement>(null);
   const queryClient = useQueryClient();
-  
-  // Manage conversation ID
-  const [conversationId, setConversationId] = useState<string | null>(null);
+  const { activeConversationId, setActiveConversationId } = useChatSessionStore();
   const [isRecentsOpen, setIsRecentsOpen] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [recentSearch, setRecentSearch] = useState('');
   const { data: conversations = [] } = useGeneralConversations();
-  
+  const conversationId = activeConversationId;
+
   // Fetch messages for current conversation
   const { data: messagesData } = useConversationMessages(conversationId);
-  const messages = useMemo(() => messagesData?.messages ?? [], [messagesData?.messages]);
+  const messages = useMemo(() => {
+    return messagesData?.messages ?? [];
+  }, [messagesData?.messages]);
   const shouldHidePanel = pathname === '/chat-enhanced';
 
   // Use Gemini-powered chat hook
@@ -44,7 +51,12 @@ export default function AiChatPanel() {
   } = usePremiumChat({
     conversationId,
     onConversationCreated: (newConversationId) => {
-      setConversationId(newConversationId);
+      setActiveConversationId(newConversationId);
+
+      queryClient.invalidateQueries({
+        queryKey: ['conversation-messages', newConversationId],
+        refetchType: 'active',
+      });
     },
     onError: (error) => {
       console.error('Chat error:', error);
@@ -53,21 +65,10 @@ export default function AiChatPanel() {
 
   // Transform messages to UI format
   const displayedMessages: UIMessage[] = messages.map((msg) => {
-    console.log('🔍 Processing message:', {
-      id: msg.id,
-      role: msg.role,
-      hasWeatherData: !!msg.weather_tool_data,
-      weatherDataLength: msg.weather_tool_data?.length,
-      weatherData: msg.weather_tool_data,
-      hasAirportData: !!msg.airport_tool_data,
-      airportDataLength: msg.airport_tool_data?.length
-    });
-
     const toolInvocations: any[] = [];
     
     // Convert weatherData to toolInvocations format (for WeatherToolUI)
     if (msg.weather_tool_data && msg.weather_tool_data.length > 0) {
-      console.log('✅ Converting weather_tool_data to toolInvocations:', msg.weather_tool_data);
       msg.weather_tool_data.forEach((weatherItem: any) => {
         // WeatherToolUI expects data in result.data format
         const toolInvocation = {
@@ -77,14 +78,12 @@ export default function AiChatPanel() {
             data: weatherItem // Wrap in data object for WeatherToolUI
           }
         };
-        console.log('📦 Created weather toolInvocation:', toolInvocation);
         toolInvocations.push(toolInvocation);
       });
     }
     
     // Convert airportData to toolInvocations format (for AirportInfoToolUI)
     if (msg.airport_tool_data && msg.airport_tool_data.length > 0) {
-      console.log('✅ Converting airport_tool_data to toolInvocations:', msg.airport_tool_data);
       msg.airport_tool_data.forEach((airportItem: any) => {
         toolInvocations.push({
           state: 'result' as const,
@@ -95,18 +94,14 @@ export default function AiChatPanel() {
         });
       });
     }
-    
-    console.log('📋 Final toolInvocations for message:', {
-      messageId: msg.id,
-      toolInvocationsCount: toolInvocations.length,
-      toolInvocations
-    });
-    
+
     return {
       id: msg.id,
       role: msg.role as 'user' | 'assistant',
       content: msg.content,
       createdAt: new Date(msg.created_at),
+      thinking_content: msg.thinking_content,
+      thinking_tokens: msg.thinking_tokens,
       toolInvocations: toolInvocations.length > 0 ? toolInvocations : undefined
     };
   });
@@ -118,44 +113,54 @@ export default function AiChatPanel() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  // Minimal keyboard handling: ESC closes panel
+  // Keyboard handling
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && aiChatOpen) toggleAiChat();
+      // ESC closes panel
+      if (e.key === 'Escape' && aiChatOpen) {
+        toggleAiChat();
+      }
     };
+    
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [aiChatOpen, toggleAiChat]);
 
   // Recent conversations: pinned first, then most recent, limit 5
-  const recentConversations = useMemo(() => {
-    const pinned = conversations.filter(c => c.pinned);
-    const others = conversations.filter(c => !c.pinned);
-    const sortDesc = (a: any, b: any) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime();
-    const ordered = [...pinned.sort(sortDesc), ...others.sort(sortDesc)];
-    return ordered.slice(0, 5);
-  }, [conversations]);
+  const filteredConversations = useMemo(() => {
+    if (!recentSearch.trim()) return conversations;
+    const query = recentSearch.toLowerCase();
+    return conversations.filter((conv) => conv.title.toLowerCase().includes(query));
+  }, [conversations, recentSearch]);
 
-  if (shouldHidePanel) {
-    return null;
-  }
+  const groupedConversations = useMemo(
+    () => groupConversationsByRecency(sortConversationsByUpdatedAt(filteredConversations)),
+    [filteredConversations]
+  );
 
-  const handleSend = () => {
-    if (!input.trim() || isLoading) return;
-    sendMessage();
-  };
+  const handleSend = useCallback((messageText?: string) => {
+    const textToSend = messageText || input.trim();
+    if (!textToSend || isLoading) return;
+    
+    // Pass the content directly to sendMessage (it will handle clearing input)
+    sendMessage(textToSend);
+  }, [input, isLoading, sendMessage]);
 
-  const handleKeyPress = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSend();
+  // Expose handleSend to window for header to call
+  useEffect(() => {
+    if (aiChatOpen) {
+      (window as any).__aiChatSend = handleSend;
     }
-  };
+    return () => {
+      delete (window as any).__aiChatSend;
+    };
+  }, [aiChatOpen, handleSend]);
 
   const messageOptions = (message: UIMessage) => ({
     actions: (
       <CopyButton content={message.content} copyMessage="Copied response to clipboard!" />
     ),
+    showTimeStamp: showTimestamps,
   });
 
   // Prefetch conversation messages for snappy switching
@@ -172,133 +177,125 @@ export default function AiChatPanel() {
     });
   };
 
-
-  const handleNew = async () => {
-    // Clear current conversation and prepare for new chat
-    const previousConversationId = conversationId;
-    
-    // Set to null first (new conversation will be created on first message send)
-    setConversationId(null);
-    
-    // Clear input
-    setInput('');
-    
-    // Remove cached messages from the previous conversation to avoid showing old data
-    if (previousConversationId) {
-      queryClient.removeQueries({ 
-        queryKey: ['conversation-messages', previousConversationId] 
-      });
+  const renderSection = (
+    label: string,
+    items: Array<{ id: string; title: string; message_count: number }>
+  ) => {
+    if (items.length === 0) {
+      return null;
     }
-    
-    // Focus input for immediate typing
-    setTimeout(() => inputRef.current?.focus(), 0);
+
+    return (
+      <div className="space-y-2" key={label}>
+        <div className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide">{label}</div>
+        <ul className="space-y-1">
+          {items.map((item) => {
+            const isActive = conversationId === item.id;
+            return (
+              <li key={item.id}>
+                <button
+                  onClick={() => setActiveConversationId(item.id)}
+                  onMouseEnter={() => prefetchConversation(item.id)}
+                  className={`w-full text-left px-2 py-2 border-l-2 transition-colors text-xs ${
+                    isActive ? 'border-blue bg-blue/5 text-text-primary' : 'border-transparent hover:bg-surface hover:border-border'
+                  }`}
+                  title={item.title}
+                >
+                  <div className="flex items-center gap-2">
+                    <span className="truncate flex-1">{item.title}</span>
+                    <span className="text-[10px] text-text-secondary">{item.message_count}</span>
+                  </div>
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+    );
   };
 
-  if (!aiChatOpen) {
-    return (
-      <button
-        onClick={toggleAiChat}
-        className="fixed right-4 top-1/2 -translate-y-1/2 bg-blue text-white px-2 py-5 shadow-md hover:bg-blue/90 transition-colors z-30 rounded-l-sm"
-        title="Open AI Chat"
-      >
-        <ChevronRight size={18} className="rotate-180" />
-      </button>
-    );
+  const handleNew = () => {
+    setActiveConversationId(null);
+    setInput('');
+    setSearchValue('');
+    // Clear cached messages to ensure truly empty state
+    queryClient.removeQueries({ queryKey: ['conversation-messages'] });
+  };
+
+  // Important: perform visibility checks only after all hooks are declared to keep hook order stable
+  if (shouldHidePanel || !aiChatOpen) {
+    return null;
   }
 
   return (
-    <aside className="w-80 md:w-96 bg-card border-l border-border flex flex-col h-full max-h-full">
-      <header className="px-4 py-2 border-b border-border flex items-center justify-between shrink-0">
-        <div className="flex items-center gap-2 text-text-primary">
-          <Sparkles className="text-blue" size={16} />
-          <span className="text-sm font-medium">AI Assistant</span>
-        </div>
-        <div className="flex items-center gap-2">
-          {selectedContext.type !== 'general' && (
-            <div className="text-[10px] px-1.5 py-0.5 border border-border text-muted-foreground">
-              {selectedContext.type === 'flight' ? 'Flight' : 'Airport'}
-            </div>
-          )}
-          <button
-            onClick={toggleAiChat}
-            className="text-text-secondary hover:text-text-primary transition-colors"
-            title="Close"
-            aria-label="Close"
-          >
-            <ChevronRight size={18} />
-          </button>
-        </div>
-      </header>
+    <>
+      {/* Mobile backdrop */}
+      {aiChatOpen && (
+        <div 
+          className="md:hidden fixed inset-0 bg-black/20 backdrop-blur-sm z-40 animate-in fade-in duration-200"
+          onClick={toggleAiChat}
+        />
+      )}
 
-      {/* Recents - Collapsible */}
-      <section className="border-b border-border shrink-0">
-        <button
-          onClick={() => setIsRecentsOpen(!isRecentsOpen)}
-          className="w-full px-4 py-2 flex items-center justify-between hover:bg-surface transition-colors"
-        >
+      {/* AI Sidebar */}
+      <aside 
+        className={`
+          fixed top-16 right-0 bottom-0 z-50
+          bg-card border-l border-border
+          flex flex-col
+          w-full md:w-96
+          transform transition-all duration-300 ease-out
+          ${aiChatOpen ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0'}
+        `}
+        style={{ transitionProperty: 'transform, opacity' }}
+      >
+        {/* TOP: Action Buttons */}
+        <div className="flex items-center justify-between px-4 py-2.5 border-b border-border shrink-0">
+          <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+            Conversations
+          </span>
           <div className="flex items-center gap-2">
-            {isRecentsOpen ? (
-              <ChevronDown size={14} className="text-muted-foreground" />
-            ) : (
-              <ChevronRight size={14} className="text-muted-foreground" />
-            )}
-            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-              Recents {!isRecentsOpen && recentConversations.length > 0 && `(${recentConversations.length})`}
-            </span>
-          </div>
-          <div className="flex items-center gap-3">
             <button 
-              onClick={(e) => {
-                e.stopPropagation();
-                handleNew();
-              }} 
-              className="text-xs text-blue hover:underline" 
+              onClick={handleNew}
+              className="text-xs text-blue hover:underline font-medium" 
               title="Start new chat"
             >
               New
             </button>
             <Link 
-              href="/chat-enhanced" 
-              className="text-xs text-text-secondary hover:text-text-primary" 
+              href={conversationId ? `/chat-enhanced?conversation=${conversationId}` : '/chat-enhanced'}
+              className="text-xs text-text-secondary hover:text-text-primary font-medium" 
               title="Open full chat"
-              onClick={(e) => e.stopPropagation()}
             >
               Open
             </Link>
+            <button
+              onClick={() => setIsSettingsOpen(true)}
+              className="text-text-secondary hover:text-text-primary transition-colors"
+              title="Settings"
+            >
+              <Settings size={14} />
+            </button>
           </div>
-        </button>
-        
-        {isRecentsOpen && (
-          <ul className="px-2 pb-2 max-h-40 overflow-y-auto">
-            {recentConversations.map((c) => (
-              <li key={c.id}>
-                <button
-                  onClick={() => setConversationId(c.id)}
-                  onMouseEnter={() => prefetchConversation(c.id)}
-                  className={`w-full text-left px-2 h-9 flex items-center gap-2 border-l-2 transition-colors ${
-                    conversationId === c.id ? 'border-blue bg-blue/5' : 'border-transparent hover:bg-surface hover:border-border'
-                  }`}
-                  title={c.title}
-                >
-                  <span className="truncate text-sm text-text-primary">{c.title}</span>
-                  <span className="ml-auto text-[10px] text-text-secondary">{c.message_count}</span>
-                </button>
-              </li>
-            ))}
-            {recentConversations.length === 0 && (
-              <li className="px-4 py-2 text-xs text-text-secondary">No recent chats</li>
-            )}
-          </ul>
-        )}
-      </section>
-
-      {error && (
-        <div className="px-6 py-3 text-sm text-red-600 bg-red-50 border-b border-border">
-          {error}
         </div>
-      )}
 
-      <div className="flex-1 overflow-y-auto px-4 py-3 min-h-0">
+        {/* Mode Selector (hidden in simple chat mode) */}
+        {!useSimpleChat && currentMode && (
+          <ChatModeSelector
+            mode={currentMode}
+            onModeChange={setMode}
+            compact={true}
+          />
+        )}
+
+        {error && (
+          <div className="px-6 py-3 text-sm text-red-600 bg-red-50 border-b border-border">
+            {error}
+          </div>
+        )}
+
+        {/* MESSAGES AREA */}
+        <div className="flex-1 overflow-y-auto px-4 py-3 min-h-0">
         {isEmpty ? (
           <div className="flex flex-col items-center justify-center h-full">
             <div className="text-center max-w-sm">
@@ -313,7 +310,7 @@ export default function AiChatPanel() {
           <>
             <MessageList
               messages={displayedMessages}
-              isTyping={isLoading}
+              isTyping={isLoading && !showThinkingProcess}
               messageOptions={messageOptions}
             />
             <div ref={messagesEndRef} />
@@ -321,31 +318,84 @@ export default function AiChatPanel() {
         )}
       </div>
 
-      <div className="p-3 border-t border-border shrink-0">
-        <div className="flex gap-2 items-end">
-          <textarea
-            ref={inputRef}
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={handleKeyPress}
-            placeholder="Ask anything..."
-            className="flex-1 px-3 py-2.5 border border-border rounded-none text-sm focus:outline-none focus:border-blue resize-none min-h-[56px] max-h-[120px]"
-            disabled={isLoading}
-          />
-          <button
-            onClick={handleSend}
-            disabled={!input.trim() || isLoading}
-            className="px-3 py-2.5 bg-blue text-white hover:bg-blue/90 rounded-none transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            title="Send"
-          >
-            {isLoading ? (
-              <Loader2 size={18} className="animate-spin" />
-            ) : (
-              <Send size={18} />
+      {/* BOTTOM: AI Assistant Header + Recents */}
+      <div className="shrink-0 border-t border-border">
+        {/* HEADER: Context Badge + Close */}
+        <header className="px-4 py-2 border-b border-border flex items-center justify-between">
+          <div className="flex items-center gap-2 text-text-primary">
+            <Sparkles className="text-blue" size={16} />
+            <span className="text-sm font-medium">AI Assistant</span>
+          </div>
+          <div className="flex items-center gap-2">
+            {selectedContext.type !== 'general' && (
+              <div className="text-[10px] px-1.5 py-0.5 border border-border text-muted-foreground">
+                {selectedContext.type === 'flight' ? 'Flight' : 'Airport'}
+              </div>
             )}
+            <button
+              onClick={toggleAiChat}
+              className="text-text-secondary hover:text-text-primary transition-colors"
+              title="Close"
+              aria-label="Close"
+            >
+              <ChevronRight size={18} />
+            </button>
+          </div>
+        </header>
+
+        {/* Recents - Collapsible */}
+        <section>
+          <button
+            onClick={() => setIsRecentsOpen(!isRecentsOpen)}
+            className="w-full px-4 py-2 flex items-center gap-2 hover:bg-surface transition-colors"
+          >
+            {isRecentsOpen ? (
+              <ChevronDown size={14} className="text-muted-foreground" />
+            ) : (
+              <ChevronRight size={14} className="text-muted-foreground" />
+            )}
+            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+              Recents {!isRecentsOpen && conversations.length > 0 && `(${conversations.length})`}
+            </span>
           </button>
-        </div>
+          
+          {isRecentsOpen && (
+            <div className="px-3 pb-3 space-y-3">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={12} />
+                <input
+                  type="text"
+                  value={recentSearch}
+                  onChange={(event) => setRecentSearch(event.target.value)}
+                  placeholder="Search conversations..."
+                  className="w-full pl-8 pr-3 py-2 bg-muted/40 border border-border text-xs placeholder:text-muted-foreground focus:outline-none focus:border-blue"
+                />
+              </div>
+
+              <div className="max-h-48 overflow-y-auto pr-1 space-y-4">
+                {renderSection('Pinned', groupedConversations.pinned)}
+                {renderSection('Today', groupedConversations.today)}
+                {renderSection('Yesterday', groupedConversations.yesterday)}
+                {renderSection('Last 7 Days', groupedConversations.lastWeek)}
+                {renderSection('Older', groupedConversations.older)}
+
+                {filteredConversations.length === 0 && (
+                  <div className="text-xs text-text-secondary text-center py-6 border border-dashed border-border/60">
+                    No conversations found
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </section>
       </div>
+
+      {/* Settings Modal */}
+      <ChatSettingsModal 
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
+      />
     </aside>
+    </>
   );
 }

@@ -61,7 +61,7 @@ export function AirportInfoToolUI({ result }: AirportInfoToolUIProps) {
 
   if (!airports.length) {
     return (
-      <div className="text-sm text-muted-foreground border border-border rounded-lg p-3">
+      <div className="text-sm text-muted-foreground border border-border p-3">
         No airport data available
       </div>
     );
@@ -80,7 +80,7 @@ function AirportCard({ airport, defaultExpanded = false }: { airport: Airport; d
   const [expanded, setExpanded] = useState(defaultExpanded);
 
   return (
-    <div className="border border-border rounded-lg overflow-hidden bg-background">
+    <div className="border border-border overflow-hidden bg-background">
       {/* Header */}
       <div
         className="flex items-center justify-between p-3 cursor-pointer hover:bg-muted/50 transition-colors"
@@ -100,7 +100,7 @@ function AirportCard({ airport, defaultExpanded = false }: { airport: Airport; d
         </div>
         <div className="flex items-center gap-2">
           {airport.classification?.type && (
-            <span className="text-xs px-2 py-0.5 rounded bg-blue-500/20 text-blue-700 dark:text-blue-400">
+            <span className="text-xs px-2 py-0.5 bg-blue-500/20 text-blue-700 dark:text-blue-400">
               {airport.classification.type.replace("_", " ")}
             </span>
           )}

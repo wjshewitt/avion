@@ -22,16 +22,13 @@ export default function AppLayout({
        {/* Header */}
        <AppHeader currentRoute={pathname} />
 
-       {/* Page Content + AI Panel */}
-       <div className="flex-1 flex min-h-0">
-         {/* Main Page Content */}
-         <div className="flex-1 min-w-0 overflow-y-auto">
-           {children}
-         </div>
-
-         {/* Right AI Chat Panel */}
-         <AiChatPanel />
+       {/* Page Content */}
+       <div className="flex-1 overflow-y-auto">
+         {children}
        </div>
+
+       {/* AI Chat Panel (Fixed Position) */}
+       <AiChatPanel />
      </div>
    </div>
  );

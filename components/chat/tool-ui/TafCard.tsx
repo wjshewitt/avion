@@ -26,7 +26,7 @@ export function TafCard({ data, defaultExpanded = true }: TafCardProps) {
 
   if (!taf) {
     return (
-      <div className="text-sm text-muted-foreground border border-border rounded-lg p-3 max-w-2xl">
+      <div className="text-sm text-muted-foreground border border-border p-3 max-w-2xl">
         No TAF data available
       </div>
     );
@@ -41,7 +41,7 @@ export function TafCard({ data, defaultExpanded = true }: TafCardProps) {
   const hasMorePeriods = forecastPeriods.length > 3;
 
   return (
-    <div className="border border-border rounded-lg overflow-hidden bg-card max-w-2xl">
+    <div className="border border-border overflow-hidden bg-card max-w-2xl">
       {/* Header */}
       <div
         className="flex items-center justify-between p-3 cursor-pointer bg-muted hover:bg-muted/80 transition-colors"
@@ -61,7 +61,7 @@ export function TafCard({ data, defaultExpanded = true }: TafCardProps) {
       {expanded && (
         <div className="border-t border-border p-3 space-y-3 bg-muted/30">
           {/* Validity Period - Prominent */}
-          <div className="bg-muted border border-border rounded p-2">
+          <div className="bg-muted border border-border p-2">
             <div className="text-xs text-foreground font-medium text-center">
               Valid: {validityPeriod}
             </div>
@@ -93,7 +93,7 @@ export function TafCard({ data, defaultExpanded = true }: TafCardProps) {
               {hasMorePeriods && (
                 <button
                   onClick={() => setShowAllPeriods(!showAllPeriods)}
-                  className="w-full text-xs text-blue-600 dark:text-blue-400 hover:underline py-2 border border-border rounded-lg hover:bg-muted/50 transition-colors"
+                  className="w-full text-xs text-blue-600 dark:text-blue-400 hover:underline py-2 border border-border hover:bg-muted/50 transition-colors"
                 >
                   {showAllPeriods
                     ? '▲ Show Less'

@@ -250,12 +250,12 @@ export function ChatMessages({
 
  return (
  <div
- className="grid grid-cols-1 overflow-y-auto pb-4"
+ className="grid grid-cols-1 overflow-y-auto overflow-x-hidden pb-4 min-h-0 flex-1"
  ref={containerRef}
  onScroll={handleScroll}
  onTouchStart={handleTouchStart}
  >
- <div className="max-w-full [grid-column:1/1] [grid-row:1/1]">
+ <div className="max-w-full [grid-column:1/1] [grid-row:1/1] min-h-0">
  {children}
  </div>
 
@@ -284,7 +284,7 @@ export const ChatContainer = forwardRef<
  return (
  <div
  ref={ref}
- className={cn("grid h-full w-full grid-rows-[1fr_auto]", className)}
+ className={cn("grid h-full w-full grid-rows-[1fr_auto] min-h-0", className)}
  {...props}
  />
  )

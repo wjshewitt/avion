@@ -3,7 +3,7 @@
 import { useEffect, useRef } from 'react';
 import { useConversationMessages } from '@/lib/tanstack/hooks/useConversationMessages';
 import ChatMessage from './chat-message';
-import { Loader2 } from 'lucide-react';
+import { GridDotsLoader } from '@/components/kokonutui/minimal-loaders';
 
 interface ChatMessagesProps {
  conversationId: string | null;
@@ -33,7 +33,10 @@ export default function ChatMessages({ conversationId, isGenerating = false }: C
  if (isLoading) {
  return (
  <div className="flex-1 flex items-center justify-center">
- <Loader2 className="animate-spin text-text-secondary" size={32} />
+ <div className="flex items-center gap-3 text-text-secondary">
+ <GridDotsLoader size="md" color="text-purple-500" />
+ <span className="text-sm font-mono">Syncing conversation...</span>
+ </div>
  </div>
  );
  }
@@ -88,12 +91,6 @@ export default function ChatMessages({ conversationId, isGenerating = false }: C
  onDelete={undefined} // Remove delete functionality for now
  />
  ))}
- {isGenerating && (
- <div className="flex items-center gap-2 text-muted-foreground py-4">
- <Loader2 className="animate-spin" size={16} />
- <span className="text-sm">AI is thinking...</span>
- </div>
- )}
  <div ref={messagesEndRef} />
  </div>
  );

@@ -14,6 +14,8 @@ import {
 import { FilePreview } from"@/components/ui/file-preview"
 import { MarkdownRenderer } from"@/components/ui/markdown-renderer"
 import { WeatherToolUI, FlightSelectorToolUI, AirportInfoToolUI } from"@/components/chat/tool-ui"
+import { useChatSettings } from"@/lib/chat-settings-store"
+import { ThinkingBlock } from"@/components/chat/ThinkingBlock"
 
 const chatBubbleVariants = cva(
 "group/message relative break-words p-3 text-sm sm:max-w-[70%]",
@@ -128,6 +130,8 @@ export interface Message {
  role:"user" |"assistant" | (string & {})
  content: string
  createdAt?: Date
+ thinking_content?: string
+ thinking_tokens?: number
  experimental_attachments?: Attachment[]
  toolInvocations?: ToolInvocation[]
  parts?: MessagePart[]
@@ -146,6 +150,8 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
  showTimeStamp = false,
  animation ="scale",
  actions,
+ thinking_content,
+ thinking_tokens,
  experimental_attachments,
  toolInvocations,
  parts,
@@ -159,6 +165,8 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
  return file
  })
  }, [experimental_attachments])
+
+ const { showToolCards } = useChatSettings()
 
  const isUser = role ==="user"
 
@@ -247,11 +255,59 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
  }
 
  if (toolInvocations && toolInvocations.length > 0) {
- return <ToolCall toolInvocations={toolInvocations} />
+ return (
+ <div className="flex flex-col items-start gap-3 max-w-full">
+ {/* Thinking block first (if present) */}
+ {thinking_content && thinking_content.trim() && (
+ <ThinkingBlock
+ content={thinking_content}
+ tokens={thinking_tokens}
+ />
+ )}
+
+ {/* Show AI's text response second (if present) */}
+ {content && content.trim() && (
+ <div className={cn(chatBubbleVariants({ isUser, animation }))}>
+ <MarkdownRenderer>{content}</MarkdownRenderer>
+ {actions ? (
+ <div className="absolute -bottom-4 right-2 flex space-x-1 border bg-background p-1 text-foreground opacity-0 transition-opacity group-hover/message:opacity-100">
+ {actions}
+ </div>
+ ) : null}
+ </div>
+ )}
+
+ {/* Show tool UI components below (if enabled) */}
+ {showToolCards && (
+ <ToolCall toolInvocations={toolInvocations} />
+ )}
+
+ {/* Timestamp at bottom (if enabled) */}
+ {showTimeStamp && createdAt ? (
+ <time
+ dateTime={createdAt.toISOString()}
+ className={cn(
+"mt-1 block px-1 text-xs opacity-50",
+ animation !=="none" &&"duration-500 animate-in fade-in-0"
+ )}
+ >
+ {formattedTime}
+ </time>
+ ) : null}
+ </div>
+ )
  }
 
  return (
  <div className={cn("flex flex-col", isUser ?"items-end" :"items-start")}>
+ {/* Thinking block for assistant messages without tool invocations */}
+ {!isUser && thinking_content && thinking_content.trim() && (
+ <ThinkingBlock
+ content={thinking_content}
+ tokens={thinking_tokens}
+ />
+ )}
+
  <div className={cn(chatBubbleVariants({ isUser, animation }))}>
  <MarkdownRenderer>{content}</MarkdownRenderer>
  {actions ? (

@@ -610,6 +610,289 @@ Data Retrieved: ${new Date(w.timestamp).toLocaleString()}
 }
 
 /**
+ * Stream chat messages with real-time token generation
+ * Yields chunks as they arrive for progressive UI updates
+ */
+export async function* sendGeneralChatMessageStream(
+  conversationHistory: ChatMessage[],
+  userMessage: string,
+  userId?: string
+): AsyncGenerator<{
+  type: 'content' | 'tool_call' | 'done' | 'thinking';
+  content?: string;
+  thinking?: string;
+  tokens?: number;
+  toolCalls?: ToolCall[];
+  weatherData?: any[];
+  airportData?: any[];
+  tokensUsed?: { input: number; output: number; thinking?: number };
+  modelUsed?: string;
+}> {
+  // Build message structure (same as non-streaming)
+  const contents: any[] = [];
+  
+  if (conversationHistory.length === 0) {
+    contents.push({
+      role: 'model',
+      parts: [{ text: GENERAL_WEATHER_SYSTEM_PROMPT }]
+    });
+  }
+  
+  conversationHistory.forEach(msg => {
+    contents.push({
+      role: msg.role === 'user' ? 'user' : 'model',
+      parts: [{ text: msg.content }]
+    });
+  });
+  
+  contents.push({
+    role: 'user',
+    parts: [{ text: userMessage }]
+  });
+  
+  const thinkingBudget = getThinkingBudget(userMessage);
+  const config = {
+    tools: [{ functionDeclarations: GENERAL_CHAT_TOOLS }],
+    thinkingConfig: {
+      thinkingBudget,
+      includeThoughts: true
+    }
+  } as any;
+  
+  // Use streaming API
+  const streamGenerator = await ai.models.generateContentStream({
+    model: MODEL,
+    contents,
+    config
+  });
+  
+  let accumulatedText = '';
+  let accumulatedThinking = '';
+  let accumulatedTokens = { input: 0, output: 0, thinking: 0 };
+  let functionCalls: any[] = [];
+  
+  // Stream chunks
+  for await (const chunk of streamGenerator) {
+    // Extract thinking parts (parts with thought: true flag)
+    const parts = chunk.candidates?.[0]?.content?.parts || [];
+    const thinkingParts = parts.filter((part: any) => part.thought === true && part.text);
+    
+    if (thinkingParts.length > 0) {
+      const thinkingText = thinkingParts.map((p: any) => p.text).join('\n');
+      accumulatedThinking += thinkingText;
+      
+      // Yield thinking chunk
+      yield {
+        type: 'thinking',
+        content: accumulatedThinking,
+        tokens: chunk.usageMetadata?.thoughtsTokenCount || 0
+      };
+    }
+    
+    // Check for function calls in this chunk
+    if (chunk.functionCalls && chunk.functionCalls.length > 0) {
+      functionCalls = chunk.functionCalls;
+      console.log('🔧 Tool calls detected in stream:', functionCalls);
+      
+      // Yield tool call notification
+      yield {
+        type: 'tool_call',
+        toolCalls: functionCalls.map((fc: any) => ({ name: fc.name, args: fc.args }))
+      };
+      
+      // Execute tools
+      const weatherDataCollection: any[] = [];
+      const airportDataCollection: any[] = [];
+      
+      const toolResults = await Promise.all(
+        functionCalls.map(async (call: any) => {
+          try {
+            let data;
+            
+            if (call.name === 'get_airport_weather') {
+              const icao = call.args?.icao?.toUpperCase();
+              if (!icao) throw new Error('ICAO required');
+              
+              const snapshot = await getAirfieldWeatherSnapshot(icao, 'full');
+              
+              weatherDataCollection.push({
+                icao,
+                metar: snapshot.weatherData.metar || null,
+                taf: snapshot.weatherData.taf || null
+              });
+              
+              data = {
+                icao,
+                metar: snapshot.weatherData.metar?.raw_text || null,
+                taf: snapshot.weatherData.taf?.raw_text || null,
+                flightCategory: snapshot.weatherData.metar?.flight_category || 'UNKNOWN',
+                timestamp: new Date().toISOString()
+              };
+            } else if (call.name === 'get_airport_capabilities') {
+              data = await executeFlightTool(call.name, call.args, userId || 'anonymous');
+              
+              airportDataCollection.push({
+                icao: call.args.icao?.toUpperCase() || 'UNKNOWN',
+                airport: data.airport,
+                runways: data.runways,
+                navigation: data.navigation,
+                communications: data.communications,
+                suitability: data.aircraft_suitability
+              });
+            } else if (userId) {
+              data = await executeFlightTool(call.name, call.args, userId);
+            } else {
+              throw new Error('User authentication required for this tool');
+            }
+            
+            return {
+              name: call.name,
+              success: true,
+              data
+            };
+          } catch (error) {
+            console.error(`Failed to execute ${call.name}:`, error);
+            return {
+              name: call.name,
+              success: false,
+              error: error instanceof Error ? error.message : 'Unknown error'
+            };
+          }
+        })
+      );
+      
+      // Add function call and results to contents for next streaming round
+      if (chunk.candidates?.[0]?.content) {
+        contents.push(chunk.candidates[0].content);
+      }
+      
+      for (let i = 0; i < functionCalls.length; i++) {
+        const call = functionCalls[i];
+        const result = toolResults[i];
+        
+        let formattedData: string;
+        
+        if (result.success) {
+          if (call.name === 'get_airport_weather') {
+            const w = result.data as AirportWeatherResult;
+            formattedData = `
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+AIRPORT WEATHER: ${w.icao}
+Flight Category: ${w.flightCategory}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+${w.metar ? `METAR: ${w.metar}` : 'METAR: Not available'}
+${w.taf ? `TAF: ${w.taf}` : 'TAF: Not available'}
+Data Retrieved: ${new Date(w.timestamp).toLocaleString()}
+`;
+          } else {
+            formattedData = JSON.stringify(result.data, null, 2);
+          }
+        } else {
+          formattedData = `ERROR: ${result.error}`;
+        }
+        
+        contents.push({
+          role: 'user',
+          parts: [{
+            functionResponse: {
+              name: call.name,
+              response: {
+                success: result.success,
+                data: formattedData
+              }
+            }
+          }]
+        });
+      }
+      
+      // Continue streaming with tool results
+      const continueStream = await ai.models.generateContentStream({
+        model: MODEL,
+        contents,
+        config
+      });
+      
+      for await (const continueChunk of continueStream) {
+        const chunkText = extractResponseText(continueChunk);
+        
+        if (chunkText) {
+          accumulatedText += chunkText;
+          
+          // Yield content chunk
+          yield {
+            type: 'content',
+            content: accumulatedText
+          };
+        }
+        
+        // Accumulate tokens
+        if (continueChunk.usageMetadata) {
+          accumulatedTokens.input += continueChunk.usageMetadata.promptTokenCount || 0;
+          accumulatedTokens.output += continueChunk.usageMetadata.candidatesTokenCount || 0;
+          accumulatedTokens.thinking += continueChunk.usageMetadata.thoughtsTokenCount || 0;
+        }
+      }
+      
+      // Yield final result with tool data
+      yield {
+        type: 'done',
+        content: accumulatedText,
+        thinking: accumulatedThinking || undefined,
+        toolCalls: functionCalls.map((fc: any) => ({ name: fc.name, args: fc.args })),
+        weatherData: weatherDataCollection.length > 0 ? weatherDataCollection : undefined,
+        airportData: airportDataCollection.length > 0 ? airportDataCollection : undefined,
+        tokensUsed: accumulatedTokens,
+        modelUsed: MODEL
+      };
+      
+      return; // Exit generator
+    }
+    
+    // Regular text chunk (no tools) - exclude thinking parts
+    let chunkText = '';
+    
+    // Try to extract from parts first (when thinking mode is enabled)
+    if (parts.length > 0) {
+      const textParts = parts.filter((part: any) => !part.thought && part.text);
+      if (textParts.length > 0) {
+        chunkText = textParts.map((p: any) => p.text).join('');
+      }
+    }
+    
+    // Fallback to extractResponseText for non-thinking responses
+    if (!chunkText && parts.length === 0) {
+      chunkText = extractResponseText(chunk) || '';
+    }
+    
+    if (chunkText) {
+      accumulatedText += chunkText;
+      
+      // Yield content chunk
+      yield {
+        type: 'content',
+        content: accumulatedText
+      };
+    }
+    
+    // Accumulate tokens
+    if (chunk.usageMetadata) {
+      accumulatedTokens.input += chunk.usageMetadata.promptTokenCount || 0;
+      accumulatedTokens.output += chunk.usageMetadata.candidatesTokenCount || 0;
+      accumulatedTokens.thinking += chunk.usageMetadata.thoughtsTokenCount || 0;
+    }
+  }
+  
+  // Final yield (no tools were called)
+  yield {
+    type: 'done',
+    content: accumulatedText,
+    thinking: accumulatedThinking || undefined,
+    tokensUsed: accumulatedTokens,
+    modelUsed: MODEL
+  };
+}
+
+/**
  * Calculate cost for general chat
  */
 export function calculateGeneralChatCost(

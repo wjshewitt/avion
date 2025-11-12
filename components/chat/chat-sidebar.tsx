@@ -2,27 +2,16 @@
 
 import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { Plus, Search, Pin, Trash2, Loader2, AlertTriangle, MessageSquare } from 'lucide-react';
-import { useGeneralConversations, useCreateConversation, useDeleteConversation } from '@/lib/tanstack/hooks/useGeneralConversations';
-import CornerBracket from '../corner-bracket';
-
-interface ConversationListItem {
- id: string;
- title: string;
- chat_type: 'general' | 'flight';
- message_count: number;
- last_message_preview: string;
- created_at: string;
- updated_at: string;
- pinned?: boolean;
-}
+import { Plus, Search, Trash2, Pencil, AlertTriangle, MessageSquare } from 'lucide-react';
+import { useGeneralConversations, useCreateConversation, useDeleteConversation, useUpdateConversationTitle, type ConversationListItem } from '@/lib/tanstack/hooks/useGeneralConversations';
+import { GridDotsLoader, CornerBracketsLoader } from '@/components/kokonutui/minimal-loaders';
+import { groupConversationsByRecency, sortConversationsByUpdatedAt } from '@/lib/conversations';
+import { DeleteConfirmDialog } from './DeleteConfirmDialog';
 
 interface ChatSidebarProps {
  activeConversationId: string | null;
  onConversationSelect: (id: string) => void;
 }
-
-const MS_IN_DAY = 24 * 60 * 60 * 1000;
 
 export default function ChatSidebar({ activeConversationId, onConversationSelect }: ChatSidebarProps) {
  const [searchQuery, setSearchQuery] = useState('');
@@ -30,6 +19,7 @@ export default function ChatSidebar({ activeConversationId, onConversationSelect
  const { data: conversations = [], isLoading, error } = useGeneralConversations();
  const createConversation = useCreateConversation();
  const deleteConversation = useDeleteConversation();
+ const updateTitle = useUpdateConversationTitle();
  
  // Prefetch conversation messages on hover for instant loading
  const prefetchConversation = (conversationId: string) => {
@@ -45,51 +35,13 @@ export default function ChatSidebar({ activeConversationId, onConversationSelect
    });
  };
 
- const filteredConversations = conversations.filter((c) =>
- c.title.toLowerCase().includes(searchQuery.toLowerCase())
- );
+const filteredConversations = conversations.filter((c) =>
+  c.title.toLowerCase().includes(searchQuery.toLowerCase())
+);
 
- const startOfTodayUtc = (() => {
-   const now = new Date();
-   return Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
- })();
-
- const groupedConversations = filteredConversations.reduce(
-   (groups, conversation) => {
-     if (conversation.pinned) {
-       groups.pinned.push(conversation);
-       return groups;
-     }
-
-     const updatedDate = new Date(conversation.updated_at);
-     const updatedDayUtc = Date.UTC(
-       updatedDate.getUTCFullYear(),
-       updatedDate.getUTCMonth(),
-       updatedDate.getUTCDate()
-     );
-
-     const diffDays = Math.floor((startOfTodayUtc - updatedDayUtc) / MS_IN_DAY);
-
-     if (diffDays <= 0) {
-       groups.today.push(conversation);
-     } else if (diffDays === 1) {
-       groups.yesterday.push(conversation);
-     } else if (diffDays <= 7) {
-       groups.lastWeek.push(conversation);
-     } else {
-       groups.older.push(conversation);
-     }
-
-     return groups;
-   },
-   {
-     pinned: [] as ConversationListItem[],
-     today: [] as ConversationListItem[],
-     yesterday: [] as ConversationListItem[],
-     lastWeek: [] as ConversationListItem[],
-     older: [] as ConversationListItem[],
-   }
- );
+const groupedConversations = groupConversationsByRecency(
+  sortConversationsByUpdatedAt(filteredConversations)
+);
 
  const handleNewConversation = async () => {
  const name = `New Chat ${conversations.length + 1}`;
@@ -97,6 +49,10 @@ export default function ChatSidebar({ activeConversationId, onConversationSelect
  if (result.conversation) {
  onConversationSelect(result.conversation.id);
  }
+ };
+
+ const handleEditTitle = (id: string, newTitle: string) => {
+ updateTitle.mutate({ id, title: newTitle });
  };
 
  return (
@@ -109,7 +65,7 @@ export default function ChatSidebar({ activeConversationId, onConversationSelect
  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-blue text-white hover:bg-blue/90 transition-colors font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed"
  >
  {createConversation.isPending ? (
- <Loader2 size={16} className="animate-spin" />
+ <CornerBracketsLoader size="sm" color="text-white" />
  ) : (
  <Plus size={16} />
  )}
@@ -135,8 +91,8 @@ export default function ChatSidebar({ activeConversationId, onConversationSelect
  <div className="flex-1 overflow-y-auto p-2">
  {isLoading && conversations.length === 0 && (
  <div className="flex flex-col items-center justify-center py-12 gap-3">
- <Loader2 className="animate-spin text-blue" size={24} />
- <p className="text-xs text-muted-foreground">Loading conversations...</p>
+ <GridDotsLoader size="md" color="text-purple-500" />
+ <p className="text-xs text-muted-foreground font-mono">Syncing fleet data...</p>
  </div>
  )}
 
@@ -161,6 +117,7 @@ export default function ChatSidebar({ activeConversationId, onConversationSelect
  activeConversationId={activeConversationId}
  onSelect={onConversationSelect}
  onDelete={(id) => deleteConversation.mutate(id)}
+ onEdit={handleEditTitle}
  onPrefetch={prefetchConversation}
  />
  )}
@@ -171,6 +128,7 @@ export default function ChatSidebar({ activeConversationId, onConversationSelect
  activeConversationId={activeConversationId}
  onSelect={onConversationSelect}
  onDelete={(id) => deleteConversation.mutate(id)}
+ onEdit={handleEditTitle}
  onPrefetch={prefetchConversation}
  />
  )}
@@ -181,6 +139,7 @@ export default function ChatSidebar({ activeConversationId, onConversationSelect
  activeConversationId={activeConversationId}
  onSelect={onConversationSelect}
  onDelete={(id) => deleteConversation.mutate(id)}
+ onEdit={handleEditTitle}
  onPrefetch={prefetchConversation}
  />
  )}
@@ -191,6 +150,7 @@ export default function ChatSidebar({ activeConversationId, onConversationSelect
  activeConversationId={activeConversationId}
  onSelect={onConversationSelect}
  onDelete={(id) => deleteConversation.mutate(id)}
+ onEdit={handleEditTitle}
  onPrefetch={prefetchConversation}
  />
  )}
@@ -201,6 +161,7 @@ export default function ChatSidebar({ activeConversationId, onConversationSelect
  activeConversationId={activeConversationId}
  onSelect={onConversationSelect}
  onDelete={(id) => deleteConversation.mutate(id)}
+ onEdit={handleEditTitle}
  onPrefetch={prefetchConversation}
  />
  )}
@@ -229,23 +190,67 @@ interface ConversationGroupProps {
  activeConversationId: string | null;
  onSelect: (id: string) => void;
  onDelete: (id: string) => void;
+ onEdit: (id: string, newTitle: string) => void;
  onPrefetch: (id: string) => void;
 }
 
-function ConversationGroup({ title, conversations, activeConversationId, onSelect, onDelete, onPrefetch }: ConversationGroupProps) {
+function ConversationGroup({ title, conversations, activeConversationId, onSelect, onDelete, onEdit, onPrefetch }: ConversationGroupProps) {
+ const [editingId, setEditingId] = useState<string | null>(null);
+ const [editingTitle, setEditingTitle] = useState('');
+ const [deletingId, setDeletingId] = useState<string | null>(null);
+
+ const handleEditStart = (conv: ConversationListItem, e: React.MouseEvent) => {
+ e.stopPropagation();
+ setEditingId(conv.id);
+ setEditingTitle(conv.title);
+ };
+
+ const handleEditSave = (id: string) => {
+ if (editingTitle.trim()) {
+ onEdit(id, editingTitle.trim());
+ }
+ setEditingId(null);
+ setEditingTitle('');
+ };
+
+ const handleEditCancel = () => {
+ setEditingId(null);
+ setEditingTitle('');
+ };
+
+ const handleDeleteClick = (conv: ConversationListItem, e: React.MouseEvent) => {
+ e.stopPropagation();
+ setDeletingId(conv.id);
+ };
+
+ const handleDeleteConfirm = () => {
+ if (deletingId) {
+ onDelete(deletingId);
+ setDeletingId(null);
+ }
+ };
+
  return (
+ <>
+ <DeleteConfirmDialog
+ isOpen={!!deletingId}
+ conversationTitle={conversations.find(c => c.id === deletingId)?.title || ''}
+ onConfirm={handleDeleteConfirm}
+ onCancel={() => setDeletingId(null)}
+ />
+
  <div className="mb-6">
  <div className="px-3 py-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-wider">{title}</div>
  <div className="space-y-0.5 mt-1">
  {conversations.map((conv) => (
  <div
  key={conv.id}
- onClick={() => onSelect(conv.id)}
+ onClick={() => editingId !== conv.id && onSelect(conv.id)}
  onMouseEnter={() => onPrefetch(conv.id)}
  role="button"
  tabIndex={0}
  onKeyDown={(e) => {
- if (e.key === 'Enter' || e.key === ' ') {
+ if (editingId !== conv.id && (e.key === 'Enter' || e.key === ' ')) {
  e.preventDefault();
  onSelect(conv.id);
  }
@@ -258,31 +263,54 @@ function ConversationGroup({ title, conversations, activeConversationId, onSelec
  >
  <div className="flex items-start justify-between gap-2">
  <div className="flex-1 min-w-0">
+ {editingId === conv.id ? (
+ <input
+ type="text"
+ value={editingTitle}
+ onChange={(e) => setEditingTitle(e.target.value)}
+ onBlur={() => handleEditSave(conv.id)}
+ onKeyDown={(e) => {
+ if (e.key === 'Enter') handleEditSave(conv.id);
+ if (e.key === 'Escape') handleEditCancel();
+ }}
+ className="w-full font-medium text-sm text-text-primary bg-transparent border-b border-blue focus:outline-none"
+ autoFocus
+ onClick={(e) => e.stopPropagation()}
+ />
+ ) : (
  <div className="font-medium text-sm text-text-primary truncate mb-0.5">
  {conv.title}
  </div>
+ )}
  <div className="text-xs text-text-secondary">
  {conv.message_count} {conv.message_count === 1 ? 'message' : 'messages'}
  </div>
  </div>
  <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
+ {editingId !== conv.id && (
+ <>
  <button
- onClick={(e) => {
- e.stopPropagation();
- if (confirm('Delete this conversation?')) {
- onDelete(conv.id);
- }
- }}
- className="p-1.5 hover:bg-red/10 hover:text-red transition-colors rounded"
+ onClick={(e) => handleEditStart(conv, e)}
+ className="p-1.5 hover:bg-muted hover:text-foreground transition-colors"
+ title="Edit title"
+ >
+ <Pencil size={14} />
+ </button>
+ <button
+ onClick={(e) => handleDeleteClick(conv, e)}
+ className="p-1.5 hover:bg-red/10 hover:text-red transition-colors"
  title="Delete"
  >
  <Trash2 size={14} />
  </button>
+ </>
+ )}
  </div>
  </div>
  </div>
  ))}
  </div>
  </div>
+ </>
  );
 }

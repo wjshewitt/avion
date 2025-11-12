@@ -433,3 +433,45 @@ body {
 [data-onboarding] *::after {
  border-radius: 0 !important;
 }
+
+/* AI Sidebar Animations */
+@keyframes slideInFromRight {
+ from {
+ transform: translateX(100%);
+ opacity: 0;
+ }
+ to {
+ transform: translateX(0);
+ opacity: 1;
+ }
+}
+
+@keyframes slideOutToRight {
+ from {
+ transform: translateX(0);
+ opacity: 1;
+ }
+ to {
+ transform: translateX(100%);
+ opacity: 0;
+ }
+}
+
+/* Smooth transitions for header search */
+.search-transition-out {
+ animation: fadeOut 150ms ease-in-out forwards;
+}
+
+.search-transition-in {
+ animation: fadeIn 150ms ease-in-out 150ms forwards;
+}
+
+@keyframes fadeOut {
+ from { opacity: 1; }
+ to { opacity: 0; }
+}
+
+@keyframes fadeIn {
+ from { opacity: 0; }
+ to { opacity: 1; }
+}

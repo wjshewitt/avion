@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { AlertCircle, Plane } from "lucide-react";
 import Link from "next/link";
+import { CornerBracketsLoader } from "@/components/kokonutui/minimal-loaders";
 
 interface LoginFormProps {
   className?: string;
@@ -123,7 +124,14 @@ export function LoginForm({ className }: LoginFormProps) {
               disabled={loading}
               size="lg"
             >
-              {loading ? "Signing in..." : "Sign In"}
+              {loading ? (
+                <span className="flex items-center gap-3">
+                  <CornerBracketsLoader size="sm" color="text-white" />
+                  Authenticating...
+                </span>
+              ) : (
+                "Sign In"
+              )}
             </Button>
           </div>
         </form>

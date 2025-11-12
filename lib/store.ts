@@ -14,6 +14,10 @@ interface AppState {
  mapCollapsed: boolean;
  toggleMap: () => void;
  
+ // Search state (shared between header and AI sidebar)
+ searchValue: string;
+ setSearchValue: (value: string) => void;
+ 
  // Alerts
  alerts: Alert[];
  addAlert: (alert: Alert) => void;
@@ -35,11 +39,15 @@ export const useAppStore = create<AppState>()(
  setSelectedFlightId: (id) => set({ selectedFlightId: id }),
  
  // UI state
- aiChatOpen: true,
+ aiChatOpen: false,
  toggleAiChat: () => set((state) => ({ aiChatOpen: !state.aiChatOpen })),
  
  mapCollapsed: false,
  toggleMap: () => set((state) => ({ mapCollapsed: !state.mapCollapsed })),
+ 
+ // Search state
+ searchValue: '',
+ setSearchValue: (value) => set({ searchValue: value }),
  
  // Alerts
  alerts: [],

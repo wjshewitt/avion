@@ -161,7 +161,7 @@ export function WeatherCardHeader({
           <div className="flex items-center gap-2 mt-1">
             <span
               className={cn(
-                "text-xs px-2 py-0.5 rounded-sm border font-medium",
+                "text-xs px-2 py-0.5 border font-medium",
                 getFlightCategoryColor(flightCategory)
               )}
             >
@@ -287,7 +287,7 @@ export function RawDataExpander({ rawText, label }: RawDataExpanderProps) {
       <summary className="text-xs text-muted-foreground cursor-pointer hover:text-foreground transition-colors">
         Show Raw {label} ▼
       </summary>
-      <div className="mt-2 text-xs font-mono bg-muted p-2 rounded border border-border overflow-x-auto">
+      <div className="mt-2 text-xs font-mono bg-muted p-2 border border-border overflow-x-auto">
         {rawText}
       </div>
     </details>
@@ -316,22 +316,22 @@ export function TafPeriod({ period, index }: TafPeriodProps) {
   const probability = period.probability;
 
   return (
-    <div className="border border-border rounded p-2 bg-card">
+    <div className="border border-border p-2 bg-card">
       {/* Period Header - Clickable to expand */}
       <button
-        className="w-full flex items-center justify-between cursor-pointer hover:bg-muted transition-colors p-1 -m-1 rounded"
+        className="w-full flex items-center justify-between cursor-pointer hover:bg-muted transition-colors p-1 -m-1"
         onClick={() => setExpanded(!expanded)}
       >
         <div className="flex-1 text-left">
           <div className="flex items-center gap-2">
             <span className="text-xs font-semibold text-foreground">Period {index + 1}</span>
             {changeIndicator && (
-              <span className="text-xs px-1.5 py-0.5 bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 border border-indigo-500/20 rounded-sm font-medium">
+              <span className="text-xs px-1.5 py-0.5 bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 border border-indigo-500/20 font-medium">
                 {changeIndicator.code || changeIndicator.text}
               </span>
             )}
             {probability && (
-              <span className="text-xs px-1.5 py-0.5 bg-orange-500/10 text-orange-700 dark:text-orange-400 border border-orange-500/20 rounded-sm font-medium">
+              <span className="text-xs px-1.5 py-0.5 bg-orange-500/10 text-orange-700 dark:text-orange-400 border border-orange-500/20 font-medium">
                 PROB{probability}
               </span>
             )}
@@ -378,7 +378,7 @@ export function TafPeriod({ period, index }: TafPeriodProps) {
           <div>
             <span className="text-muted-foreground">Category:</span>{' '}
             <span className={cn(
-              "font-medium px-1.5 py-0.5 rounded text-xs",
+              "font-medium px-1.5 py-0.5 text-xs",
               getFlightCategoryColor(period.flight_category)
             )}>
               {period.flight_category}

@@ -3,7 +3,8 @@
 import { useState, useEffect, useCallback } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { CheckCircle2, XCircle, Loader2 } from "lucide-react";
+import { CheckCircle2, XCircle } from "lucide-react";
+import { CornerBracketsLoader } from "@/components/kokonutui/minimal-loaders";
 
 interface UsernameStepProps {
   value: string;
@@ -78,7 +79,7 @@ export function UsernameStep({ value, onChange, onValidChange }: UsernameStepPro
 
   const getStatusIcon = () => {
     if (!touched || !value) return null;
-    if (checking) return <Loader2 className="w-4 h-4 text-text-muted animate-spin" />;
+    if (checking) return <CornerBracketsLoader size="sm" color="text-blue" />;
     if (error || available === false) return <XCircle className="w-4 h-4 text-critical" />;
     if (available === true) return <CheckCircle2 className="w-4 h-4 text-green" />;
     return null;

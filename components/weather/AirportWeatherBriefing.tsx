@@ -10,7 +10,8 @@ import {
 import MetarHorizontalView from "./MetarHorizontalView";
 import TafHorizontalView from "./TafHorizontalView";
 import WeatherConcernsBanner from "./WeatherConcernsBanner";
-import { Loader2, AlertTriangle } from "lucide-react";
+import { AlertTriangle } from "lucide-react";
+import { ScannerLoader } from "@/components/kokonutui/minimal-loaders";
 
 interface AirportWeatherBriefingProps {
   icao: string;
@@ -52,8 +53,8 @@ export default function AirportWeatherBriefing({ icao }: AirportWeatherBriefingP
     return (
       <div className="flex min-h-[400px] items-center justify-center">
         <div className="flex items-center gap-3 text-text-secondary">
-          <Loader2 className="h-6 w-6 animate-spin" />
-          <span className="text-sm">Loading weather data...</span>
+          <ScannerLoader size="md" color="text-amber" />
+          <span className="text-sm font-mono">Scanning weather data...</span>
         </div>
       </div>
     );

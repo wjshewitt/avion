@@ -9,7 +9,6 @@ import {
   Thermometer,
   Wind,
   Droplets,
-  Loader2,
   AlertTriangle,
   RefreshCw,
   Download,
@@ -19,6 +18,7 @@ import {
   ChevronUp,
   Zap,
 } from "lucide-react";
+import { ScannerLoader } from "@/components/kokonutui/minimal-loaders";
 import { useAirfieldWeather } from "@/lib/tanstack/hooks/useAirfieldWeather";
 import {
   analyzeMetarConcerns,
@@ -322,8 +322,9 @@ export default function IndividualWeatherPage() {
       )}
 
       {isLoading ? (
-        <div className="flex items-center justify-center py-16 text-muted-foreground">
-          <Loader2 className="h-6 w-6 animate-spin" />
+        <div className="flex items-center justify-center gap-3 py-16 text-muted-foreground">
+          <ScannerLoader size="md" color="text-amber" />
+          <span className="text-sm font-mono">Scanning weather data...</span>
         </div>
       ) : (
         <div className="space-y-6">

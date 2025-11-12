@@ -6,7 +6,6 @@ import {
   ArrowLeftRight,
   Cloud,
   Eye,
-  Loader2,
   Thermometer,
   Wind,
   Droplets,
@@ -16,7 +15,9 @@ import {
   Navigation,
   Plane,
   Gauge,
+  Loader2,
 } from "lucide-react";
+import { ScannerLoader } from "@/components/kokonutui/minimal-loaders";
 import { useMetar, useCompleteWeather } from "@/lib/tanstack/hooks/useWeather";
 import { useFlights } from "@/lib/tanstack/hooks/useFlights";
 import { useWeatherRisk } from "@/lib/tanstack/hooks/useWeatherRisk";
@@ -406,8 +407,9 @@ function RouteWeatherTab() {
       )}
 
       {isLoading ? (
-        <div className="flex items-center justify-center py-16">
-          <Loader2 className="h-6 w-6 animate-spin text-blue" />
+        <div className="flex items-center justify-center gap-3 py-16">
+          <ScannerLoader size="md" color="text-amber" />
+          <span className="text-sm font-mono text-text-secondary">Scanning weather data...</span>
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
@@ -509,8 +511,9 @@ function AirportWeatherTab() {
       )}
 
       {loading.any ? (
-        <div className="flex items-center justify-center py-16">
-          <Loader2 className="h-6 w-6 animate-spin text-blue" />
+        <div className="flex items-center justify-center gap-3 py-16">
+          <ScannerLoader size="md" color="text-amber" />
+          <span className="text-sm font-mono text-text-secondary">Scanning weather data...</span>
         </div>
       ) : !airportCode || airportCode.length !== 4 ? (
         <div className="border border-dashed border-border p-12 text-center">
@@ -699,8 +702,9 @@ function AirportWeatherStandard() {
       )}
 
       {loading.any ? (
-        <div className="flex items-center justify-center py-16">
-          <Loader2 className="h-6 w-6 animate-spin text-blue" />
+        <div className="flex items-center justify-center gap-3 py-16">
+          <ScannerLoader size="md" color="text-amber" />
+          <span className="text-sm font-mono text-text-secondary">Scanning weather data...</span>
         </div>
       ) : !airportCode || airportCode.length !== 4 ? (
         <div className="border border-dashed border-border p-12 text-center">

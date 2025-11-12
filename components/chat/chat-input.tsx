@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Send, Paperclip, Loader2 } from 'lucide-react';
+import { Send, Paperclip } from 'lucide-react';
+import { CornerSweepLoader } from '@/components/kokonutui/minimal-loaders';
 
 const SLASH_COMMANDS = [
  { command: '/weather', description: 'Get airport weather' },
@@ -149,9 +150,7 @@ export default function ChatInput({ conversationId, onMessageSent, isGenerating 
  className="px-4 py-3 bg-blue text-white hover:bg-blue/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
  >
  {isGenerating ? (
- <>
- <Loader2 size={20} className="animate-spin" />
- </>
+ <CornerSweepLoader size="sm" color="text-white" />
  ) : (
  <Send size={20} />
  )}

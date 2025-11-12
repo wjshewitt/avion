@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { QueryClientProvider, useQueryClient } from "@tanstack/react-query";
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
 import { useRouter } from "next/navigation";
@@ -110,22 +110,26 @@ function GlobalErrorHandler() {
 }
 
 export function Providers({ children }: { children: React.ReactNode }) {
-  // Use PersistQueryClientProvider for automatic cache persistence
-  if (persister) {
+  // Ensure the same branch renders on SSR and first client render to avoid hydration/hook mismatches
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
+  const canPersist = mounted && Boolean(persister);
+
+  if (canPersist && persister) {
     return (
-      <PersistQueryClientProvider 
-        client={queryClient} 
-        persistOptions={{ 
+      <PersistQueryClientProvider
+        client={queryClient}
+        persistOptions={{
           persister,
-          maxAge: 1000 * 60 * 60 * 24, // 24 hours
+          maxAge: 1000 * 60 * 60 * 24,
           dehydrateOptions: {
-            // Only persist chat-related queries
             shouldDehydrateQuery: (query) => {
               const queryKey = query.queryKey[0] as string;
               return (
-                queryKey === 'general-conversations' ||
-                queryKey === 'conversation-messages' ||
-                queryKey === 'conversation'
+                queryKey === "general-conversations" ||
+                queryKey === "conversation-messages" ||
+                queryKey === "conversation"
               );
             },
           },
@@ -138,7 +142,6 @@ export function Providers({ children }: { children: React.ReactNode }) {
     );
   }
 
-  // Fallback for SSR
   return (
     <QueryClientProvider client={queryClient}>
       <GlobalErrorHandler />

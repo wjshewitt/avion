@@ -37,14 +37,43 @@ export function usePremiumChat(options: UsePremiumChatOptions) {
     abortControllerRef.current = new AbortController();
     
     try {
+      let targetConversationId = conversationId;
+
+      if (!targetConversationId) {
+        const title = messageContent.slice(0, 50) + (messageContent.length > 50 ? "..." : "");
+        const response = await fetch("/api/chat/conversations", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ chat_type: "general", title }),
+        });
+
+        if (!response.ok) {
+          const errorPayload = await response.json().catch(() => ({}));
+          throw new Error(errorPayload.error || "Failed to create conversation");
+        }
+
+        const created = await response.json();
+        targetConversationId = created?.conversation?.id ?? created?.id ?? null;
+
+        if (!targetConversationId) {
+          throw new Error("Conversation ID missing in creation response");
+        }
+
+        onConversationCreated?.(targetConversationId);
+      }
+
+      if (!targetConversationId) {
+        throw new Error("Conversation ID unavailable");
+      }
+
       const result = await sendMessageMutation.mutateAsync({
-        conversationId,
+        conversationId: targetConversationId,
         content: messageContent,
       });
       
       // If new conversation was created, notify parent
-      if (!conversationId && result.conversationId && onConversationCreated) {
-        onConversationCreated(result.conversationId);
+      if (result.conversationId && result.conversationId !== targetConversationId) {
+        onConversationCreated?.(result.conversationId);
       }
       
     } catch (err) {

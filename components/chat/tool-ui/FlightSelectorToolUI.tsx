@@ -38,7 +38,7 @@ export function FlightSelectorToolUI({ result }: FlightSelectorToolUIProps) {
 
   if (!flights.length) {
     return (
-      <div className="text-sm text-muted-foreground border border-border rounded-lg p-3">
+      <div className="text-sm text-muted-foreground border border-border p-3">
         No flights found
       </div>
     );
@@ -72,7 +72,7 @@ export function FlightSelectorToolUI({ result }: FlightSelectorToolUIProps) {
   };
 
   return (
-    <div className="border border-border rounded-lg overflow-hidden bg-background max-w-2xl">
+    <div className="border border-border overflow-hidden bg-background max-w-2xl">
       {/* Header */}
       <div
         className="flex items-center justify-between p-3 cursor-pointer hover:bg-muted/50 transition-colors border-b border-border"
@@ -133,7 +133,7 @@ export function FlightSelectorToolUI({ result }: FlightSelectorToolUIProps) {
                     {flight.status && (
                       <span
                         className={cn(
-                          "text-xs px-2 py-0.5 rounded font-medium",
+                          "text-xs px-2 py-0.5 font-medium",
                           getStatusColor(flight.status)
                         )}
                       >

@@ -3,6 +3,7 @@
 import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Upload, X, User } from "lucide-react";
+import { VerticalBarsLoader } from "@/components/kokonutui/minimal-loaders";
 
 interface ProfilePictureStepProps {
   value: string | null;
@@ -185,8 +186,9 @@ export function ProfilePictureStep({ value, onChange }: ProfilePictureStepProps)
         )}
 
         {uploading && (
-          <div className="bg-background-secondary p-3 border border-border-subtle">
-            <p className="text-xs text-text-muted font-medium">Uploading...</p>
+          <div className="bg-background-secondary p-4 border border-border-subtle flex items-center gap-3">
+            <VerticalBarsLoader size="sm" color="text-green" />
+            <p className="text-xs text-text-muted font-medium">Processing image...</p>
           </div>
         )}
       </div>
