@@ -1,0 +1,50 @@
+{
+  "FLT234": {
+    "flightId": "FLT234",
+    "weatherSummary": "Clear skies expected along route. Light headwinds at cruise altitude. No significant weather systems forecast. Visibility excellent at both departure and arrival airports. Temperature within normal operating range.",
+    "operationalNotes": "Standard routing via J80. No NOTAMs affecting route. All navigation aids operational. Expect normal traffic flow at JFK. Fuel reserves adequate for planned route with standard alternates.",
+    "generatedAt": "2025-11-04T07:30:00Z"
+  },
+  "FLT567": {
+    "flightId": "FLT567",
+    "weatherSummary": "Moderate turbulence expected over Rockies between FL280-FL350. Convective activity developing near Chicago area. Recommend altitude adjustment to FL370. Crosswinds 15-20 knots at ORD. Consider additional fuel for holding.",
+    "operationalNotes": "ATC flow control in effect at ORD due to weather. Expect 20-30 minute delay. Alternate routing via J146 available if needed. Ground stop possible if conditions worsen. Crew rest requirements met.",
+    "generatedAt": "2025-11-04T09:00:00Z"
+  },
+  "FLT891": {
+    "flightId": "FLT891",
+    "weatherSummary": "Scattered clouds along route. Light precipitation possible near Atlanta. Winds favorable, slight tailwind component. No icing conditions forecast. Visibility good at both airports with ceiling above minimums.",
+    "operationalNotes": "Terrain clearance adequate throughout route. Standard departure and arrival procedures. No special equipment requirements. Normal fuel planning applies. All crew qualifications current for route.",
+    "generatedAt": "2025-11-04T11:15:00Z"
+  },
+  "FLT123": {
+    "flightId": "FLT123",
+    "weatherSummary": "Severe thunderstorms forecast along entire route. Multiple convective SIGMETs active. Icing conditions above FL200. Strong wind shear reported at MIA. Visibility below minimums. Flight cancelled due to weather.",
+    "operationalNotes": "Flight cancelled due to severe weather conditions. Passengers being rebooked on next available flights. Aircraft will remain at JFK. Crew reassigned to FLT890 departing at 18:00. Maintenance inspection not required.",
+    "generatedAt": "2025-11-04T13:00:00Z"
+  },
+  "FLT456": {
+    "flightId": "FLT456",
+    "weatherSummary": "Excellent weather conditions throughout route. Clear skies, unlimited visibility. Light winds at all altitudes. No weather systems affecting route. Perfect flying conditions for entire journey.",
+    "operationalNotes": "Direct routing approved. No traffic delays expected. All systems normal. Standard fuel load sufficient. Early arrival possible due to favorable winds. No special considerations required.",
+    "generatedAt": "2025-11-04T08:45:00Z"
+  },
+  "FLT789": {
+    "flightId": "FLT789",
+    "weatherSummary": "Winter weather advisory in effect for DFW area. Light snow and freezing drizzle possible. Runway treatment in progress. Braking action reported as fair to good. Temperature near freezing at arrival.",
+    "operationalNotes": "De-icing required at BOS before departure. Additional fuel added for potential holding at DFW. Alternate airport KAUS available. Crew trained for winter operations. Ground delay program possible.",
+    "generatedAt": "2025-11-04T10:30:00Z"
+  },
+  "FLT321": {
+    "flightId": "FLT321",
+    "weatherSummary": "Clear conditions expected. Short flight duration minimizes weather exposure. Light winds throughout. No significant weather between departure and arrival. Standard visual approach possible at SFO.",
+    "operationalNotes": "Short-haul flight with minimal operational complexity. Standard procedures apply. No special routing required. Fuel planning straightforward. Quick turnaround expected at SFO for next leg.",
+    "generatedAt": "2025-11-04T12:00:00Z"
+  },
+  "FLT654": {
+    "flightId": "FLT654",
+    "weatherSummary": "Partly cloudy skies along route. Light turbulence possible over mountains. No significant weather systems. Winds within normal limits. Good visibility at both airports throughout flight time.",
+    "operationalNotes": "Standard westbound routing. Normal traffic flow expected. All navigation aids operational. Adequate fuel reserves. Crew rest requirements satisfied. No maintenance items affecting dispatch.",
+    "generatedAt": "2025-11-04T14:20:00Z"
+  }
+}

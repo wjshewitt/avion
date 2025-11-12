@@ -1,0 +1,259 @@
+{
+  "airport_code": "KTEB",
+  "airport_name": "Teterboro Airport",
+  "location": "Teterboro, Bergen County, New Jersey, USA",
+  "data_collection_date": "2025-11-10",
+  "sources": {
+    "primary": [
+      "Port Authority of New York and New Jersey (PANYNJ) official documentation",
+      "FAA Teterboro Airport information pages",
+      "Teterboro Flight Crew Handbook (PANYNJ)",
+      "FAA AirNav database",
+      "Teterboro Users Group noise abatement procedures"
+    ],
+    "secondary": [
+      "FlightAware airport information",
+      "AirNav airport guide",
+      "FlightRadar24 operational data",
+      "National Weather Service - NY",
+      "Teterboro Airport Noise Office"
+    ]
+  },
+  "risk_factors": {
+    "operational_hours": {
+      "opens_utc": "Open 24 hours",
+      "closes_utc": "Open 24 hours",
+      "night_curfew": false,
+      "curfew_start_utc": null,
+      "curfew_end_utc": null,
+      "weekend_restrictions": false,
+      "holiday_closures": false,
+      "tower_hours": "05:45 EDT minimum (typically 24/7 coverage)",
+      "notes": "24/7 operations with control tower. However, voluntary restraint on non-essential flights 23:00-06:00 local time due to noise restrictions.",
+      "lighting": "High-intensity runway lights, operational sunset to sunrise"
+    },
+    "slot_requirements": {
+      "slot_controlled": false,
+      "advance_booking_required_hours": 0,
+      "slot_availability_typical": "No formal slot system; operations on first-come, first-served basis",
+      "peak_congestion_times": "Business hours (08:00-17:00 weekdays), summer thunderstorm season (May-September), holiday periods",
+      "notes": "NYC airspace proximity creates coordination requirements but no formal slots. Check NOTAM for current capacity status."
+    },
+    "weather_vulnerability": {
+      "fog_prone": true,
+      "snow_closure_frequency": "Occasional (2-5 events annually) - rare full closure",
+      "wind_limitations": false,
+      "requires_cat_ii_iii_capability": true,
+      "seasonal_risk_periods": "December-February (winter snow/ice), May-September (thunderstorms)",
+      "cat_capability": "ILS approach available; CAT II/III capable",
+      "weather_patterns": "Temperate continental climate. Winter: occasional snow (avg 24 inches annually), ice events. Spring/Summer: thunderstorms (peak July-August). Fall: generally stable.",
+      "sea_level_rise_vulnerability": "High - projected sea-level rise 3 feet by end of century could cause permanent flooding",
+      "thunderstorm_risk": "Significant summer risk (July-August peak) - accounts for major delays and congestion"
+    },
+    "runway_specifications": {
+      "minimum_runway_length_meters": 1829,
+      "runway_surface_type": "Asphalt",
+      "number_of_runways": 2,
+      "crosswind_limitations": "Standard 15 knot crosswind limitation",
+      "weight_restrictions": "Maximum ramp weight 100,000 lbs; taxiway width (50 feet) limits aircraft size",
+      "runway_details": [
+        {
+          "runway_id": "01/19",
+          "length_meters": 2134,
+          "length_feet": 7000,
+          "width_meters": 46,
+          "surface": "Asphalt",
+          "lighting": "High-intensity",
+          "approaches": ["ILS", "LOC", "GPS"]
+        },
+        {
+          "runway_id": "06/24",
+          "length_meters": 1829,
+          "length_feet": 6013,
+          "width_meters": 46,
+          "surface": "Asphalt",
+          "lighting": "High-intensity",
+          "approaches": ["ILS", "LOC", "GPS"]
+        }
+      ],
+      "elevation_feet": 8,
+      "elevation_meters": 2.4,
+      "notes": "Limited runway length (max 7,000 ft) restricts large corporate jets and commercial aircraft. Narrow taxiways create operational constraints.",
+      "weight_impact": "Aircraft exceeding 100,000 lbs ramp weight not permitted",
+      "hot_spots": [
+        {
+          "location": "TWY L/RWY 06/24",
+          "risk": "Confusion between taxiway and runway - safety hazard"
+        },
+        {
+          "location": "TWY G/RWY 06/24",
+          "risk": "Similar confusion risk"
+        }
+      ]
+    },
+    "crew_requirements": {
+      "special_crew_training_required": true,
+      "mountain_airport_rating": false,
+      "cat_ii_iii_rating_required": "Recommended - some procedures require instrument capability",
+      "captain_only_airport": false,
+      "minimum_pilot_hours": "Private pilot certificate minimum; instrument rating recommended",
+      "special_training": [
+        "Knowledge of NYC Class B airspace procedures",
+        "Familiarity with Teterboro hotspots and taxiway confusion areas",
+        "Understanding of noise abatement procedures",
+        "Line Up and Wait (LUAW) procedure compliance"
+      ],
+      "notes": "FAA provides detailed pilot briefing materials. New or changed-ownership jet aircraft require pre-flight coordination."
+    },
+    "handling_complexity": {
+      "handler_availability_24_7": true,
+      "fuel_availability": true,
+      "customs_hours": "Available with 2-hour prior notice (PPR)",
+      "immigration_processing_time_avg": "15-30 minutes",
+      "minimum_notice_hours": 2,
+      "weekend_surcharges": false,
+      "handling_options": [
+        "Multiple Fixed Base Operators (FBOs)",
+        "24/7 ground support",
+        "Fuel services (Jet A and 100LL)"
+      ],
+      "notes": "Excellent handling infrastructure. Multiple FBO options allow competitive service. US Customs pre-clearance available.",
+      "handling_capacity": "Not a constraint - multiple operators provide robust ground services"
+    },
+    "congestion_metrics": {
+      "average_taxi_time_minutes": 10,
+      "peak_hour_delays_typical": "15-45 minutes during business hours",
+      "airspace_complexity": "High - New York Class B airspace (KLGA, KJFK, KEWR nearby)",
+      "atc_delays_frequency": "Common during peak hours and summer thunderstorm season",
+      "seasonal_congestion_multiplier": 1.5,
+      "notes": "Congestion primarily airspace-related rather than airport-related. Summer thunderstorms cause significant delays. Holiday periods moderate impact.",
+      "current_delay_status": "Generally available with 15-minute taxi delays typical"
+    },
+    "permits_and_clearances": {
+      "requires_prior_permission": true,
+      "ppr_notice_period_hours": 0,
+      "overflight_permit_required": false,
+      "landing_permit_processing_time": "Immediate (Class D airspace)",
+      "diplomatic_clearance_required": false,
+      "customs_requirement": "PPR minimum 2 hours in advance",
+      "notes": "Jet-powered aircraft must obtain permission from Airport Manager (new operators or ownership changes). Permission to Operate form required.",
+      "international_flights": "US Customs pre-clearance available - 2-hour notice required"
+    },
+    "noise_restrictions": {
+      "noise_category_required": "Chapter 3 (Stage 3) minimum",
+      "chapter_requirements": "Chapter 3 or better; Chapter 2 aircraft prohibited",
+      "noise_surcharges": "Yes - violations assessed in addition to potential operational restrictions",
+      "preferred_departure_routes": [
+        "Runway 19 preferred for departures 22:00-07:00 (nighttime)",
+        "Runway 24 less preferred during nighttime",
+        "Avoid noise-sensitive routes over Hackensack University Medical Center"
+      ],
+      "noise_complaints_risk": "High - airport surrounded by residential areas and medical facility",
+      "maximum_noise_levels": {
+        "runway_24_night": "80 dB(A) (22:00-07:00)",
+        "runway_24_day": "90 dB(A) (07:00-22:00)",
+        "other_runways_all_times": "95 dB(A)",
+        "helicopter_limit": "95 dB(A) all times"
+      },
+      "violation_consequences": "3 violations within 2 years = operational ban",
+      "quiet_hours": "Voluntary restraint 23:00-06:00 on non-essential flights",
+      "dalton_procedure": "Recommended for noise reduction - VFR departure with IFR pickup in air"
+    },
+    "infrastructure_reliability": {
+      "power_outage_frequency": "Rare",
+      "equipment_failure_rate": "Low",
+      "maintenance_closure_days_annual": "Minimal",
+      "backup_systems_available": true,
+      "historical_closure_incidents": "None reported in recent years",
+      "winter_maintenance": "Runway 6/24 prioritized for snow removal; taxiways maintained for FBO access"
+    },
+    "security_requirements": {
+      "security_screening_time_avg": "0 minutes (general aviation facility - no TSA screening)",
+      "enhanced_security_periods": "None typically; standard facility protocols",
+      "vip_security_delays": "Minimal - facility accommodates VIP operations",
+      "passenger_background_check_required": false,
+      "notes": "General aviation facility without TSA screening - major advantage for private operations. Standard airport security protocols."
+    },
+    "seasonal_factors": {
+      "high_season_months": ["May", "June", "July", "August", "September", "December"],
+      "ski_season_congestion": "Moderate - indirect impact from NYC ski travel (not direct airport focus)",
+      "summer_thunderstorm_frequency": "High - peak July-August (30-40 days with thunderstorm activity)",
+      "winter_deicing_delays_avg": "30 minutes (when required)",
+      "holiday_peak_dates": ["Thanksgiving", "Christmas-New Year", "Memorial Day", "Labor Day"],
+      "notes": "Summer thunderstorms primary seasonal challenge. Winter snow/ice less frequent but impactful when occurs. Business travel patterns influence weekday congestion."
+    },
+    "alternate_airport_proximity": {
+      "nearest_suitable_alternate_code": "KLGA",
+      "alternate_airport_name": "LaGuardia Airport",
+      "distance_to_alternate_km": 18.3,
+      "distance_to_alternate_nm": 9.9,
+      "alternate_typically_available": true,
+      "ground_transport_time_to_alternate_minutes": 20,
+      "backup_alternates": [
+        {
+          "code": "KEWR",
+          "name": "Newark Liberty International",
+          "distance_km": 30.6,
+          "distance_nm": 16.5,
+          "notes": "Major international hub, more flight options"
+        },
+        {
+          "code": "KJFK",
+          "name": "John F. Kennedy International",
+          "distance_km": 45.1,
+          "distance_nm": 24.4,
+          "notes": "Largest NYC airport, more facilities"
+        },
+        {
+          "code": "KHPN",
+          "name": "Westchester County (White Plains)",
+          "distance_km": 56.3,
+          "distance_nm": 30.4,
+          "notes": "North of NYC, less congested"
+        },
+        {
+          "code": "KMMK",
+          "name": "Morristown Municipal",
+          "distance_km": 50,
+          "distance_nm": 27,
+          "notes": "General aviation alternative"
+        }
+      ],
+      "notes": "Multiple excellent alternates available. Sea-level rise projections affect long-term viability of KTEB and KLGA. Stewart International (SWF) discussed as future alternate."
+    },
+    "payment_and_fees": {
+      "advance_payment_required": false,
+      "credit_account_needed": false,
+      "handling_agent_prepayment": "Not required but common for fuel",
+      "fuel_payment_terms": "Post-flight settlement available; credit cards accepted",
+      "landing_fees": "Yes - per Port Authority of NY&NJ schedule",
+      "handling_fees": "Yes - variable by FBO",
+      "parking_fees": "Yes - overnight parking charges apply",
+      "noise_surcharges": "Yes - assessed for violations",
+      "notes": "Transparent fee structure published by PANYNJ. Multiple FBOs allow fee comparison. Jet fuel and 100LL available."
+    }
+  },
+  "summary": {
+    "risk_level": "Medium",
+    "primary_challenges": [
+      "Noise restrictions and residential proximity",
+      "Summer thunderstorm season (May-September)",
+      "NYC Class B airspace coordination",
+      "Limited runway lengths (max 7,000 ft)",
+      "Weight restrictions (max 100,000 lbs ramp weight)",
+      "Taxiway confusion hot spots",
+      "Potential sea-level rise vulnerability (long-term)"
+    ],
+    "operational_advantages": [
+      "24/7 operations",
+      "Proximity to NYC (12 miles to Midtown)",
+      "No TSA screening (vs. commercial airports)",
+      "Multiple FBO options with excellent services",
+      "US Customs pre-clearance available",
+      "Multiple excellent alternate airports",
+      "Modern runway instrumentation (ILS)"
+    ],
+    "crew_considerations": "Must understand NYC Class B airspace procedures, Teterboro hotspots, noise abatement rules, and Line Up and Wait procedures. Jet aircraft operators require Pre-Flight coordination. CAT II/III rating recommended for instrument operations.",
+    "planning_recommendation": "Business hours (08:00-17:00 weekdays) experience moderate congestion; early morning or evening slots more available. Summer thunderstorm season (Jul-Aug) requires flexible scheduling and awareness of potential diversions. Verify aircraft weight under 100,000 lbs ramp weight limit. Comply strictly with noise abatement procedures (3-strike violation policy). Holiday periods (Dec, Thanksgiving, Memorial Day) require advance booking. Winter operations generally manageable with occasional snow impacts."
+  }
+}

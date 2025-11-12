@@ -1,0 +1,735 @@
+{
+  "assessment_metadata": {
+    "assessment_date": "2025-11-10",
+    "assessed_by": "Western Europe Airport Data Collection Subagent",
+    "assessment_scope": "Comprehensive risk factor analysis for three Western European business aviation airports",
+    "airports_assessed": [
+      "Paris Le Bourget (LFPB)",
+      "London Luton (EGGX)",
+      "Geneva (LSGG)"
+    ],
+    "data_sources": {
+      "general": [
+        "EASA (European Union Aviation Safety Agency)",
+        "ICAO regulations and Air Navigation Plans",
+        "Airport official websites and FBO resources"
+      ],
+      "france_lfpb": [
+        "French DGAC (Direction Générale de l'Aviation Civile)",
+        "AIP FRANCE - LBG",
+        "Universal Aviation Paris flight support",
+        "ASM (Aviation Services Management)",
+        "Boeing noise documentation"
+      ],
+      "uk_eggx": [
+        "UK CAA (Civil Aviation Authority)",
+        "London Luton Airport official publications",
+        "Slot Coordination Authority",
+        "CAP documents (CAA Policies)",
+        "Noise monitoring reports"
+      ],
+      "switzerland_lsgg": [
+        "Swiss FOCA (Federal Office of Civil Aviation)",
+        "Slot Coordination Switzerland",
+        "Geneva Airport (Genève Aéroport) official resources",
+        "MeteoSwiss (aeronautical climatology)",
+        "AIP SWITZERLAND"
+      ]
+    }
+  },
+  "airports": {
+    "LFPB": {
+      "airport_code": "LFPB",
+      "iata_code": "LBG",
+      "airport_name": "Paris Le Bourget",
+      "country": "France",
+      "location": "Northeast of Paris, approximately 11 km from city center",
+      "type": "Business Aviation Hub",
+      "risk_assessment": {
+        "operational_hours": {
+          "description": "Operating hours and curfews",
+          "data": {
+            "opens_utc": "00:00",
+            "closes_utc": "24:00 (24/7 operations)",
+            "night_curfew": true,
+            "curfew_start_utc": "22:15",
+            "curfew_end_utc": "06:00",
+            "weekend_restrictions": false,
+            "holiday_closures": false,
+            "curfew_details": "Jet engine departures prohibited 22:15-06:00 local time, except medical evacuations. Arrivals available 24/7."
+          },
+          "risk_level": "High",
+          "impact_notes": "Night curfew restricts flexibility for last-minute departures; arrivals unaffected"
+        },
+        "slot_requirements": {
+          "description": "Whether airport requires pre-allocated slots",
+          "data": {
+            "slot_controlled": true,
+            "advance_booking_required_hours": 24,
+            "slot_availability_typical": "Generally available; high demand during events (Paris Air Show, French Open)",
+            "peak_congestion_times": "May-June (French Open), July-September (summer travel), Air Show biennially",
+            "coordination_note": "Temporary slot coordination November 5-December 10, 2024, and January 7-February 11, 2025"
+          },
+          "risk_level": "High",
+          "impact_notes": "Slots managed via E-Airportslots; major events create substantial congestion"
+        },
+        "weather_vulnerability": {
+          "description": "Weather conditions that cause disruptions",
+          "data": {
+            "fog_prone": true,
+            "snow_closure_frequency": "Occasional in winter",
+            "wind_limitations": "Moderate; three runways (07/25, 03/21, 09/27) provide directional flexibility",
+            "requires_cat_ii_iii_capability": false,
+            "seasonal_risk_periods": "November-February (fog and winter weather)",
+            "elevation_feet": 220,
+            "climate": "Temperate marine; fog common in Île-de-France region"
+          },
+          "risk_level": "High",
+          "impact_notes": "Fog notably impacts visibility; CAT II operations available for runway 27"
+        },
+        "runway_specifications": {
+          "description": "Runway requirements and limitations",
+          "data": {
+            "runways": [
+              {
+                "designation": "07/25",
+                "length_meters": 3000,
+                "length_feet": 9843,
+                "surface_type": "Concrete",
+                "width_meters": 45,
+                "status": "Primary runway"
+              },
+              {
+                "designation": "03/21",
+                "length_meters": 2665,
+                "length_feet": 8743,
+                "surface_type": "Asphalt",
+                "width_meters": 60
+              },
+              {
+                "designation": "09/27",
+                "length_meters": 1847,
+                "length_feet": 6060,
+                "surface_type": "Asphalt",
+                "width_meters": 45,
+                "note": "Limited to aircraft weighing maximum 5.7 tons from 21:15 to 05:00 local time"
+              }
+            ],
+            "number_of_runways": 3,
+            "crosswind_limitations": "Moderate; triple simultaneous parallel approaches possible",
+            "weight_restrictions": "Large aircraft (codes E and F) require prior coordination with aerodrome operator"
+          },
+          "risk_level": "Medium",
+          "impact_notes": "Three runways reduce weather impacts; night restrictions on smallest runway"
+        },
+        "crew_requirements": {
+          "description": "Special qualifications needed",
+          "data": {
+            "special_crew_training_required": false,
+            "mountain_airport_rating": false,
+            "cat_ii_iii_rating_required": false,
+            "captain_only_airport": false,
+            "minimum_pilot_hours": "Standard EASA requirements",
+            "crew_visa_requirements": "EU/Schengen crews: passport required. Non-Schengen: Schengen visa required; crew visas issued upon arrival valid 72 hours",
+            "documentation_required": "Crew licenses (EASA/ICAO certified), certificates of airworthiness, registration, insurance, noise certificates"
+          },
+          "risk_level": "Medium",
+          "impact_notes": "Non-EU crew require Schengen visa coordination; ramp checks frequent for international flights"
+        },
+        "handling_complexity": {
+          "description": "Ground handling and service factors",
+          "data": {
+            "handler_availability_24_7": true,
+            "fuel_availability": "JET A-1 available 24/7",
+            "customs_hours": "24/7 for CIQ clearance at FBO (approximately 5-10 minutes processing)",
+            "immigration_processing_time_avg": "10-15 minutes for passengers; crew can bypass immigration",
+            "minimum_notice_hours": 2,
+            "weekend_surcharges": "Available at all times without surcharges",
+            "fbo_options": "Multiple FBOs including Universal Aviation, Samsic Aero, Sky Echlipse",
+            "parking_availability": "Limited during peak times; advance booking essential",
+            "gendec_manifest_required": true
+          },
+          "risk_level": "Medium",
+          "impact_notes": "Efficient CIQ processing; hangar/parking space limited during events; advance coordination essential"
+        },
+        "congestion_metrics": {
+          "description": "Traffic and capacity issues",
+          "data": {
+            "average_taxi_time_minutes": "15-25",
+            "peak_hour_delays_typical": "15-30 minutes during peak season",
+            "airspace_complexity": "Moderate; proximity to Paris CDG/Orly airspace requires ATC coordination",
+            "atc_delays_frequency": "Occasional during peak summer months",
+            "annual_movements": "Approximately 55,751 aircraft movements (96% business aviation)",
+            "seasonal_congestion_multiplier": 1.5,
+            "peak_season_impact": "May-September shows elevated delays"
+          },
+          "risk_level": "Medium",
+          "impact_notes": "Predictable delay patterns; high movement volume does not typically cause major congestion"
+        },
+        "permits_and_clearances": {
+          "description": "Authorization requirements",
+          "data": {
+            "requires_prior_permission": true,
+            "ppr_notice_period_hours": 24,
+            "overflight_permit_required": false,
+            "landing_permit_processing_time": "Typically same-day if requested in advance",
+            "diplomatic_clearance_required": false,
+            "ppr_method": "Via handling agent or E-Airportslots",
+            "documentation_required": "Flight schedule, crew passport copies, receiving party details"
+          },
+          "risk_level": "High",
+          "impact_notes": "PPR mandatory; advance booking essential to avoid last-minute rejections"
+        },
+        "noise_restrictions": {
+          "description": "Noise abatement procedures",
+          "data": {
+            "noise_category_required": true,
+            "chapter_requirements": "ICAO Chapter 4 (Stage 4) compliance required for new aircraft. Chapter 3 (Stage 2/3) aircraft subject to arrival time restrictions after 23:30 and before 06:15",
+            "noise_surcharges": "Landing fees modulated based on aircraft noise classification (highest for loudest aircraft)",
+            "preferred_departure_routes": "Specific SIDs (Standard Instrument Departures) designated for noise abatement",
+            "noise_complaints_risk": "Moderate; active noise monitoring program"
+          },
+          "risk_level": "Low-Medium",
+          "impact_notes": "Stage 2 aircraft heavily penalized; newer aircraft preferred. Advance payment of noise-modulated landing fees required"
+        },
+        "infrastructure_reliability": {
+          "description": "Airport facility dependability",
+          "data": {
+            "power_outage_frequency": "Rare",
+            "equipment_failure_rate": "Low",
+            "maintenance_closure_days_annual": "Minimal; typically weekends for maintenance",
+            "backup_systems_available": true,
+            "historical_closure_incidents": "No major extended closures in recent history"
+          },
+          "risk_level": "Low",
+          "impact_notes": "Well-maintained facilities; reliable infrastructure"
+        },
+        "security_requirements": {
+          "description": "Security processing factors",
+          "data": {
+            "security_screening_time_avg": "5-10 minutes",
+            "enhanced_security_periods": "Elevated during major events and peak travel",
+            "vip_security_delays": "Managed through FBO VIP channels; minimal delays",
+            "passenger_background_check_required": false
+          },
+          "risk_level": "Low-Medium",
+          "impact_notes": "Standard European security procedures"
+        },
+        "seasonal_factors": {
+          "description": "Time-based operational changes",
+          "data": {
+            "high_season_months": "May-September",
+            "ski_season_congestion": "Not applicable (Alpine resort not proximity factor)",
+            "summer_thunderstorm_frequency": "Moderate; June-August",
+            "winter_deicing_delays_avg": "Not typical; deicing available when needed",
+            "holiday_peak_dates": "French Open (May-June), Summer holidays (July-August), Air Show (odd years, June)"
+          },
+          "risk_level": "Medium",
+          "impact_notes": "Predictable seasonal patterns; major events create temporary congestion"
+        },
+        "alternate_airport_proximity": {
+          "description": "Backup options availability",
+          "data": {
+            "nearest_suitable_alternate_code": "LFPG (Paris Charles de Gaulle)",
+            "distance_to_alternate_km": 35,
+            "distance_to_alternate_nm": 19,
+            "alternate_typically_available": false,
+            "note": "CDG primarily commercial; not ideal for business aviation. Next alternate: Le Touquet (LFAT) at 75 km",
+            "ground_transport_time_to_alternate_minutes": "45-60 minutes to CDG by car"
+          },
+          "risk_level": "Medium",
+          "impact_notes": "Limited suitable alternates; CDG congested with commercial traffic; Le Touquet distant but feasible"
+        },
+        "payment_and_fees": {
+          "description": "Financial arrangements that may cause delays",
+          "data": {
+            "advance_payment_required": true,
+            "credit_account_needed": false,
+            "handling_agent_prepayment": "Required for many services",
+            "fuel_payment_terms": "Varies by provider; typically prepayment or credit card at time of uplift",
+            "landing_fees": "Noise-modulated; invoiced directly by Aéroports de Paris (ADP) from April 1, 2022 onwards",
+            "fee_payment_note": "Universal Aviation no longer pays landing fees on behalf of operators as of April 2022"
+          },
+          "risk_level": "Low",
+          "impact_notes": "Payment systems reliable; advance coordination prevents delays"
+        }
+      }
+    },
+    "EGGX": {
+      "airport_code": "EGGX",
+      "iata_code": "LTN",
+      "airport_name": "London Luton",
+      "country": "United Kingdom",
+      "location": "32 miles north of central London, Bedfordshire",
+      "type": "Commercial and Business Aviation",
+      "risk_assessment": {
+        "operational_hours": {
+          "description": "Operating hours and curfews",
+          "data": {
+            "opens_utc": "00:00",
+            "closes_utc": "24:00 (24/7 operations)",
+            "night_curfew": true,
+            "curfew_start_utc": "23:00",
+            "curfew_end_utc": "06:00",
+            "weekend_restrictions": false,
+            "holiday_closures": false,
+            "curfew_details": "Summer 2025: Ad-hoc night slots restricted (23:00-06:59); pool of 100 slots available first-come-first-served. Only aircraft with QC rating ≤0.5 permitted at night.",
+            "summer_2025_note": "Runway closures for maintenance: Sundays May 25-June 29, 03:00-05:20 local time"
+          },
+          "risk_level": "High",
+          "impact_notes": "Strict night restrictions particularly from June-September 2025; daytime operations unrestricted"
+        },
+        "slot_requirements": {
+          "description": "Whether airport requires pre-allocated slots",
+          "data": {
+            "slot_controlled": true,
+            "advance_booking_required_hours": 24,
+            "slot_availability_typical": "Constrained during peak hours; slots must be confirmed",
+            "peak_congestion_times": "0600-2200 Monday-Friday; limited weekend availability",
+            "night_slots_summer": "Maximum 100 ad-hoc movements pool (June 14-September 17, 2025); very limited"
+          },
+          "risk_level": "High",
+          "impact_notes": "Slot-controlled airport; business aviation requires advance planning; night slots extremely limited"
+        },
+        "weather_vulnerability": {
+          "description": "Weather conditions that cause disruptions",
+          "data": {
+            "fog_prone": false,
+            "snow_closure_frequency": "Rare; UK South East climate mild",
+            "wind_limitations": "Moderate; single runway (08/26) can limit operations in crosswind conditions",
+            "requires_cat_ii_iii_capability": false,
+            "seasonal_risk_periods": "Winter storms (December-February); occasional summer thunderstorms"
+          },
+          "risk_level": "Low-Medium",
+          "impact_notes": "Single runway vulnerability in certain wind conditions; generally stable UK weather"
+        },
+        "runway_specifications": {
+          "description": "Runway requirements and limitations",
+          "data": {
+            "runways": [
+              {
+                "designation": "08/26",
+                "length_meters": 3048,
+                "length_feet": 10000,
+                "surface_type": "Asphalt",
+                "width_meters": 45.7,
+                "status": "Single runway"
+              }
+            ],
+            "number_of_runways": 1,
+            "crosswind_limitations": "Significant constraint; single runway limits flexibility in crosswind conditions",
+            "weight_restrictions": "Accommodates wide range of aircraft; no specific restrictions noted"
+          },
+          "risk_level": "Medium",
+          "impact_notes": "Single runway is major operational constraint; no crosswind alternatives"
+        },
+        "crew_requirements": {
+          "description": "Special qualifications needed",
+          "data": {
+            "special_crew_training_required": false,
+            "mountain_airport_rating": false,
+            "cat_ii_iii_rating_required": false,
+            "captain_only_airport": false,
+            "minimum_pilot_hours": "Standard EASA requirements",
+            "crew_visa_requirements": "Post-BREXIT: Non-UK/EU crew may require visa; EU crew passports sufficient for Schengen waiver countries",
+            "documentation_required": "Standard UK entry requirements; crew passports mandatory"
+          },
+          "risk_level": "Medium",
+          "impact_notes": "Post-BREXIT crew coordination required; EU crew generally hassle-free with passports"
+        },
+        "handling_complexity": {
+          "description": "Ground handling and service factors",
+          "data": {
+            "handler_availability_24_7": true,
+            "fuel_availability": "JET A-1 available; 100LL not available",
+            "customs_hours": "24/7 (No US Customs pre-clearance)",
+            "immigration_processing_time_avg": "Standard UK processing times",
+            "minimum_notice_hours": 2,
+            "weekend_surcharges": "Yes; surcharges for out-of-hours operations (25-50% depending on shift)",
+            "mandatory_handling": true,
+            "handler_providers": "Signature Flight Support (Terminal 1: 24hrs, Terminal 2: dawn-dusk), EVO Jet, Harrods Aviation"
+          },
+          "risk_level": "Medium",
+          "impact_notes": "Mandatory handling increases costs; multiple FBOs available; out-of-hours surcharges significant"
+        },
+        "congestion_metrics": {
+          "description": "Traffic and capacity issues",
+          "data": {
+            "average_taxi_time_minutes": "12-20",
+            "peak_hour_delays_typical": "10-25 minutes during peak hours",
+            "airspace_complexity": "Moderate; proximity to London airspace (Luton Radar sector)",
+            "atc_delays_frequency": "Occasional during peak daytime hours",
+            "seasonal_congestion_multiplier": 1.3,
+            "annual_passengers": "18 million current; expanding to 32 million post-expansion"
+          },
+          "risk_level": "Medium",
+          "impact_notes": "Growing congestion due to airport expansion; daytime delays predictable"
+        },
+        "permits_and_clearances": {
+          "description": "Authorization requirements",
+          "data": {
+            "requires_prior_permission": false,
+            "ppr_notice_period_hours": 0,
+            "overflight_permit_required": false,
+            "landing_permit_processing_time": "Not required for general aviation",
+            "diplomatic_clearance_required": false,
+            "foreign_carrier_permit": "£107 per application if applicable (commercial operations only)",
+            "note": "Non-EU registered charter flights require UK CAA landing permits (standard lead time 3 business days)"
+          },
+          "risk_level": "Low",
+          "impact_notes": "No PPR required for GA; commercial operations require permits"
+        },
+        "noise_restrictions": {
+          "description": "Noise abatement procedures",
+          "data": {
+            "noise_category_required": true,
+            "chapter_requirements": "Aircraft with QC (Quota Count) > 0.5 prohibited at night (22:00-05:59). Summer 2025: Only QC ≤ 0.5 permitted during night ad-hoc operations",
+            "noise_surcharges": "Day operations (06:00-22:59): Up to 400% surcharge for noise violations. Night operations (23:00-05:59): 300-600% surcharge",
+            "preferred_departure_routes": "Noise Preferential Routes (NPRs) enforced up to 3,000 ft day / 4,000 ft night; specific routes require higher altitudes",
+            "noise_complaints_risk": "Moderate-High; active community monitoring"
+          },
+          "risk_level": "Medium",
+          "impact_notes": "Strict noise controls; QC rating critical for night operations. Significant surcharges for violations."
+        },
+        "infrastructure_reliability": {
+          "description": "Airport facility dependability",
+          "data": {
+            "power_outage_frequency": "Rare",
+            "equipment_failure_rate": "Low",
+            "maintenance_closure_days_annual": "Periodic; main runway resurfacing November 3, 2025-March 27, 2026",
+            "backup_systems_available": true,
+            "maintenance_note": "Night closures Monday-Friday 00:01-05:45 local time; break December 19, 2025-January 4, 2026"
+          },
+          "risk_level": "Low",
+          "impact_notes": "Well-maintained; scheduled resurfacing in winter 2025-26"
+        },
+        "security_requirements": {
+          "description": "Security processing factors",
+          "data": {
+            "security_screening_time_avg": "5-15 minutes",
+            "enhanced_security_periods": "Standard UK security; elevated during security alerts",
+            "vip_security_delays": "Minimal with FBO coordination",
+            "passenger_background_check_required": false
+          },
+          "risk_level": "Low",
+          "impact_notes": "Standard UK aviation security protocols"
+        },
+        "seasonal_factors": {
+          "description": "Time-based operational changes",
+          "data": {
+            "high_season_months": "June-September (summer travel)",
+            "ski_season_congestion": "Not applicable",
+            "summer_thunderstorm_frequency": "Moderate; July-August",
+            "winter_deicing_delays_avg": "Minimal; de-icing available when needed",
+            "holiday_peak_dates": "Easter, Summer holidays (July-August), Christmas/New Year"
+          },
+          "risk_level": "Medium",
+          "impact_notes": "Predictable summer peaks; winter generally stable"
+        },
+        "alternate_airport_proximity": {
+          "description": "Backup options availability",
+          "data": {
+            "nearest_suitable_alternate_code": "EGSS (London Stansted)",
+            "distance_to_alternate_km": 45,
+            "distance_to_alternate_nm": 24,
+            "alternate_typically_available": true,
+            "other_options": [
+              "EGMC (Southend): 60 km east",
+              "EGKK (London Gatwick): 80 km south",
+              "EGLL (London Heathrow): 65 km west",
+              "EGKA (Shoreham, West Sussex): 90 km south"
+            ],
+            "ground_transport_time_to_alternate_minutes": "60-90 minutes depending on alternate"
+          },
+          "risk_level": "Low",
+          "impact_notes": "Multiple suitable alternates within reasonable distance; Stansted preferred for GA"
+        },
+        "payment_and_fees": {
+          "description": "Financial arrangements that may cause delays",
+          "data": {
+            "advance_payment_required": true,
+            "credit_account_needed": false,
+            "handling_agent_prepayment": "Often required for various services",
+            "fuel_payment_terms": "Typically credit card or prepayment at uplift",
+            "handling_charges": "Band G aircraft (25-35,999 kg MTOW): £725/hour off-peak, £1,087/hour peak; 6% airport levy applied",
+            "surcharges": "25% surcharge for one sector out-of-hours, 50% for two sectors"
+          },
+          "risk_level": "Low-Medium",
+          "impact_notes": "Payment systems reliable; out-of-hours surcharges substantial"
+        }
+      }
+    },
+    "LSGG": {
+      "airport_code": "LSGG",
+      "iata_code": "GVA",
+      "airport_name": "Geneva Cointrin",
+      "country": "Switzerland",
+      "location": "4 km northwest of Geneva city center, near Switzerland-France border",
+      "type": "International Business Aviation Hub",
+      "risk_assessment": {
+        "operational_hours": {
+          "description": "Operating hours and curfews",
+          "data": {
+            "opens_utc": "00:00",
+            "closes_utc": "24:00 (24/7 for emergencies)",
+            "night_curfew": true,
+            "curfew_start_utc": "00:00",
+            "curfew_end_utc": "06:00",
+            "weekend_restrictions": false,
+            "holiday_closures": false,
+            "night_operations": "Limited; non-commercial flights allowed 06:00-22:00 only. Commercial flights 06:00-00:30.",
+            "emergency_operations": "Available 23:31-04:59 with prior approval",
+            "practical_hours": "06:00-23:30 for most business aviation"
+          },
+          "risk_level": "High",
+          "impact_notes": "Effective night ban for non-commercial flights; limited evening operations"
+        },
+        "slot_requirements": {
+          "description": "Whether airport requires pre-allocated slots",
+          "data": {
+            "slot_controlled": true,
+            "advance_booking_required_hours": 120,
+            "slot_availability_typical": "Requires advance coordination; slots allocated in 19-minute blocks",
+            "peak_congestion_times": "08:00-18:00 weekdays; Geneva Motor Show (March) and EBACE (May)",
+            "ga_ba_note": "No slots available through commercial slot coordination; PPR required instead"
+          },
+          "risk_level": "High",
+          "impact_notes": "Strict slot coordination; 5-day advance booking for IFR flights mandatory"
+        },
+        "weather_vulnerability": {
+          "description": "Weather conditions that cause disruptions",
+          "data": {
+            "fog_prone": false,
+            "snow_closure_frequency": "Occasional in winter; nearby Alps influence weather patterns",
+            "wind_limitations": "Moderate; Alpine wind patterns can affect operations",
+            "requires_cat_ii_iii_capability": true,
+            "seasonal_risk_periods": "November-February (winter Alpine conditions); occasional summer thunderstorms",
+            "alpine_considerations": "Proximity to Alps creates variable weather; rapid weather changes possible",
+            "elevation_feet": 1411,
+            "winter_impact": "Snow and ice possible; de-icing services available"
+          },
+          "risk_level": "High",
+          "impact_notes": "Alpine weather patterns create seasonal vulnerability; winter operations challenging"
+        },
+        "runway_specifications": {
+          "description": "Runway requirements and limitations",
+          "data": {
+            "runways": [
+              {
+                "designation": "04/22",
+                "length_meters": 3900,
+                "length_feet": 12795,
+                "surface_type": "Concrete",
+                "width_meters": 50,
+                "ils_capability": "CAT I for runway 04, CAT IIIb for runway 22"
+              },
+              {
+                "designation": "04L/22R",
+                "length_meters": 823,
+                "length_feet": 2700,
+                "surface_type": "Grass/Earth",
+                "note": "Limited use; auxiliary runway"
+              }
+            ],
+            "number_of_runways": 1,
+            "crosswind_limitations": "Primary runway accommodates all aircraft; good all-weather capability",
+            "weight_restrictions": "Accommodates wide range including heavy jets"
+          },
+          "risk_level": "Low",
+          "impact_notes": "Single primary runway with excellent ILS; capable of handling significant weather"
+        },
+        "crew_requirements": {
+          "description": "Special qualifications needed",
+          "data": {
+            "special_crew_training_required": false,
+            "mountain_airport_rating": false,
+            "cat_ii_iii_rating_required": false,
+            "captain_only_airport": false,
+            "minimum_pilot_hours": "Standard EASA requirements",
+            "crew_visa_requirements": "EU/Schengen crews: passport sufficient. Non-Schengen: Visa required; crew visas issued upon arrival, typically valid 72 hours",
+            "documentation_required": "Flight crew licenses (EASA/ICAO certified), certificates of airworthiness, registration, insurance"
+          },
+          "risk_level": "Medium",
+          "impact_notes": "Standard requirements; non-Schengen crew visa coordination necessary"
+        },
+        "handling_complexity": {
+          "description": "Ground handling and service factors",
+          "data": {
+            "handler_availability_24_7": true,
+            "fuel_availability": "JET A-1 available on-site; quick turnaround support",
+            "customs_hours": "05:00-24:00 LT (Schengen and non-Schengen processing available)",
+            "immigration_processing_time_avg": "15-30 minutes depending on passport origin",
+            "minimum_notice_hours": 2,
+            "weekend_surcharges": "No specific surcharges; services available all week",
+            "mandatory_handling": true,
+            "handler_options": "Dassault, Signature, Swissport, Jet Aviation",
+            "self_handling_note": "Not permitted; mandatory handling agent required for all operations"
+          },
+          "risk_level": "Medium",
+          "impact_notes": "Mandatory handling increases costs; professional service providers available"
+        },
+        "congestion_metrics": {
+          "description": "Traffic and capacity issues",
+          "data": {
+            "average_taxi_time_minutes": "10-18",
+            "peak_hour_delays_typical": "5-20 minutes during peak hours",
+            "airspace_complexity": "Low-Moderate; Switzerland SES (Single European Sky) participant",
+            "atc_delays_frequency": "Rare; well-managed airspace",
+            "annual_movements": "Approximately 191,000 (current); projected 236,000 by 2030",
+            "seasonal_congestion_multiplier": 1.4,
+            "event_impact": "Geneva Motor Show and EBACE create temporary congestion"
+          },
+          "risk_level": "Low-Medium",
+          "impact_notes": "Efficient operations; growth expected but currently stable"
+        },
+        "permits_and_clearances": {
+          "description": "Authorization requirements",
+          "data": {
+            "requires_prior_permission": true,
+            "ppr_notice_period_hours": 120,
+            "ppr_booking_timeline_irr_vfr": "5 days advance for IFR; 1 day for VFR commercial",
+            "ppr_booking_timeline_ga": "5 days for IFR non-commercial; day-of for VFR non-commercial",
+            "overflight_permit_required": false,
+            "landing_permit_required": false,
+            "epermi_system": "FOCA (Federal Office of Civil Aviation) ePermit system for non-repetitive flights (24-72 hours before departure)",
+            "documentation_required": "Flight plan, crew licenses (EASA/ICAO), proof of insurance"
+          },
+          "risk_level": "High",
+          "impact_notes": "Mandatory PPR with strict advance notice requirements; FOCA ePermit system for non-regular flights"
+        },
+        "noise_restrictions": {
+          "description": "Noise abatement procedures",
+          "data": {
+            "noise_category_required": true,
+            "chapter_requirements": "EASA Chapter 4 (Stage 4) compliance strongly encouraged. Aircraft with noise certification margin ≤ 5 dBA prohibited from night operations.",
+            "noise_surcharges": "Applied based on aircraft noise classification; modulated charges encourage quieter aircraft",
+            "preferred_departure_routes": "Standard Instrument Departures (SIDs) mandatory; continuous descent arrival (CDA) procedures preferred",
+            "noise_complaints_risk": "Moderate; active monitoring program; 24,000 affected during day, 75,000 at night"
+          },
+          "risk_level": "Medium",
+          "impact_notes": "Noise restrictions limiting noisier aircraft; expansion requires meeting noise reduction targets"
+        },
+        "infrastructure_reliability": {
+          "description": "Airport facility dependability",
+          "data": {
+            "power_outage_frequency": "Rare",
+            "equipment_failure_rate": "Low",
+            "maintenance_closure_days_annual": "Minimal; scheduled maintenance during low-traffic periods",
+            "backup_systems_available": true,
+            "historical_closure_incidents": "June 2024: Brief closure due to control tower flooding (weather-related); resolved quickly"
+          },
+          "risk_level": "Low",
+          "impact_notes": "Generally reliable; weather events rare but possible"
+        },
+        "security_requirements": {
+          "description": "Security processing factors",
+          "data": {
+            "security_screening_time_avg": "5-15 minutes",
+            "enhanced_security_periods": "Standard Swiss security; no elevated requirements",
+            "vip_security_delays": "Minimal with FBO coordination",
+            "passenger_background_check_required": false
+          },
+          "risk_level": "Low",
+          "impact_notes": "Standard Schengen security protocols"
+        },
+        "seasonal_factors": {
+          "description": "Time-based operational changes",
+          "data": {
+            "high_season_months": "March (Motor Show), May (EBACE), June-September (summer)",
+            "ski_season_congestion": "Not at airport; nearby Alps create winter weather challenges",
+            "summer_thunderstorm_frequency": "Moderate; July-August",
+            "winter_deicing_delays_avg": "Available on demand; typically not significant",
+            "holiday_peak_dates": "Easter, Summer holidays (July-August), Christmas/New Year"
+          },
+          "risk_level": "Medium",
+          "impact_notes": "Events create predictable congestion; winter weather variability important"
+        },
+        "alternate_airport_proximity": {
+          "description": "Backup options availability",
+          "data": {
+            "nearest_suitable_alternate_code": "LFLI (Annemasse)",
+            "distance_to_alternate_km": 13,
+            "distance_to_alternate_nm": 7,
+            "alternate_typically_available": true,
+            "other_options": [
+              "LSZH (Zurich): 280 km north",
+              "LSGL (Lausanne): 60 km west",
+              "LSGS (Sion): 150 km southeast"
+            ],
+            "annemasse_note": "Smaller airport; customs/immigration support; 30-minute drive to Geneva",
+            "ground_transport_time_to_alternate_minutes": "15-20 minutes to Annemasse"
+          },
+          "risk_level": "Low",
+          "impact_notes": "Annemasse very close and accessible; good backup option for diversions"
+        },
+        "payment_and_fees": {
+          "description": "Financial arrangements that may cause delays",
+          "data": {
+            "advance_payment_required": true,
+            "credit_account_needed": false,
+            "handling_agent_prepayment": "Required for most services",
+            "fuel_payment_terms": "Typically prepayment or credit card",
+            "airport_fees": "Approximately CHF 128.10 base fee",
+            "handling_charges": "Approximately CHF 300-500 depending on aircraft type",
+            "ground_handler_mandatory": "All operators must use authorized handling agents"
+          },
+          "risk_level": "Low",
+          "impact_notes": "Swiss pricing higher than neighboring countries; payment systems reliable"
+        }
+      }
+    }
+  },
+  "key_findings_summary": {
+    "highest_risk_airports": {
+      "rank": [
+        {
+          "position": 1,
+          "airport": "LSGG (Geneva)",
+          "primary_risk_factors": [
+            "Alpine weather vulnerability and winter closures",
+            "Mandatory 5-day advance PPR booking for IFR flights",
+            "Mandatory handling agents (cost increase)",
+            "Night ban for non-commercial flights (06:00-22:00 effective hours)",
+            "Strict noise restrictions for noisier aircraft"
+          ],
+          "operational_complexity": "High - Alpine location creates weather challenges; Swiss regulatory framework strict"
+        },
+        {
+          "position": 2,
+          "airport": "LFPB (Paris)",
+          "primary_risk_factors": [
+            "Night curfew 22:15-06:00 local time restricts flexibility",
+            "Slot-controlled with advance booking requirements",
+            "Fog-prone conditions affect visibility",
+            "High congestion during peak season events",
+            "Noise-modulated landing fees (administrative complexity)"
+          ],
+          "operational_complexity": "High - Major hub with event-driven congestion; night restrictions significant"
+        },
+        {
+          "position": 3,
+          "airport": "EGGX (London)",
+          "primary_risk_factors": [
+            "Single runway limits flexibility in crosswind conditions",
+            "Strict night slot restrictions (Summer 2025: only 100 slots for ad-hoc, QC ≤ 0.5 only)",
+            "UK post-BREXIT crew documentation requirements",
+            "Out-of-hours surcharges (25-50%) increase costs",
+            "Mandatory handling agents (cost increase)"
+          ],
+          "operational_complexity": "Medium-High - Single runway constraint; night restrictions growing"
+        }
+      ]
+    },
+    "comparative_advantages": {
+      "LFPB": "24/7 arrivals without slots; multiple runways for weather flexibility; no diplomatic clearance required; efficient CIQ processing",
+      "EGGX": "No PPR required; multiple alternate airports within short distance; daytime operations unrestricted; straightforward regulatory environment",
+      "LSGG": "Reliable weather handling (CAT IIIb capability); efficient operations; excellent backup (Annemasse 13 km); professional infrastructure; good alternate airports"
+    },
+    "critical_success_factors": {
+      "advance_planning": "All three airports require 24+ hour advance coordination; LSGG requires 5 days for IFR",
+      "cost_considerations": "LSGG mandatory handling (most expensive); EGGX out-of-hours surcharges; LFPB noise-modulated fees",
+      "seasonal_planning": "LFPB: May-June events create congestion. EGGX: June-September night restrictions. LSGG: Alpine weather November-February.",
+      "crew_documentation": "EU crews generally straightforward; non-Schengen crews require advance visa coordination for LFPB/LSGG"
+    }
+  }
+}

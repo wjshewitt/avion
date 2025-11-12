@@ -1,0 +1,446 @@
+{
+  "airports": [
+    {
+      "icao": "EBBR",
+      "iata": "BRU",
+      "name": "Brussels National Airport",
+      "city": "Brussels",
+      "country": "Belgium",
+      "region": "Benelux & Nordics",
+      "data_collection_date": "2025-11-10",
+      "sources": [
+        "Belgian CAA (Belgocontrol)",
+        "Brussels Airport Official Website (brusselsairport.be)",
+        "AIP Belgium (ops.skeyes.be)",
+        "Brucoord (Belgium Slot Coordination)",
+        "Boeing Noise Procedures Document",
+        "Brussels Airport 2023 Runway Performance Report"
+      ],
+      "risk_factors": {
+        "operational_hours": {
+          "opens_utc": "00:00",
+          "closes_utc": "24:00",
+          "night_curfew": true,
+          "curfew_start_utc": "23:00",
+          "curfew_end_utc": "05:59",
+          "weekend_restrictions": true,
+          "holiday_closures": false,
+          "notes": "Operates 24/7 but with restrictions on night slots. Silent nights enforced Friday-Saturday (01:00-06:00), Saturday-Sunday (00:00-06:00), Sunday-Monday (00:00-06:00) with NO take-off slots allocated during these periods. Maximum 16,000 annual night slots available (5,000 for departures). Night departures: 22:45-05:40 LT; Night arrivals: 23:10-06:05 LT. Violations result in fines €1,000-€20,000 and imprisonment 8 days to 1 year."
+        },
+        "slot_requirements": {
+          "slot_controlled": true,
+          "advance_booking_required_hours": 24,
+          "slot_availability_typical": "Constrained - Level 2-3 coordination, approximately 70-80% utilization during 10:00-18:00",
+          "peak_congestion_times": "10:00-18:00 local time, especially 12:00-14:00",
+          "notes": "Highly slot-coordinated airport. Mandatory Prior Permission Required (PPR) for non-scheduled flights. Slots must be coordinated through Brucoord. Peak season (summer, ski season) reduces availability further. New regulations effective March 30, 2025 will enforce noise-based aircraft restrictions during night hours."
+        },
+        "weather_vulnerability": {
+          "fog_prone": true,
+          "snow_closure_frequency": "Moderate - seasonal winter impact (Dec-Feb), rare full closures",
+          "wind_limitations": "Crosswind 15 knots for approaches, can be exceeded with pilot approval",
+          "requires_cat_ii_iii_capability": true,
+          "seasonal_risk_periods": "December-February (winter snow/ice), occasional summer thunderstorms",
+          "notes": "Alpine location (Zaventem) affects weather. Modern ILS CAT III capabilities available on all three runways (07L/25R, 07R/25L, 01/19). Winter deicing procedures in place. Fog can affect operations early morning and late evening during winter. ILS approach minima enforced: visibility must exceed 1900m, ceiling higher than 500ft above airport elevation. Wind limitations: crosswind <15 knots, tailwind <5 knots during approaches."
+        },
+        "runway_specifications": {
+          "minimum_runway_length_meters": 2987,
+          "runway_surface_type": "Concrete/asphalt (grooved)",
+          "number_of_runways": 3,
+          "crosswind_limitations": "15 knots typical (can be exceeded with pilot approval)",
+          "weight_restrictions": "No restrictions; designed for largest aircraft (MTOW 560+ tonnes)",
+          "runway_details": [
+            {
+              "designator": "07L/25R",
+              "length_meters": 3638,
+              "width_meters": 60,
+              "surface": "Concrete/grooved",
+              "ils_equipped": true,
+              "lighting": "High intensity"
+            },
+            {
+              "designator": "07R/25L",
+              "length_meters": 3211,
+              "width_meters": 60,
+              "surface": "Concrete/grooved",
+              "ils_equipped": true,
+              "lighting": "High intensity"
+            },
+            {
+              "designator": "01/19",
+              "length_meters": 2987,
+              "width_meters": 60,
+              "surface": "Asphalt/grooved",
+              "ils_equipped": true,
+              "lighting": "High intensity"
+            }
+          ]
+        },
+        "crew_requirements": {
+          "special_crew_training_required": false,
+          "mountain_airport_rating": "Not required; airport at 56m MSL (low elevation)",
+          "cat_ii_iii_rating_required": "Recommended for night operations, required for low visibility approaches",
+          "captain_only_airport": false,
+          "minimum_pilot_hours": "No specific minimum, but experience with slot-controlled airports and A-CDM procedures beneficial",
+          "notes": "Standard EASA Part-FCL compliance required. Familiarity with complex airspace (EDMM), multiple SIDs/STARs, and slot coordination procedures essential. CAT II/III capability important for operational reliability. No special mountain training needed."
+        },
+        "handling_complexity": {
+          "handler_availability_24_7": true,
+          "fuel_availability": true,
+          "customs_hours": "24/7 (can extend for scheduled flights)",
+          "immigration_processing_time_avg": "30-45 minutes standard",
+          "minimum_notice_hours": 2,
+          "weekend_surcharges": "10-15% typical for weekend/holiday handling",
+          "notes": "Multiple FBO options available (Aviapartner, ExecuJet Belgium). General aviation handling MANDATORY. CIQ facilities available 24/7. Jet A1 fuel standard, available 24/7 except 21:00-05:00 when only credit cards accepted by chosen petroleum company. De-icing services available by arrangement. Apron access restricted 07:00-17:00. Payment arrangements must be confirmed in advance. High demand during peak periods causes ground service delays."
+        },
+        "congestion_metrics": {
+          "average_taxi_time_minutes": "15-25 minutes (normal), 30-40 minutes during peak",
+          "peak_hour_delays_typical": "5-15 minutes during 12:00-14:00 peak",
+          "airspace_complexity": "High - complex approach corridors, multiple SIDs/STARs, frequent vectoring from EDMM",
+          "atc_delays_frequency": "Moderate - approximately 20-30% of flights experience minor delays during peak",
+          "seasonal_congestion_multiplier": "1.3-1.5x during peak summer and ski season",
+          "notes": "A-CDM (Airport Collaborative Decision Making) implementation manages congestion. EDMM Radar approach includes strict separation standards. 2023 saw 192,267 movements (+7% from 2022). Missed approaches increased 26% in 2023 (279 total), mostly due to unstable approaches and weather. Winter months add complexity. Runway 19 maintenance closures can occur. Preferential runway system used during low traffic periods (nights/weekends)."
+        },
+        "permits_and_clearances": {
+          "requires_prior_permission": true,
+          "ppr_notice_period_hours": 24,
+          "overflight_permit_required": false,
+          "landing_permit_processing_time": "Automatic with slot confirmation",
+          "diplomatic_clearance_required": false,
+          "notes": "Slot requests must be made 24 hours in advance through Brucoord. Non-scheduled flights may require formal PPR procedure with airport coordination. All non-EU operators should confirm slot procedures. Diplomatic flights require standard EU procedures."
+        },
+        "noise_restrictions": {
+          "noise_category_required": "ICAO Chapter 3, 4, and 5 (stratified by aircraft type)",
+          "chapter_requirements": "Chapter 4 aircraft subject to 20x landing fee surcharge vs. Chapter 3 aircraft (effective April 2025)",
+          "noise_surcharges": "Up to 20x more for loudest/oldest aircraft vs. modern aircraft; terminal fee varies -25% to +40% based on noise/emissions/distance/time-of-day",
+          "preferred_departure_routes": "Specific noise abatement procedures for arrivals and departures",
+          "noise_complaints_risk": "High - airport located 7km from Brussels city center in densely populated area",
+          "notes": "Engine run-ups prohibited at holding position except for immediate pre-takeoff tests, must occur 06:00-21:00 with prior permission. Taxi restrictions 22:00-04:59: maximum 4 aircraft taxiing simultaneously, maximum 3 at holding point. APU restricted except for engine start/cabin heat. Aircraft parking equipped with 400Hz power and pre-conditioned air to minimize APU use. New regulations March 30, 2025 restrict certain aircraft types during night hours based on noise performance."
+        },
+        "infrastructure_reliability": {
+          "power_outage_frequency": "Low - rare",
+          "equipment_failure_rate": "Low - modern facilities",
+          "maintenance_closure_days_annual": "Minimal - typically runway-specific maintenance",
+          "backup_systems_available": "Yes - multiple ILS systems across three runways, A-CDM backup systems",
+          "historical_closure_incidents": "Runway 19 ILS maintenance closures in 2023; no major facility outages reported",
+          "notes": "Well-maintained modern airport infrastructure. Snow removal equipment available for winter operations. SNOWTAM reports issued during winter. CNS drone monitoring planned to enhance navigation aid surveillance. Equipment redundancy ensures operations continuity."
+        },
+        "security_requirements": {
+          "security_screening_time_avg": "20-30 minutes standard",
+          "enhanced_security_periods": "During heightened alert levels or special events",
+          "vip_security_delays": "Potential for 30-45 minutes during high-profile visits",
+          "passenger_background_check_required": "Standard EU security vetting",
+          "notes": "24/7 security services available. EU aviation security standards apply. VIP protocols available through diplomatic coordination. Standard ECAC security procedures."
+        },
+        "seasonal_factors": {
+          "high_season_months": "June-August, December (holiday travel)",
+          "ski_season_congestion": "December-February, with peak December 18-January 5",
+          "summer_thunderstorm_frequency": "Occasional (affects routing during summer)",
+          "winter_deicing_delays_avg": "5-15 minutes during active snow conditions",
+          "holiday_peak_dates": "December 22-January 2, Easter week, summer holidays mid-July to mid-August",
+          "notes": "Winter months (Dec-Feb) require de-icing procedures which can add 10-15 minutes to operations. Ski season significantly increases traffic. Summer thunderstorms can cause vectoring delays. Night slot restrictions more strictly enforced during weekends. Maintenance windows usually scheduled between February-March and September-October for minimal impact."
+        },
+        "alternate_airport_proximity": {
+          "nearest_suitable_alternate_code": "EBCI",
+          "distance_to_alternate_km": 52,
+          "alternate_typically_available": "Yes - Charleroi Airport generally available",
+          "ground_transport_time_to_alternate_minutes": 65,
+          "notes": "Charleroi (EBCI) is primary alternate, 52km south. Brussels South Charleroi has modern facilities and less congestion. Other options: Antwerp (EBAW, 45km north), Liège (EBLG, 90km east). For technical issues or significant delays, Charleroi is preferred for most aircraft types."
+        },
+        "payment_and_fees": {
+          "advance_payment_required": "Recommended for non-scheduled operators",
+          "credit_account_needed": "Beneficial for frequent operators",
+          "handling_agent_prepayment": "Often required; confirmed with handler at booking",
+          "fuel_payment_terms": "Credit card required 21:00-05:00; advance arrangements during day",
+          "notes": "Brussels Airport assesses aeronautical charges (landing, handling, parking). Landing charges based on aircraft type and time. Noise surcharges increasingly important (up to 20x for older aircraft). Terminal air navigation service charges calculable via formula using unit rate (€248.84 in 2025), noise factor, emissions factor, and distance factor. All charges subject to standard VAT (21%). Handling agents: Aviapartner, ExecuJet Belgium (with specific hours). Many operators establish credit accounts for operational efficiency."
+        }
+      }
+    },
+    {
+      "icao": "ESSB",
+      "iata": "BMA",
+      "name": "Stockholm Bromma Airport",
+      "city": "Stockholm",
+      "country": "Sweden",
+      "region": "Benelux & Nordics",
+      "data_collection_date": "2025-11-10",
+      "sources": [
+        "Swedavia (Swedish Transport Agency)",
+        "Stockholm Bromma Airport Official Website",
+        "AIP Sweden",
+        "Bromma Environmental Permit Documentation",
+        "Boeing Noise Procedures Document",
+        "Universal Weather and Aviation Database"
+      ],
+      "risk_factors": {
+        "operational_hours": {
+          "opens_utc": "06:00",
+          "closes_utc": "22:00",
+          "night_curfew": true,
+          "curfew_start_utc": "22:00",
+          "curfew_end_utc": "07:00",
+          "weekend_restrictions": true,
+          "holiday_closures": false,
+          "notes": "Monday-Friday: 06:00-21:00 UTC (07:00-22:00 LT), Saturday: 08:00-16:00 UTC (09:00-17:00 LT), Sunday: 11:00-21:00 UTC (12:00-22:00 LT). No night operations allowed except emergency/state flights with prior notice. Control tower operational Mon-Fri 05:45-21:00 UTC. Customs/immigration 24/7. Extensions to advertised hours are NOT permitted under environmental licensing conditions."
+        },
+        "slot_requirements": {
+          "slot_controlled": false,
+          "advance_booking_required_hours": 0,
+          "slot_availability_typical": "Generally available during operating hours",
+          "peak_congestion_times": "10:00-14:00 local time on weekdays",
+          "notes": "Not a formal slot-coordinated airport. However, all non-scheduled flights require Prior Permission (PPR) for customs clearance. Capacity constraints exist due to single runway and strict environmental limits (80,000-100,000 annual movements maximum). Peak periods during weekday business hours can experience minor delays."
+        },
+        "weather_vulnerability": {
+          "fog_prone": true,
+          "snow_closure_frequency": "Moderate - December-February seasonal impact, rare full closures",
+          "wind_limitations": "Not explicitly specified but typical Nordic airport standards apply",
+          "requires_cat_ii_iii_capability": true,
+          "seasonal_risk_periods": "October-March (winter weather, snow, ice, low visibility), occasional summer thunderstorms",
+          "notes": "Nordic temperate marine climate with cool summers and relatively warm winters for latitude. Modern ILS capabilities available for Cat II/III operations. Single runway (12/30) limits weather flexibility. Winter weather (snow, ice, reduced visibility) can cause delays December-February. Fog common during transition seasons (October-November, March-April). Current weather (November 10, 2025): MVFR with 1,700 ft ceiling, temperature 5°C. Winter temperatures typically -5°C to 0°C. Deicing procedures required during winter operations."
+        },
+        "runway_specifications": {
+          "minimum_runway_length_meters": 1668,
+          "runway_surface_type": "Asphalt",
+          "number_of_runways": 1,
+          "crosswind_limitations": "Not explicitly specified; typical Nordic standards",
+          "weight_restrictions": "No formal restrictions; designed for regional aircraft and some business jets",
+          "runway_details": [
+            {
+              "designator": "12/30",
+              "length_meters": 1668,
+              "width_meters": 45,
+              "surface": "Asphalt",
+              "ils_equipped": true,
+              "lighting": "High intensity"
+            }
+          ]
+        },
+        "crew_requirements": {
+          "special_crew_training_required": false,
+          "mountain_airport_rating": "Not required; airport at 14-47m MSL (very low elevation)",
+          "cat_ii_iii_rating_required": "Recommended for operations during winter months and low visibility conditions",
+          "captain_only_airport": false,
+          "minimum_pilot_hours": "No specific minimum, but familiarity with single-runway operations and noise restrictions beneficial",
+          "notes": "Standard EASA Part-FCL compliance required. Familiarity with city airport operations, noise abatement procedures, and single-runway constraints essential. CAT II/III capability important for winter reliability. Airspace complexity low compared to major hubs. Knowledge of Stockholm airspace (ESSA nearby) beneficial. Noise sensitivity training recommended due to residential proximity."
+        },
+        "handling_complexity": {
+          "handler_availability_24_7": false,
+          "fuel_availability": true,
+          "customs_hours": "24/7 available but advance notice required",
+          "immigration_processing_time_avg": "15-30 minutes",
+          "minimum_notice_hours": 24,
+          "weekend_surcharges": "Potential surcharges for weekend operations outside standard hours",
+          "notes": "Limited FBO options compared to major airports. Aviapartner provides ground handling services. General Aviation Terminal available for private clients. Jet fuel (JET A1, AVGAS) available. All non-scheduled flights require 24-hour PPR notice for customs clearance. Handling services may be limited during reduced operating hours. Weekend operations face operational constraints due to environmental permit restrictions. PPR coordination essential for international flights."
+        },
+        "congestion_metrics": {
+          "average_taxi_time_minutes": "10-15 minutes (normal)",
+          "peak_hour_delays_typical": "2-5 minutes during 10:00-14:00 weekday peaks",
+          "airspace_complexity": "Low - relatively simple approach patterns, proximity to ESSA (Stockholm Arlanda) but separate airspace",
+          "atc_delays_frequency": "Low - generally efficient operations due to limited traffic and single runway",
+          "seasonal_congestion_multiplier": "1.1-1.2x during peak business hours",
+          "notes": "Single runway limits simultaneous operations but traffic volume manageable. Environmental permit limits 80,000-100,000 annual movements (averaging 98-122 movements/day). Taxiing congestion minimal due to small apron and limited aircraft capacity. No A-CDM system but straightforward ATC procedures. Winter weather can increase delays from 2-5 to 10-15 minutes on affected days."
+        },
+        "permits_and_clearances": {
+          "requires_prior_permission": true,
+          "ppr_notice_period_hours": 24,
+          "overflight_permit_required": false,
+          "landing_permit_processing_time": "Automatic with PPR confirmation",
+          "diplomatic_clearance_required": false,
+          "notes": "All non-scheduled flights MUST obtain PPR 24 hours in advance for customs/immigration clearance. Scheduled flights operate under established slots. Environmental licensing restricts total annual movements, so late requests may be refused if annual quota approaching. Contact airport directly or through handling agent for PPR coordination."
+        },
+        "noise_restrictions": {
+          "noise_category_required": "ICAO Chapter 3, 4 (stratified)",
+          "chapter_requirements": "Noise limits: FBN 55 and 65 dBA in surrounding areas; chapter-based surcharges apply",
+          "noise_surcharges": "Applied per Swedavia tariff; exact rates subject to 2026 tariff review",
+          "preferred_departure_routes": "Aircraft must not operate below 2000 ft MSL over central Stockholm except during take-off/landing",
+          "noise_complaints_risk": "Very High - airport located 7km west-northwest of Stockholm city center in densely populated urban area",
+          "notes": "Strict noise regulations due to city airport status. No operations 22:00-07:00 weekdays (environmental permit). Environmental permit limits: 80,000 annual movements maximum in lease agreement (vs. 100,000 permit). Noise insulation required for residential buildings exposed to ≥80 dBA; indoor levels must not exceed 30 dBA after mitigation. Engine run-ups only during operating hours; reverse thrust limited on landing. APU can only be used for engine starts or cabin heat, and not earlier than 5 minutes before push-back. Annual movement quota near capacity creates operational pressure."
+        },
+        "infrastructure_reliability": {
+          "power_outage_frequency": "Low - modern facilities",
+          "equipment_failure_rate": "Low - well-maintained",
+          "maintenance_closure_days_annual": "Minimal; typically runway-specific seasonal maintenance",
+          "backup_systems_available": "Yes - ILS backup systems; single runway limits contingency options",
+          "historical_closure_incidents": "No major recent incidents reported",
+          "notes": "Modern airport infrastructure well-maintained by Swedavia. Single runway is structural limitation - any maintenance causes significant operational constraints. Winter weather maintenance required November-March. ILS system redundancy supports reliability. Drainage systems maintained for snow/rain management. Future uncertain due to political/financial discussions regarding airport closure."
+        },
+        "security_requirements": {
+          "security_screening_time_avg": "15-20 minutes",
+          "enhanced_security_periods": "During elevated alert levels",
+          "vip_security_delays": "Minimal for city airport security scale",
+          "passenger_background_check_required": "Standard EU security vetting",
+          "notes": "Standard Swedish and EU aviation security procedures. City airport with moderate security requirements. 24/7 customs/immigration availability but may require advance notice for staffing. No special VIP security complications."
+        },
+        "seasonal_factors": {
+          "high_season_months": "May-September (summer), December (holiday)",
+          "ski_season_congestion": "Moderate December-February (Stockholm area ski traffic)",
+          "summer_thunderstorm_frequency": "Occasional June-August",
+          "winter_deicing_delays_avg": "10-20 minutes during active snow/ice conditions",
+          "holiday_peak_dates": "December 20-January 5, Easter week, July-August summer holidays",
+          "notes": "Winter (December-February) requires deicing procedures; single runway increases impact of weather delays. Spring (March-May) and fall (September-October) generally favorable. Summer (June-August) peak tourist season drives traffic. Environmental permit severely restricts ability to handle seasonal peaks. Winter weather closure risk higher than major hub due to single runway and northern latitude. Annual movement quota (80,000-100,000) often constrains peak season operations."
+        },
+        "alternate_airport_proximity": {
+          "nearest_suitable_alternate_code": "ESSA",
+          "distance_to_alternate_km": 42,
+          "alternate_typically_available": "Yes - Stockholm Arlanda is major hub, always available",
+          "ground_transport_time_to_alternate_minutes": 45,
+          "notes": "Stockholm Arlanda (ESSA) is primary alternate, 42km northeast, 45-minute ground transport. Modern major international airport with full facilities. Secondary option: Stockholm Västerås (VST), 97km west. Arlanda capacity rarely exceeded; always viable contingency. Rapid transit train connects city to Arlanda efficiently."
+        },
+        "payment_and_fees": {
+          "advance_payment_required": "Recommended for non-scheduled operators",
+          "credit_account_needed": "Beneficial for frequent operators",
+          "handling_agent_prepayment": "Often required; coordinate with Swedavia/Aviapartner",
+          "fuel_payment_terms": "Standard prepay or credit terms negotiated with FBO",
+          "notes": "Swedavia charges landing/take-off fees based on MTOW. Noise charges included in tariff structure (under review for January 1, 2026 update). Passenger fees applicable. Ground handling charges through Aviapartner. Consultation on new charges ongoing (meetings June-October 2025, decision by January 1, 2026). Most operators establish credit accounts for efficiency. PPR coordination may require payment confirmation before clearance."
+        }
+      }
+    },
+    {
+      "icao": "LECU",
+      "iata": "ECV",
+      "name": "Madrid Cuatro Vientos Airport",
+      "city": "Madrid",
+      "country": "Spain",
+      "region": "Benelux & Nordics",
+      "data_collection_date": "2025-11-10",
+      "sources": [
+        "Spanish AESA (Aeronautical Safety and Security Agency)",
+        "ENAIRE (Spanish Air Navigation Service)",
+        "AIP Spain",
+        "Madrid Cuatro Vientos Official Airport Documentation",
+        "Cuatro Vientos Airport Operators (Universal Aviation, JetMate Aviation)",
+        "SKYbrary Aviation Safety Database",
+        "OurAirports Community Database"
+      ],
+      "risk_factors": {
+        "operational_hours": {
+          "opens_utc": "08:00",
+          "closes_utc": "18:00",
+          "night_curfew": true,
+          "curfew_start_utc": "18:00",
+          "curfew_end_utc": "08:00",
+          "weekend_restrictions": true,
+          "holiday_closures": false,
+          "notes": "Weekdays: 08:00-18:00 UTC (10:00-20:00 LT approx. with DST); Sundays: 07:00-18:00 UTC (09:00-20:00 LT); Saturdays and holidays may have restricted hours. Control tower operational during published hours. Operations limited by civil/military shared use and VFR-only operations (daytime visual conditions typically required). No IFR capability means weather-dependent operations."
+        },
+        "slot_requirements": {
+          "slot_controlled": false,
+          "advance_booking_required_hours": 0,
+          "slot_availability_typical": "Generally available during operating hours",
+          "peak_congestion_times": "09:00-12:00 and 14:00-17:00 local time on weekdays",
+          "notes": "Not a slot-coordinated airport. However, aircraft restrictions apply: only military, state, or light civil aircraft permitted. Does not serve as airport of entry for international flights except under special arrangements. Capacity inherently limited by runway length, aircraft restrictions, and VFR-only operations. Shared civil-military operations can create scheduling constraints during military activity."
+        },
+        "weather_vulnerability": {
+          "fog_prone": true,
+          "snow_closure_frequency": "Very Low - rare snow in Madrid climate, elevation 2,269 ft",
+          "wind_limitations": "Not explicitly specified",
+          "requires_cat_ii_iii_capability": false,
+          "seasonal_risk_periods": "Spring (March-May, occasional fog), Summer (June-August, potential thunderstorms)",
+          "notes": "Mediterranean climate: spring fog possible, particularly early morning (March-April). Summer thunderstorms occasional (June-August). Winter rarely brings snow. Elevation 2,269 ft (691m) above sea level; typical Madrid climate with continental influences. VFR-only operations mean any low visibility events cause significant operational impact. No published METAR for LECU - nearest weather station is Getafe Air Base 10km away. Current conditions (May 2025): generally VFR with occasional spring fog. Thunderstorm activity possible March-September."
+        },
+        "runway_specifications": {
+          "minimum_runway_length_meters": 1127,
+          "runway_surface_type": "Asphalt and Grass",
+          "number_of_runways": 2,
+          "crosswind_limitations": "Not explicitly specified; typical Spanish standards",
+          "weight_restrictions": "Significant - limited to light civil aircraft, helicopters, piston-engine aircraft, medium turbo-props, small business jets due to runway length and urban encroachment",
+          "runway_details": [
+            {
+              "designator": "09/27 (Primary)",
+              "length_meters": 1500,
+              "width_meters": 30,
+              "surface": "Asphalt",
+              "ils_equipped": false,
+              "lighting": "High intensity"
+            },
+            {
+              "designator": "09L/27R (Secondary)",
+              "length_meters": 1127,
+              "width_meters": 45,
+              "surface": "Grass (military use)",
+              "ils_equipped": false,
+              "lighting": "Limited"
+            }
+          ]
+        },
+        "crew_requirements": {
+          "special_crew_training_required": false,
+          "mountain_airport_rating": "Not required; moderate elevation (2,269 ft) but not mountain airport",
+          "cat_ii_iii_rating_required": false,
+          "captain_only_airport": false,
+          "minimum_pilot_hours": "No specific minimum; basic general aviation qualifications sufficient",
+          "notes": "Standard EASA Part-FCL or equivalent Spanish aviation authority compliance required. VFR-only operations mean no need for complex instrument certification. Awareness of short runway length (1,500m/4,921ft primary runway) critical - many larger aircraft cannot legally operate here. Knowledge of Spanish airspace procedures essential. Familiarity with mixed civil-military operations advantageous. Flight training operations common at airport."
+        },
+        "handling_complexity": {
+          "handler_availability_24_7": false,
+          "fuel_availability": true,
+          "customs_hours": "Limited - not designated international airport of entry",
+          "immigration_processing_time_avg": "N/A - not designated for international arrivals",
+          "minimum_notice_hours": 24,
+          "weekend_surcharges": "Potential surcharges for weekend operations due to reduced staffing",
+          "notes": "Limited FBO options: Universal Aviation, JetMate Aviation provide ground handling. NOT an airport of entry for international flights (customs facilities available but not full clearance authority). Jet A1 and AVGAS available. Handling coordination essential 24 hours in advance. Weekend/holiday operations limited by staff availability. No customs pre-clearance available (no US customs facility). Crew transportation, catering via contracted FBOs. Flight school operations (Quality Fly) provide training services. Ground services oriented toward general aviation/training rather than commercial charter."
+        },
+        "congestion_metrics": {
+          "average_taxi_time_minutes": "5-10 minutes (minimal)",
+          "peak_hour_delays_typical": "2-5 minutes during peak hours",
+          "airspace_complexity": "Low - relatively straightforward, proximity to Madrid FIR (LEMD) but separate operations",
+          "atc_delays_frequency": "Very Low - limited traffic, simple operations",
+          "seasonal_congestion_multiplier": "1.1x maximum during peak academic training periods",
+          "notes": "Very limited traffic volume due to aircraft restrictions and runway limitations. Single primary runway simplifies operations but weather delays can impact training schools (significant user). Spring/fall training peaks may see moderate increases. Taxi times minimal due to small apron and limited aircraft. Military operations (police helicopters, Spanish Air Force) occasionally cause brief delays. No congestion management system needed - capacity rarely approached."
+        },
+        "permits_and_clearances": {
+          "requires_prior_permission": true,
+          "ppr_notice_period_hours": 24,
+          "overflight_permit_required": false,
+          "landing_permit_processing_time": "Typically 2-4 hours with proper notification",
+          "diplomatic_clearance_required": false,
+          "notes": "Prior Permission Required (PPR) for all non-resident operations. Contact airport 24 hours in advance through handling agent or directly. For international operations, standard Spanish AESA approval required but airport not designated for international traffic (customs restrictions). Military overflights coordinate through Spanish Defense Ministry. Ground handling agent coordination essential for flight planning."
+        },
+        "noise_restrictions": {
+          "noise_category_required": "ICAO Chapter 3, 4 (stratified)",
+          "chapter_requirements": "Limited restriction due to small airport scale and relatively low traffic",
+          "noise_surcharges": "Minimal - low traffic and residential sensitivity lower than major airports",
+          "preferred_departure_routes": "Visual departure routes; aircraft avoid central Madrid city center",
+          "noise_complaints_risk": "Moderate - proximity to Madrid suburbs and training aircraft operations (piston-engine trainers generate audible noise)",
+          "notes": "Airport located 8-9km southwest of Madrid city center in suburban area. Training aircraft (piston-engine) and helicopter operations create periodic noise. No strict ICAO Chapter 4 surcharges observed at this airport. Environmental sensitivity moderate compared to city airports. Flight training creates recurring noise during business hours. Military helicopter operations (police, air force) add periodic noise."
+        },
+        "infrastructure_reliability": {
+          "power_outage_frequency": "Low - rare",
+          "equipment_failure_rate": "Low - maintained facilities",
+          "maintenance_closure_days_annual": "Minimal; typically runway sweeping/marking",
+          "backup_systems_available": "Limited - military base coordination for critical services",
+          "historical_closure_incidents": "No major recent incidents reported; occasional closures for military operations",
+          "notes": "Joint civil-military facility; military operations may occasionally restrict civilian access. Facilities adequate for general aviation but not modern major hub standards. Drainage and winter preparations minimal due to Madrid climate. No sophisticated backup systems; single runway means any maintenance impacts operations. Historical stability good with no major infrastructure failures."
+        },
+        "security_requirements": {
+          "security_screening_time_avg": "10-15 minutes (minimal for general aviation)",
+          "enhanced_security_periods": "During Spanish national alert levels",
+          "vip_security_delays": "Minimal for general aviation airport scale",
+          "passenger_background_check_required": "Standard EU vetting for scheduled/charter operations",
+          "notes": "General aviation security procedures apply. No dedicated US Customs facility. Spanish military presence adds security layer but does not impede civilian operations. Basic security screening sufficient for private flights. Commercial operations follow standard Spanish/EU procedures. VIP/diplomatic flights coordinate through Spanish authorities."
+        },
+        "seasonal_factors": {
+          "high_season_months": "February-May (flight training peak), September-November (training resumption)",
+          "ski_season_congestion": "Not applicable - Madrid area has no ski operations",
+          "summer_thunderstorm_frequency": "Occasional June-August",
+          "winter_deicing_delays_avg": "None - snow rare at Madrid elevation",
+          "holiday_peak_dates": "Easter week, July-August (summer holidays, reduced operations), December holidays",
+          "notes": "VFR-only operations mean weather significantly impacts operations during spring fog season (March-April) and summer thunderstorm period (June-August). Flight training peaks February-May and September-November (academic calendar). Summer (June-August) sees reduced commercial activity but training may continue. Winter (December-February) generally stable weather permits high reliability. Spring fog (March-April) primary seasonal weather risk. No winter deicing required due to Madrid climate. Elevation and continental climate result in generally stable year-round operations with spring/summer thunderstorm considerations."
+        },
+        "alternate_airport_proximity": {
+          "nearest_suitable_alternate_code": "LEMD",
+          "distance_to_alternate_km": 24,
+          "alternate_typically_available": "Yes - Madrid-Barajas major hub, always available",
+          "ground_transport_time_to_alternate_minutes": 30,
+          "notes": "Adolfo Suárez Madrid-Barajas (LEMD) primary alternate, 24km northeast, 30-minute ground transport. Major international hub with full IFR capabilities, never capacity-constrained for single-aircraft diversions. Secondary option: Getafe Air Base (LEGT), 10km away but military facility with restrictions. Madrid city rail/bus connects to Barajas efficiently. For weather alternatives, Barajas with full CAT III capability provides reliable backup to VFR-only Cuatro Vientos."
+        },
+        "payment_and_fees": {
+          "advance_payment_required": "Recommended for non-resident operators",
+          "credit_account_needed": "Beneficial if operating frequently",
+          "handling_agent_prepayment": "Often required; coordinate with FBO at booking",
+          "fuel_payment_terms": "Standard prepay or credit terms via FBO",
+          "notes": "Landing fees approximately €6.60 + 21% VAT; parking fees €60 + VAT for 3 days; passenger fee €2.62 + VAT; weather service €0.41 + VAT; airport security €3.78 + VAT; infrastructure use €0.61 + VAT; air traffic service €4.86 + VAT (per OurAirports community data). Terminal charges per EUROCONTROL: €25.78-€19.33 depending on aircraft category + 21% VAT. FBO handling through Universal Aviation or JetMate typically requires advance payment. Fuel prices competitive with Spanish market. Relatively low fees for general aviation operation compared to major hubs."
+        }
+      }
+    }
+  ]
+}

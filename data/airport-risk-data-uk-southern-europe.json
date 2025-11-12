@@ -1,0 +1,1126 @@
+{
+  "metadata": {
+    "collection_date": "2025-11-10",
+    "agent": "UK & Southern Europe Airport Data Collection Subagent",
+    "airports_covered": ["EGLF", "LFMN", "LSZH"],
+    "sources": [
+      "UK Civil Aviation Authority (CAA)",
+      "French Direction Générale de l'Aviation Civile (DGAC)",
+      "Swiss Federal Office of Civil Aviation (FOCA)",
+      "Official airport websites and NOTAMs",
+      "AIP publications for UK, France, and Switzerland",
+      "European aviation weather services",
+      "Business aviation service providers",
+      "Airport operational databases"
+    ]
+  },
+  "airports": {
+    "EGLF": {
+      "name": "Farnborough Airport",
+      "icao": "EGLF",
+      "iata": "FAB",
+      "location": "Hampshire, United Kingdom",
+      "country": "UK",
+      "coordinates": {
+        "latitude": 51.8756,
+        "longitude": -0.7748
+      },
+      "elevation_feet": 238,
+      "risk_factors": {
+        "operational_hours": {
+          "description": "Operating hours and curfews",
+          "data": {
+            "opens_utc": "0600",
+            "closes_utc": "2300",
+            "opens_local_time": "0700",
+            "closes_local_time": "2200",
+            "night_curfew": true,
+            "curfew_start_utc": "2300",
+            "curfew_end_utc": "0600",
+            "weekend_restrictions": true,
+            "weekend_hours": "0800-2000 LT",
+            "holiday_closures": true,
+            "ground_running_restrictions": "0800-2000 weekdays only"
+          },
+          "sources": [
+            "Farnborough Airport Official Website",
+            "Universal Weather Aviation",
+            "Just Aviation Flight Operations"
+          ],
+          "risk_notes": "Strict operational windows with night curfews; weekend hours significantly restricted. Night operations prohibited."
+        },
+        "slot_requirements": {
+          "description": "Whether airport requires pre-allocated slots",
+          "data": {
+            "slot_controlled": false,
+            "advance_booking_required_hours": 24,
+            "slot_requirement": "Prior Permission Request (PPR) mandatory",
+            "ppr_notice": "Minimum 24 hours advance notice required",
+            "slot_availability_typical": "Generally available but must coordinate with TAG Aviation",
+            "peak_congestion_times": "0900-1700 weekdays"
+          },
+          "sources": [
+            "Farnborough Airport Operations",
+            "TAG Aviation",
+            "Just Aviation Flight Operations"
+          ],
+          "risk_notes": "While not formally slot-controlled, PPR is mandatory for all operations. Delays possible if PPR not obtained."
+        },
+        "weather_vulnerability": {
+          "description": "Weather conditions that cause disruptions",
+          "data": {
+            "fog_prone": false,
+            "snow_closure_frequency": "Rare; UK climate mitigates severe closures",
+            "wind_limitations": "Crosswind limitation 15 knots",
+            "requires_cat_ii_iii_capability": false,
+            "cat_ii_iii_equipped": false,
+            "low_visibility_procedures": "LVP implemented when visibility 1500m or below or ceiling 200ft",
+            "rvr_departure_minimum": "400 meters RVR",
+            "seasonal_risk_periods": "Winter months (Dec-Feb) for reduced visibility"
+          },
+          "sources": [
+            "IVAO Farnborough Local Procedures",
+            "Boeing Farnborough Noise Report",
+            "CAA Regulations"
+          ],
+          "risk_notes": "Not equipped for CAT II/III operations. Low visibility conditions significantly restrict operations."
+        },
+        "runway_specifications": {
+          "description": "Runway requirements and limitations",
+          "data": {
+            "runway_designation": "06/24",
+            "runway_length_meters": 2440,
+            "runway_width_meters": 60,
+            "runway_surface_type": "Asphalt",
+            "number_of_runways": 1,
+            "tora_runway_06_meters": 2000,
+            "toda_runway_06_meters": 2063,
+            "lda_runway_06_meters": 1800,
+            "lda_runway_24_meters": 1800,
+            "crosswind_limitations": 15,
+            "weight_restrictions": "Single-engine jet aircraft prohibited from taking off or going around on RWY 06; all other aircraft must use full runway length",
+            "maximum_aircraft_size": "Gulfstream G650, Cessna Citation X class aircraft"
+          },
+          "sources": [
+            "Farnborough Airport Airfield Specs",
+            "Boeing Farnborough Noise Report",
+            "Code 7700 Runway Data"
+          ],
+          "risk_notes": "Single runway; runway 06 has specific restrictions for single-engine jets. Limited runway length compared to major hubs."
+        },
+        "crew_requirements": {
+          "description": "Special qualifications needed",
+          "data": {
+            "special_crew_training_required": false,
+            "mountain_airport_rating": false,
+            "cat_ii_iii_rating_required": false,
+            "captain_only_airport": false,
+            "minimum_pilot_hours": "Standard EASA/CAA requirements",
+            "noise_abatement_training": true,
+            "ppr_coordination_required": true,
+            "noise_preferential_routings": "Mandatory; specific procedures required"
+          },
+          "sources": [
+            "Boeing Farnborough Noise Report",
+            "Farnborough Airport Operations",
+            "CAA Regulations"
+          ],
+          "risk_notes": "Standard crew requirements apply, but noise abatement procedures are strictly enforced."
+        },
+        "handling_complexity": {
+          "description": "Ground handling and service factors",
+          "data": {
+            "handler_availability_24_7": false,
+            "handler_availability": "0700-2200 LT daily",
+            "fuel_availability": true,
+            "fuel_types": ["Jet A-1", "Avgas 100LL", "Sustainable Aviation Fuel (SAF)"],
+            "customs_hours": "0700-2200 LT (coordinated with flights)",
+            "immigration_processing_time_avg": "30-45 minutes",
+            "customs_availability": "On-site at Farnborough",
+            "minimum_notice_hours": 24,
+            "weekend_surcharges": true,
+            "ground_support": "TAG Aviation, World Fuel Services, maintenance support (EASA & FAA 145 approved)"
+          },
+          "sources": [
+            "Farnborough Airport Aircraft Services",
+            "Universal Weather Aviation",
+            "Paramount Business Jets"
+          ],
+          "risk_notes": "Limited 24/7 availability; weekend surcharges apply. Premium services but higher costs."
+        },
+        "congestion_metrics": {
+          "description": "Traffic and capacity issues",
+          "data": {
+            "average_taxi_time_minutes": 8,
+            "peak_hour_delays_typical": "5-10 minutes",
+            "airspace_complexity": "Medium - near London controlled airspace",
+            "atc_delays_frequency": "Low to Medium",
+            "annual_movements": 30000,
+            "seasonal_congestion_multiplier": 1.2,
+            "peak_periods": "Weekday business hours 0900-1700"
+          },
+          "sources": [
+            "Farnborough Airport Statistics",
+            "Just Aviation Flight Operations",
+            "European Airport Index 2024"
+          ],
+          "risk_notes": "Generally efficient operations; modest delays during business hours. Proximity to London airspace can affect traffic."
+        },
+        "permits_and_clearances": {
+          "description": "Authorization requirements",
+          "data": {
+            "requires_prior_permission": true,
+            "ppr_notice_period_hours": 24,
+            "ppr_mandatory": true,
+            "ppr_contact": "TAG Aviation / Farnborough Airport Operations",
+            "overflight_permit_required": false,
+            "landing_permit_processing_time": "Immediate (if PPR obtained)",
+            "diplomatic_clearance_required": false,
+            "customs_clearance_required": true
+          },
+          "sources": [
+            "Farnborough Airport Rules & Regulations",
+            "UK CAA Publications",
+            "Farnborough Airport Operations"
+          ],
+          "risk_notes": "PPR is non-negotiable. Processing delays possible if submitted late. All international flights require customs clearance."
+        },
+        "noise_restrictions": {
+          "description": "Noise abatement procedures",
+          "data": {
+            "noise_category_required": "Chapter 3 (ICAO Annex 16) or equivalent",
+            "chapter_requirements": "Chapter 3 compliance mandatory",
+            "noise_surcharges": true,
+            "noise_surcharge_rates": "Chapter 3 compliant aircraft: reduced/none; non-compliant: significant surcharges",
+            "preferred_departure_routes": "Noise Preferential Routing (NPR) mandatory",
+            "minimum_altitude_before_turn": "500 feet",
+            "climb_profile": "Best rate of climb until 3000 feet",
+            "noise_complaints_risk": "High - residential area (Farnborough town)"
+          },
+          "sources": [
+            "Boeing Farnborough Noise Report",
+            "Farnborough Airport Rules & Regulations",
+            "CAA Noise Abatement Procedures"
+          ],
+          "risk_notes": "Strict noise abatement procedures enforced. Chapter 3 compliance essential for cost-effective operations."
+        },
+        "infrastructure_reliability": {
+          "description": "Airport facility dependability",
+          "data": {
+            "power_outage_frequency": "Very rare",
+            "equipment_failure_rate": "Low",
+            "maintenance_closure_days_annual": "Minimal; coordinated maintenance schedules",
+            "backup_systems_available": true,
+            "historical_closure_incidents": "Rare",
+            "facilities": [
+              "Temperature-controlled hangarage",
+              "Aircraft cleaning services",
+              "Catering facilities",
+              "Oxygen refill services",
+              "Maintenance support (EASA & FAA 145 approved)"
+            ]
+          },
+          "sources": [
+            "Farnborough Airport Aircraft Services",
+            "Farnborough Airport Official Website"
+          ],
+          "risk_notes": "Modern, well-maintained facility with excellent reliability record."
+        },
+        "security_requirements": {
+          "description": "Security processing factors",
+          "data": {
+            "security_screening_time_avg": "15-20 minutes",
+            "enhanced_security_periods": "Airshow events (annual), high-profile visits",
+            "vip_security_delays": "Coordinated in advance; typically 30-60 minutes",
+            "passenger_background_check_required": "Standard UK Border Force checks",
+            "airside_access": "Restricted; escort required between GAT and aircraft per ICAO standards"
+          },
+          "sources": [
+            "Farnborough Airport Operations",
+            "UK Border Force Procedures"
+          ],
+          "risk_notes": "Standard security procedures; during airshow events, additional restrictions may apply."
+        },
+        "seasonal_factors": {
+          "description": "Time-based operational changes",
+          "data": {
+            "high_season_months": ["May", "June", "July", "August", "September"],
+            "ski_season_congestion": "Not applicable",
+            "summer_thunderstorm_frequency": "Moderate (June-August)",
+            "winter_deicing_delays_avg": "Rare; UK climate mitigates need",
+            "holiday_peak_dates": ["Easter", "Summer holidays", "Christmas/New Year"],
+            "airshow_event": "July (Farnborough International Airshow) - major congestion and restrictions",
+            "business_peak": "Monday-Thursday, 0900-1700"
+          },
+          "sources": [
+            "Farnborough International Airshow",
+            "Just Aviation Flight Operations",
+            "European Aviation Weather Services"
+          ],
+          "risk_notes": "July airshow creates significant disruptions; holiday periods moderate congestion."
+        },
+        "alternate_airport_proximity": {
+          "description": "Backup options availability",
+          "data": {
+            "nearest_suitable_alternate_code": "LCY (London City)",
+            "distance_to_alternate_km": 48,
+            "alternate_list": [
+              {
+                "code": "LCY",
+                "name": "London City Airport",
+                "distance_km": 48,
+                "distance_nm": 26,
+                "ground_transport_time_minutes": 60
+              },
+              {
+                "code": "BQH",
+                "name": "London Biggin Hill",
+                "distance_km": 48,
+                "distance_nm": 26,
+                "ground_transport_time_minutes": 75
+              },
+              {
+                "code": "SOU",
+                "name": "Southampton Airport",
+                "distance_km": 77,
+                "distance_nm": 42,
+                "ground_transport_time_minutes": 90
+              },
+              {
+                "code": "LHR",
+                "name": "London Heathrow",
+                "distance_km": 43,
+                "distance_nm": 23,
+                "ground_transport_time_minutes": 75
+              }
+            ],
+            "alternate_typically_available": true,
+            "ground_transport_time_to_alternate_minutes": 60
+          },
+          "sources": [
+            "Travelmath Airport Data",
+            "Icarus Jet Airport Guide",
+            "Farnborough Airport"
+          ],
+          "risk_notes": "Multiple alternates available within 50 nm; good contingency planning options."
+        },
+        "payment_and_fees": {
+          "description": "Financial arrangements that may cause delays",
+          "data": {
+            "advance_payment_required": false,
+            "credit_account_needed": false,
+            "handling_agent_prepayment": "Not typically required but recommended",
+            "fuel_payment_terms": "Standard commercial terms available",
+            "landing_fees": "Approximately £200-400 depending on aircraft type",
+            "handling_charges": "Premium pricing for FBO services (World Fuel, TAG Aviation)",
+            "ppr_fee": "No direct PPR fee, but included in airport charges"
+          },
+          "sources": [
+            "Farnborough Airport Aircraft Services",
+            "World Fuel Services",
+            "TAG Aviation"
+          ],
+          "risk_notes": "Premium pricing model; credit facilities typically available for established operators."
+        }
+      },
+      "overall_risk_assessment": "MEDIUM - Modern, efficient business aviation hub with strict operational controls (PPR, noise restrictions, limited hours). Limited 24/7 capability and night operations prohibition are key constraints. Excellent reliability and handling infrastructure mitigate some risks.",
+      "key_constraints": [
+        "Mandatory PPR for all operations",
+        "No night operations (0700-2200 LT only)",
+        "Strict noise abatement procedures",
+        "Single runway with weight restrictions",
+        "Not equipped for CAT II/III operations",
+        "Premium pricing model",
+        "Weekend hour restrictions"
+      ]
+    },
+    "LFMN": {
+      "name": "Nice Côte d'Azur Airport",
+      "icao": "LFMN",
+      "iata": "NCE",
+      "location": "Nice, Provence-Alpes-Côte d'Azur, France",
+      "country": "France",
+      "coordinates": {
+        "latitude": 43.6584,
+        "longitude": 7.2158
+      },
+      "elevation_feet": 13,
+      "risk_factors": {
+        "operational_hours": {
+          "description": "Operating hours and curfews",
+          "data": {
+            "opens_utc": "0001",
+            "closes_utc": "2359",
+            "local_timezone": "UTC+2 (Summer), UTC+1 (Winter)",
+            "night_curfew": true,
+            "curfew_start_utc": "2200",
+            "curfew_end_utc": "0630",
+            "runway_04l_night_closure": true,
+            "runway_04l_closure_period": "2200-0300 UTC (until April 30, 2025)",
+            "runway_04r_available": "24 hours",
+            "weekend_restrictions": false,
+            "holiday_closures": false,
+            "operational_mode": "24/7 capable but with runway restrictions during night"
+          },
+          "sources": [
+            "Nice Airport NOTAM Database",
+            "French DGAC",
+            "OurAirports NOTAM Information"
+          ],
+          "risk_notes": "Officially 24/7, but runway 04L closed 2200-0300 UTC seasonally. Night operations possible only on RWY 04R/22L."
+        },
+        "slot_requirements": {
+          "description": "Whether airport requires pre-allocated slots",
+          "data": {
+            "slot_controlled": true,
+            "slot_coordination_required": "During peak season (May 16 - Sept 15)",
+            "advance_booking_required_hours": 48,
+            "slot_availability_typical": "Limited during peak season",
+            "peak_congestion_times": "May-October (summer season, tourism peak)",
+            "special_events": [
+              "Cannes Film Festival (May)",
+              "Monaco Grand Prix (May)",
+              "Summer tourism season (June-August)"
+            ],
+            "parking_availability": "Extremely limited during peak season; advance coordination essential"
+          },
+          "sources": [
+            "Universal Weather Business Aviation Guide",
+            "Nice Airport Operational Guidelines",
+            "AirWise Executive"
+          ],
+          "risk_notes": "Severe congestion during peak season (May-October); parking approval can be cancelled if flight schedule changes."
+        },
+        "weather_vulnerability": {
+          "description": "Weather conditions that cause disruptions",
+          "data": {
+            "fog_prone": true,
+            "snow_closure_frequency": "Rare; Mediterranean climate",
+            "wind_limitations": "Mistral wind (cold, strong northerly wind) affects operations in winter/spring",
+            "mistral_frequency": "Occasional (Dec-April)",
+            "mistral_impact": "Can cause significant delays, particularly crosswind operations",
+            "requires_cat_ii_iii_capability": true,
+            "runway_specifications": [
+              {
+                "runway": "04R/22L",
+                "length_meters": 2963,
+                "ils_capability": "ILS available"
+              },
+              {
+                "runway": "04L/22R",
+                "length_meters": 2628,
+                "ils_capability": "ILS out of service (NOTAM A2056/25)",
+                "status": "Restricted operations"
+              }
+            ],
+            "seasonal_risk_periods": "Winter/Spring (Mistral), Summer thunderstorms",
+            "rescue_firefighting_level": "Level 9 daytime, Level 7 nighttime"
+          },
+          "sources": [
+            "Nice Airport Weather Portal",
+            "French DGAC Weather Service",
+            "OurAirports NOTAM Database",
+            "SKYbrary Nice Côte d'Azur"
+          ],
+          "risk_notes": "Mistral winds significant risk; fog occasional but manageable. Winter weather less severe than northern Europe."
+        },
+        "runway_specifications": {
+          "description": "Runway requirements and limitations",
+          "data": {
+            "runway_count": 2,
+            "runways": [
+              {
+                "designation": "04R/22L",
+                "length_meters": 2963,
+                "width_meters": 45,
+                "surface": "Asphalt",
+                "ils": "ILS equipped"
+              },
+              {
+                "designation": "04L/22R",
+                "length_meters": 2628,
+                "width_meters": 45,
+                "surface": "Asphalt",
+                "ils": "ILS currently out of service (per NOTAM A2056/25)",
+                "ils_status": "Maintenance in progress"
+              }
+            ],
+            "elevation_meters": 4,
+            "crosswind_limitations": "Moderate",
+            "weight_restrictions": "No significant weight restrictions for business jets"
+          },
+          "sources": [
+            "Nice Airport Specifications",
+            "Bigorre Aviation Portal",
+            "METAR-TAF Data"
+          ],
+          "risk_notes": "Good runway length for business aviation. One runway (04L) temporarily limited due to ILS maintenance."
+        },
+        "crew_requirements": {
+          "description": "Special qualifications needed",
+          "data": {
+            "special_crew_training_required": true,
+            "mountain_airport_rating": false,
+            "cat_ii_iii_rating_required": true,
+            "cat_ii_iii_operations": "Frequently required due to weather patterns",
+            "captain_only_airport": false,
+            "minimum_pilot_hours": "Standard EASA requirements with CAT II/III capability",
+            "mistral_wind_training": "Recommended for winter operations",
+            "french_radiotelephony": "Required (French language radio communications)"
+          },
+          "sources": [
+            "French DGAC Regulations",
+            "Nice Airport Operations",
+            "European Aviation Safety Agency (EASA)"
+          ],
+          "risk_notes": "CAT II/III capability essential; French language requirement for radio communications."
+        },
+        "handling_complexity": {
+          "description": "Ground handling and service factors",
+          "data": {
+            "handler_availability_24_7": true,
+            "fuel_availability": true,
+            "fuel_types": ["Jet A-1", "Avgas 100LL"],
+            "fuel_surcharge": "Potential delays during peak season",
+            "customs_hours": "24/7 available",
+            "customs_location_night": "Main terminal (20:00-08:00)",
+            "immigration_processing_time_avg": "20-45 minutes (night processing slower)",
+            "minimum_notice_hours": 24,
+            "ground_support_providers": [
+              "DC Aviation G-OPS",
+              "Signature Flight Support",
+              "SWISSPORT EXECUTIVE AVIATION",
+              "AVIAPARTNER EXECUTIVE NICE",
+              "AirWise Executive",
+              "EVO Jet"
+            ],
+            "weekend_surcharges": true,
+            "turnaround_complexity": "High during peak season due to parking constraints"
+          },
+          "sources": [
+            "FlightAware Nice Airport",
+            "Business Air News Handbook",
+            "Universal Weather Business Aviation Guide",
+            "Centurion Jets Airport Guide",
+            "AirWise Executive Services"
+          ],
+          "risk_notes": "24/7 operations available but peak season creates significant turnaround delays. Night customs processing slower (main terminal required)."
+        },
+        "congestion_metrics": {
+          "description": "Traffic and capacity issues",
+          "data": {
+            "average_taxi_time_minutes": 12,
+            "peak_hour_delays_typical": "15-30 minutes (peak season)",
+            "airspace_complexity": "Medium - within Marseille FIR",
+            "atc_delays_frequency": "Medium to High during peak season",
+            "annual_passengers": 14800000,
+            "annual_movements": "Estimated 180,000+",
+            "seasonal_congestion_multiplier": 2.5,
+            "peak_periods": "May-October (summer tourism)",
+            "critical_events": [
+              "Cannes Film Festival (May 14-26): extreme congestion",
+              "Monaco Grand Prix (May): extreme congestion",
+              "Summer holiday season (June-August): high congestion"
+            ],
+            "parking_capacity_issue": "Severely limited; advanced coordination essential"
+          },
+          "sources": [
+            "Universal Weather Business Aviation Guide",
+            "Nice Airport 2024 Review",
+            "FlightAware Airport Data"
+          ],
+          "risk_notes": "Congestion multiplier 2.5x during peak season. Cannes Film Festival and Monaco GP create critical demand periods."
+        },
+        "permits_and_clearances": {
+          "description": "Authorization requirements",
+          "data": {
+            "requires_prior_permission": true,
+            "ppr_notice_period_hours": 24,
+            "ppr_required": "Not mandatory but highly recommended for peak season",
+            "overflight_permit_required": true,
+            "overflight_permit_source": "French DGAC",
+            "landing_permit_processing_time": "24-48 hours (can be expedited)",
+            "diplomatic_clearance_required": false,
+            "airport_of_entry": true,
+            "customs_declaration": "GENDEC (General Declaration) required for international flights"
+          },
+          "sources": [
+            "Flytag Flight Support",
+            "French DGAC",
+            "Nice Airport Operations"
+          ],
+          "risk_notes": "Permits manageable; main delay risk is parking approval cancellation during schedule changes."
+        },
+        "noise_restrictions": {
+          "description": "Noise abatement procedures",
+          "data": {
+            "noise_category_required": "Chapter 3 (ICAO Annex 16) preferred",
+            "chapter_requirements": "Chapter 3 compliant aircraft preferred",
+            "noise_surcharges": true,
+            "noise_surcharge_details": "Chapter 3 aircraft preferred; Chapter 2 aircraft may face surcharges",
+            "preferred_departure_routes": "Defined departure procedures available",
+            "noise_complaints_risk": "Medium - residential areas nearby",
+            "night_operation_restrictions": "RWY 04L closed 2200-0300 UTC (seasonal); night operations on RWY 04R/22L possible"
+          },
+          "sources": [
+            "French DGAC Noise Regulations",
+            "Nice Airport Operations"
+          ],
+          "risk_notes": "Chapter 3 compliance preferred but not strictly mandated. Night operations limited to one runway seasonally."
+        },
+        "infrastructure_reliability": {
+          "description": "Airport facility dependability",
+          "data": {
+            "power_outage_frequency": "Very rare",
+            "equipment_failure_rate": "Low",
+            "maintenance_closure_days_annual": "Minimal; coordinated during low-traffic periods",
+            "backup_systems_available": true,
+            "historical_closure_incidents": "Rare",
+            "facilities": [
+              "General Aviation Terminal (GAT)",
+              "VIP facilities",
+              "Hotels nearby",
+              "Cargo handling",
+              "De-icing services (seasonal)"
+            ],
+            "ongoing_improvements": "Terminal 2 redevelopment (increased capacity from 14M to 18M passengers annually)"
+          },
+          "sources": [
+            "Nice Airport Official Website",
+            "Nice Airport 2024 Review"
+          ],
+          "risk_notes": "Modern facility with excellent reliability. Terminal expansion underway to improve capacity."
+        },
+        "security_requirements": {
+          "description": "Security processing factors",
+          "data": {
+            "security_screening_time_avg": "15-25 minutes",
+            "enhanced_security_periods": "During major events (Cannes, Monaco GP)",
+            "vip_security_delays": "Coordinated VIP procedures; typically 30-45 minutes",
+            "passenger_background_check_required": "Standard French/Schengen checks",
+            "crew_visa_service": "Crew visas available on-site (72-hour validity)"
+          },
+          "sources": [
+            "Icarus Jet Helicopter Charter Guide",
+            "Flytag Flight Support",
+            "Nice Airport Operations"
+          ],
+          "risk_notes": "Standard security procedures; VIP processing coordinated in advance."
+        },
+        "seasonal_factors": {
+          "description": "Time-based operational changes",
+          "data": {
+            "high_season_months": ["May", "June", "July", "August", "September", "October"],
+            "ski_season_congestion": "Not applicable (coastal location)",
+            "summer_thunderstorm_frequency": "Moderate to High (June-August)",
+            "winter_weather_impact": "Mistral winds (Dec-April); generally mild winters",
+            "holiday_peak_dates": ["Easter", "May Day", "Ascension", "Whitsun", "Summer holidays (June-Aug)", "August (French holiday peak)"],
+            "major_events": [
+              "Cannes Film Festival (May 14-26): CRITICAL CONGESTION",
+              "Monaco Grand Prix (May): CRITICAL CONGESTION",
+              "Summer tourism season: HIGH CONGESTION"
+            ],
+            "business_peak": "Monday-Friday year-round; elevated May-October"
+          },
+          "sources": [
+            "Universal Weather Business Aviation Guide",
+            "Centurion Jets Airport Guide",
+            "Nice Airport Events Calendar"
+          ],
+          "risk_notes": "May is critical congestion month (Cannes + Monaco GP). August also very busy (French holiday season)."
+        },
+        "alternate_airport_proximity": {
+          "description": "Backup options availability",
+          "data": {
+            "nearest_suitable_alternate_code": "LFMD",
+            "distance_to_alternate_km": 26,
+            "alternate_list": [
+              {
+                "code": "LFMD",
+                "name": "Cannes Mandelieu Airport",
+                "distance_km": 26,
+                "distance_nm": 14,
+                "ground_transport_time_minutes": 35,
+                "limitations": "MTOW limit 35,000 kg; hours 0800-sunset; smaller jets preferred"
+              },
+              {
+                "code": "LFML",
+                "name": "Marseille Provence Airport",
+                "distance_km": 155,
+                "distance_nm": 84,
+                "ground_transport_time_minutes": 150,
+                "capabilities": "Full AOE services"
+              },
+              {
+                "code": "LFTH",
+                "name": "Toulon Hyères Airport",
+                "distance_km": 93,
+                "distance_nm": 50,
+                "ground_transport_time_minutes": 120,
+                "capabilities": "Full AOE services"
+              },
+              {
+                "code": "LNMC",
+                "name": "Monaco Heliport",
+                "distance_km": 19,
+                "distance_nm": 10,
+                "ground_transport_time_minutes": 20,
+                "limitations": "Helicopters only; 5-minute flight"
+              }
+            ],
+            "alternate_typically_available": true,
+            "ground_transport_time_to_alternate_minutes": 35
+          },
+          "sources": [
+            "Icarus Jet Helicopter Charter Guide",
+            "Closest Airports to Monaco",
+            "Southern France Business Aviation Guide"
+          ],
+          "risk_notes": "Cannes is closest alternate (26 km) but has weight and operational limitations. Good network of alternates for contingency."
+        },
+        "payment_and_fees": {
+          "description": "Financial arrangements that may cause delays",
+          "data": {
+            "advance_payment_required": false,
+            "credit_account_needed": false,
+            "handling_agent_prepayment": "Recommended for peak season to secure parking",
+            "fuel_payment_terms": "Standard commercial terms",
+            "landing_fees": "Approximately €150-300 depending on aircraft type",
+            "handling_charges": "Premium pricing during peak season",
+            "parking_surcharges": "Significant during peak season (May-October)",
+            "passenger_charges": "Applicable; included in airport fees"
+          },
+          "sources": [
+            "Nice Airport Official Pricing",
+            "Business Air News Handbook"
+          ],
+          "risk_notes": "Premium pricing model; significant surcharges during peak season. Prepayment recommended to secure parking."
+        }
+      },
+      "overall_risk_assessment": "HIGH - Premier Mediterranean destination with critical seasonal congestion (May-October), especially during Cannes Film Festival and Monaco Grand Prix. Mistral wind risk, limited parking capacity, and complex peak-season coordination requirements create substantial operational challenges. 24/7 capability is offset by peak-season constraints.",
+      "key_constraints": [
+        "Extreme seasonal congestion (May-October)",
+        "Limited parking availability",
+        "Mistral wind weather risk",
+        "CAT II/III capability required",
+        "Runway 04L seasonally restricted at night",
+        "French language radio requirements",
+        "Premium pricing during peak season",
+        "Parking approval cancellation risk",
+        "Critical events (Cannes, Monaco GP) create severe congestion"
+      ]
+    },
+    "LSZH": {
+      "name": "Zurich Airport",
+      "icao": "LSZH",
+      "iata": "ZRH",
+      "location": "Zurich, Switzerland",
+      "country": "Switzerland",
+      "coordinates": {
+        "latitude": 47.4647,
+        "longitude": 8.5492
+      },
+      "elevation_feet": 1417,
+      "risk_factors": {
+        "operational_hours": {
+          "description": "Operating hours and curfews",
+          "data": {
+            "opens_utc_summer": "0410",
+            "closes_utc_summer": "2055",
+            "opens_utc_winter": "0510",
+            "closes_utc_winter": "2155",
+            "private_flights_opens": "0630",
+            "private_flights_closes": "2200",
+            "night_curfew": true,
+            "night_curfew_weekdays": "0100-0700, 2100-0059",
+            "night_curfew_weekends": "0100-0900, 2000-0059",
+            "slot_scheduling": "Strict adherence required; zero flexibility"
+          },
+          "sources": [
+            "ASM Zurich Airport Guide",
+            "Slot Coordination Switzerland",
+            "Zurich Airport Official Website"
+          ],
+          "risk_notes": "Strict operating hours with different schedules for summer/winter. Private flights have tighter window (0630-2200 LT). Night operations heavily restricted."
+        },
+        "slot_requirements": {
+          "description": "Whether airport requires pre-allocated slots",
+          "data": {
+            "slot_controlled": true,
+            "advance_booking_required_hours": 96,
+            "slot_availability_typical": "Limited; coordinated scheduling required",
+            "peak_congestion_times": "0700-0900, 1600-1900 local time",
+            "maximum_movements_5min": 8,
+            "maximum_movements_10min": 14,
+            "maximum_movements_30min": 40,
+            "maximum_movements_60min": 66,
+            "ad_hoc_flight_penalty": "Reduced capacity by 3 arrivals, 3 departures; minimum 4 slots required",
+            "slot_deviation_policy": "ZERO FLEXIBILITY - any deviation results in cancellation/denied access"
+          },
+          "sources": [
+            "Slot Coordination Switzerland",
+            "Zurich Airport Slot Information",
+            "ASM Zurich Airport Guide"
+          ],
+          "risk_notes": "Extremely strict slot control with zero flexibility. Ad-hoc flights face capacity penalties. Compliance is mandatory."
+        },
+        "weather_vulnerability": {
+          "description": "Weather conditions that cause disruptions",
+          "data": {
+            "fog_prone": true,
+            "fog_frequency": "Frequent in winter months (Dec-Feb)",
+            "snow_closure_frequency": "Occasional; de-icing procedures mitigate closures",
+            "wind_limitations": "Alpine wind patterns; variable conditions",
+            "requires_cat_ii_iii_capability": true,
+            "cat_ii_equipped_runways": [
+              {
+                "runway": "14",
+                "capability": "CAT IIIb"
+              },
+              {
+                "runway": "16",
+                "capability": "CAT IIIb"
+              }
+            ],
+            "seasonal_risk_periods": "Winter (Dec-Feb) fog; Summer (Jun-Aug) thunderstorms",
+            "atfm_delay_causes": "Weather: 65%, Non-ATC: 30%, ATC: 5%",
+            "de_icing_service": "Assured October 1 - April 30"
+          },
+          "sources": [
+            "vACC Switzerland",
+            "Zurich Airport Winter Operations",
+            "PRB Annual Monitoring Report 2023",
+            "Swiss FOCA Regulations"
+          ],
+          "risk_notes": "CAT II/III essential. Winter fog is primary weather risk. Alpine location creates variable weather patterns."
+        },
+        "runway_specifications": {
+          "description": "Runway requirements and limitations",
+          "data": {
+            "runway_count": 3,
+            "runways": [
+              {
+                "designation": "14/32",
+                "length_meters": 3300,
+                "width_meters": 60,
+                "surface": "Concrete",
+                "ils": "ILS - CAT IIIb"
+              },
+              {
+                "designation": "16/34",
+                "length_meters": 3700,
+                "width_meters": 60,
+                "surface": "Asphalt",
+                "ils": "ILS - CAT IIIb"
+              },
+              {
+                "designation": "10/28",
+                "length_meters": "Not fully specified",
+                "surface": "Mixed",
+                "ils": "ILS/DME"
+              }
+            ],
+            "elevation_feet": 1417,
+            "preferential_runway_system": true,
+            "crosswind_limitations": "Varies by runway",
+            "weight_restrictions": "No significant restrictions for business jets"
+          },
+          "sources": [
+            "vACC Switzerland LSZH",
+            "Navigraph Airport Charts",
+            "Zurich Airport Official Specs"
+          ],
+          "risk_notes": "Excellent runway infrastructure with multiple CAT II/IIIb equipped runways. Preferential system based on wind/time."
+        },
+        "crew_requirements": {
+          "description": "Special qualifications needed",
+          "data": {
+            "special_crew_training_required": true,
+            "mountain_airport_rating": true,
+            "alpine_approach_training": "Required for operations in Alpine environment",
+            "cat_ii_iii_rating_required": true,
+            "cat_ii_iii_capability": "Essential for business aviation at LSZH",
+            "captain_only_airport": false,
+            "minimum_pilot_hours": "EASA standards with Alpine/CAT II/III capability",
+            "swiss_radiotelephony": "English standard; German/French on request"
+          },
+          "sources": [
+            "Swiss FOCA Regulations",
+            "vACC Switzerland",
+            "European Aviation Safety Agency (EASA)"
+          ],
+          "risk_notes": "Alpine approach training and CAT II/III rating essential. Crew qualifications are critical success factor."
+        },
+        "handling_complexity": {
+          "description": "Ground handling and service factors",
+          "data": {
+            "handler_availability_24_7": true,
+            "fuel_availability": true,
+            "fuel_types": ["Jet A", "Avgas 100LL"],
+            "fuel_payment_terms": "Standard commercial terms",
+            "customs_hours": "24/7 available; expedited for business aviation",
+            "customs_screening_requirements": "Standard Schengen procedures; security escort required between GAT and aircraft",
+            "immigration_processing_time_avg": "20-30 minutes",
+            "minimum_notice_hours": 24,
+            "ground_support_providers": [
+              "BHS Aviation Switzerland AG",
+              "SWISS PRIVILEGE AVIATION SERVICES GmbH"
+            ],
+            "deicing_coordination": "October 1 - April 30; coordinated by Winter Operation Coordinator"
+          },
+          "sources": [
+            "Zurich Airport Business Aviation",
+            "ASM Zurich Airport Guide",
+            "Zurich Airport Ground Handling"
+          ],
+          "risk_notes": "Professional 24/7 handling available. Winter de-icing well-coordinated. Premium pricing model."
+        },
+        "congestion_metrics": {
+          "description": "Traffic and capacity issues",
+          "data": {
+            "average_taxi_time_minutes": 10,
+            "peak_hour_delays_typical": "5-15 minutes (peak periods)",
+            "airspace_complexity": "High - complex Terminal Maneuvering Area (TMA)",
+            "atc_delays_frequency": "Low to Medium",
+            "annual_movements": "Estimated 260,000+",
+            "seasonal_congestion_multiplier": 1.3,
+            "peak_periods": ["Monday-Friday 0700-0900", "1600-1900 local time"],
+            "ski_season_congestion": "Elevated December-February (winter sports travel)",
+            "summer_thunderstorm_impact": "June-August; occasional delays"
+          },
+          "sources": [
+            "PRB Annual Monitoring Report 2023",
+            "European Airport Index 2024",
+            "Zurich Airport Official Data"
+          ],
+          "risk_notes": "Zurich rated #1 in Europe for airport efficiency (2024). Minimal delays despite high volume. Ski season creates seasonal surge."
+        },
+        "permits_and_clearances": {
+          "description": "Authorization requirements",
+          "data": {
+            "requires_prior_permission": false,
+            "slot_coordination_required": true,
+            "overflight_permit_required": false,
+            "landing_permit_processing_time": "Via slot coordination (2-4 days typical)",
+            "diplomatic_clearance_required": false,
+            "schengen_procedures": "Standard Schengen Area procedures apply"
+          },
+          "sources": [
+            "Slot Coordination Switzerland",
+            "Swiss FOCA",
+            "Zurich Airport Official Website"
+          ],
+          "risk_notes": "Slot coordination is primary requirement; no separate landing permits needed."
+        },
+        "noise_restrictions": {
+          "description": "Noise abatement procedures",
+          "data": {
+            "noise_category_required": "Chapter 3 (ICAO Annex 16) preferred",
+            "chapter_requirements": "Chapter 3 preferred; Chapter 2 aircraft face surcharges",
+            "noise_surcharges": true,
+            "noise_surcharge_effective_2027": "New classification system effective January 2027",
+            "surcharge_rates_2027": "Up to CHF 5,000+ for non-compliant aircraft after 23:00",
+            "preferred_departure_routes": "Defined departure procedures",
+            "noise_complaints_risk": "Medium - residential areas nearby",
+            "night_landings_restriction_weekdays": "0100-0700, 2100-0059",
+            "night_landings_restriction_weekends": "0100-0900, 2000-0059"
+          },
+          "sources": [
+            "Zurich Airport Noise Regulation",
+            "FlightGlobal Zurich Noise Fee Article",
+            "Swiss Federal Civil Aviation Office"
+          ],
+          "risk_notes": "Planned noise fee increases starting 2027; Chapter 3 compliance becoming more important economically."
+        },
+        "infrastructure_reliability": {
+          "description": "Airport facility dependability",
+          "data": {
+            "power_outage_frequency": "Very rare",
+            "equipment_failure_rate": "Very low",
+            "maintenance_closure_days_annual": "Minimal; coordinated during low-traffic periods",
+            "backup_systems_available": true,
+            "historical_closure_incidents": "Rare",
+            "facilities": [
+              "Modern terminals",
+              "General Aviation Center for business aviation",
+              "Hotels on-site",
+              "Maintenance facilities",
+              "De-icing equipment",
+              "Cargo handling"
+            ]
+          },
+          "sources": [
+            "Zurich Airport Official Website",
+            "European Airport Index 2024"
+          ],
+          "risk_notes": "World-class infrastructure with excellent reliability. Rated #1 in Europe for efficiency (2024)."
+        },
+        "security_requirements": {
+          "description": "Security processing factors",
+          "data": {
+            "security_screening_time_avg": "1 minute (2024 data)",
+            "average_2023": "12 minutes (improved significantly)",
+            "enhanced_security_periods": "Standard Schengen procedures",
+            "vip_security_delays": "Coordinated VIP processing; typically 15-25 minutes",
+            "passenger_background_check_required": "Standard Schengen procedures",
+            "airside_escort_required": "ICAO standards (GAT to aircraft escort required)"
+          },
+          "sources": [
+            "European Airport Index 2024",
+            "Zurich Airport Official Website"
+          ],
+          "risk_notes": "Exceptional security efficiency (1 minute average 2024). Dramatic improvement from 12 minutes in 2023."
+        },
+        "seasonal_factors": {
+          "description": "Time-based operational changes",
+          "data": {
+            "high_season_months": ["December", "January", "February", "July", "August"],
+            "ski_season_congestion": "December-February (Alpine ski resort season)",
+            "summer_thunderstorm_frequency": "High (June-August)",
+            "winter_deicing_delays_avg": "0-15 minutes (Oct 1 - Apr 30)",
+            "holiday_peak_dates": ["Christmas/New Year", "Easter", "Summer holidays"],
+            "business_peak": "Monday-Friday year-round; elevated ski season",
+            "airspace_modifications": "Spring 2025: Airspace redesign (March 20 - June 12, 2025)"
+          },
+          "sources": [
+            "Zurich Airport Operational Calendar",
+            "SKYbriefing AIC Documents",
+            "European Airport Index 2024"
+          ],
+          "risk_notes": "Ski season creates predictable December-February surge. Summer thunderstorms occasional. 2025 airspace changes may impact operations temporarily."
+        },
+        "alternate_airport_proximity": {
+          "description": "Backup options availability",
+          "data": {
+            "nearest_suitable_alternate_code": "LSGG",
+            "distance_to_alternate_km": 277,
+            "distance_to_alternate_nm": 150,
+            "alternate_list": [
+              {
+                "code": "LSGG",
+                "name": "Geneva Airport",
+                "distance_km": 277,
+                "distance_nm": 150,
+                "ground_transport_time_minutes": 180,
+                "capabilities": "Full AOE, slot-controlled, year-round"
+              },
+              {
+                "code": "LSZB",
+                "name": "Bern Airport",
+                "distance_km": 125,
+                "distance_nm": 67,
+                "ground_transport_time_minutes": 90,
+                "capabilities": "Smaller regional airport, less congestion"
+              },
+              {
+                "code": "LSZT",
+                "name": "Sion Airport",
+                "distance_km": 200,
+                "distance_nm": 108,
+                "ground_transport_time_minutes": 120,
+                "capabilities": "Alpine airport, seasonal ski season traffic"
+              }
+            ],
+            "alternate_typically_available": true,
+            "ground_transport_time_to_alternate_minutes": 90
+          },
+          "sources": [
+            "Navigraph Airports Switzerland",
+            "European Airport Index 2024",
+            "Zurich Airport Emergency Procedures"
+          ],
+          "risk_notes": "Geneva is primary alternate but 277 km away. Bern is closer (125 km) for emergencies. Good contingency options."
+        },
+        "payment_and_fees": {
+          "description": "Financial arrangements that may cause delays",
+          "data": {
+            "advance_payment_required": false,
+            "credit_account_needed": "Preferred for regular operators",
+            "handling_agent_prepayment": "Not typically required",
+            "fuel_payment_terms": "Standard commercial terms",
+            "landing_fees": "Approximately CHF 300-600 depending on aircraft weight",
+            "noise_surcharge": "Applicable; varies by aircraft noise class",
+            "parking_fees": "Based on aircraft weight and duration",
+            "passenger_charges": "Applicable (outbound passengers)",
+            "emission_charges": "NOx emission-based charges",
+            "noise_fee_increase_2027": "Planned significant increases for non-compliant aircraft"
+          },
+          "sources": [
+            "Zurich Airport Charge Regulation",
+            "Zurich Airport Charge Calculator",
+            "ASM Zurich Airport Guide"
+          ],
+          "risk_notes": "Premium pricing model; multiple fee categories (landing, parking, noise, emissions). Planned 2027 increases for noisy aircraft."
+        }
+      },
+      "overall_risk_assessment": "MEDIUM - Highly efficient, well-managed major airport with strict operational controls. Excellent infrastructure and security efficiency (ranked #1 in Europe 2024). Primary risks are Alpine weather (fog, winter conditions), strict slot coordination with zero flexibility, and high fees. Exceptional operational reliability and safety record mitigate many risks.",
+      "key_constraints": [
+        "Mandatory strict slot coordination with zero flexibility",
+        "CAT II/III capability required",
+        "Alpine approach training required",
+        "Winter weather and fog risk",
+        "Night operations heavily restricted",
+        "Premium pricing model",
+        "Planned noise fee increases (2027)",
+        "Complex TMA airspace",
+        "Ski season congestion (Dec-Feb)",
+        "Private flights limited to 0630-2200 LT"
+      ]
+    }
+  },
+  "comparative_analysis": {
+    "operational_hours_summary": {
+      "EGLF": "Most restricted: 0700-2200 LT only, no night operations",
+      "LFMN": "Most flexible: 24/7 capable (with seasonal runway restrictions)",
+      "LSZH": "Highly restricted: 0630-2200 LT for private flights, strict slot windows"
+    },
+    "weather_risk_ranking": {
+      "1_highest": "LSZH - Alpine fog risk, winter weather, CAT II/III essential",
+      "2_high": "LFMN - Mistral winds, fog, summer thunderstorms",
+      "3_moderate": "EGLF - UK maritime climate, minimal extreme weather"
+    },
+    "congestion_risk_ranking": {
+      "1_critical": "LFMN - Extreme seasonal peaks (May-October), Cannes/Monaco events",
+      "2_high": "LSZH - Ski season surge (Dec-Feb), worldwide hub traffic",
+      "3_moderate": "EGLF - Business hours congestion, manageable overall"
+    },
+    "crew_qualification_requirements": {
+      "most_demanding": "LSZH - Alpine rating, CAT II/III, complex procedures required",
+      "highly_demanding": "LFMN - CAT II/III capability, Mistral wind training, French radio",
+      "least_demanding": "EGLF - Standard EASA, noise abatement procedures"
+    },
+    "cost_ranking": {
+      "1_most_expensive": "LSZH - Premium European hub pricing, multiple fee categories",
+      "2_expensive": "LFMN - Peak-season surcharges, premium FBO services",
+      "3_moderate": "EGLF - Premium UK pricing, but lower volume than continental airports"
+    },
+    "24_7_capability": {
+      "EGLF": "NO - 0700-2200 LT only, no night operations",
+      "LFMN": "YES - 24/7 capable (with seasonal runway restrictions)",
+      "LSZH": "NO - 0630-2200 LT for private flights, heavily restricted night"
+    }
+  },
+  "data_quality_notes": {
+    "sources_reliability": "High - Data sourced from official aviation authorities (CAA, DGAC, FOCA), airport operators, NOTAMs, and established business aviation services",
+    "gaps": [
+      "Specific historical closure frequencies for Zurich - fog not quantified",
+      "Nice Airport ILS maintenance timeline - completion date not confirmed",
+      "Farnborough specific CAT procedures - not equipped but procedures referenced",
+      "Real-time delay statistics for Nice during Cannes Festival - highly variable"
+    ],
+    "limitations": [
+      "Weather data seasonal approximations based on climate patterns",
+      "Congestion metrics based on 2023-2024 data; may vary annually",
+      "Fee structures may change; reference official charge calculators",
+      "Slot availability highly variable; check Slot Coordination Switzerland for current status",
+      "COVID-19 recovery patterns may continue to affect seasonal patterns"
+    ]
+  },
+  "recommendations_for_use": {
+    "flight_planning": "Cross-reference all data with current NOTAMs, weather forecasts, and slot availability 7-14 days before operations",
+    "risk_assessment": "Apply seasonal multipliers during identified peak periods; extra contingency planning for Nice (May-October) and Zurich (Dec-Feb)",
+    "crew_planning": "Ensure required certifications for target airport at least 30 days in advance; arrange training if necessary",
+    "contingency_planning": "Always have alternate airport plan; Nice has best alternates; Zurich alternates further but available; Farnborough has multiple options nearby",
+    "seasonal_operations": "Avoid Nice May 14-26 (Cannes) and May (Monaco GP) if possible; plan for Zurich ski season surge; Farnborough relatively stable year-round"
+  }
+}

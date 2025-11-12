@@ -1,0 +1,1021 @@
+[
+  {
+    "icao": "KTEB",
+    "iata": "TEB",
+    "name": "Teterboro Airport",
+    "city": "Teterboro",
+    "state": "New Jersey",
+    "country": "United States",
+    "latitude": 40.8502,
+    "longitude": -74.0545,
+    "timezone": "America/New_York",
+    "is_corporate_hub": true,
+    "popularity_score": 100,
+    "aircraft_types": ["business_jet", "turboprop"],
+    "runway_count": 2,
+    "longest_runway_ft": 7009,
+    "fbo_count": 5,
+    "fbo_details": [
+      {
+        "name": "Jet Aviation Teterboro",
+        "services": ["fuel", "hangar", "maintenance", "crew_rest", "conference_rooms", "customs", "car_rental", "catering"],
+        "fuel_types": ["Jet_A", "Jet_A1"],
+        "hangar_space": true,
+        "maintenance_capable": true,
+        "customs_available": true,
+        "24_hour_service": true
+      },
+      {
+        "name": "Signature Flight Support - East",
+        "services": ["fuel", "hangar", "maintenance", "crew_rest", "conference_rooms", "customs", "car_rental", "catering"],
+        "fuel_types": ["Jet_A", "Jet_A1"],
+        "hangar_space": true,
+        "maintenance_capable": true,
+        "customs_available": true,
+        "24_hour_service": true
+      },
+      {
+        "name": "Signature Flight Support - West",
+        "services": ["fuel", "hangar", "maintenance", "crew_rest", "conference_rooms", "customs", "car_rental", "catering"],
+        "fuel_types": ["Jet_A", "Jet_A1"],
+        "hangar_space": true,
+        "maintenance_capable": true,
+        "customs_available": true,
+        "24_hour_service": true
+      },
+      {
+        "name": "Signature Flight Support - South",
+        "services": ["fuel", "hangar", "maintenance", "crew_rest", "conference_rooms", "customs", "car_rental", "catering"],
+        "fuel_types": ["Jet_A", "Jet_A1"],
+        "hangar_space": true,
+        "maintenance_capable": true,
+        "customs_available": true,
+        "24_hour_service": true
+      },
+      {
+        "name": "Atlantic Aviation",
+        "services": ["fuel", "hangar", "maintenance", "crew_rest", "conference_rooms", "customs", "car_rental", "catering"],
+        "fuel_types": ["Jet_A", "Jet_A1"],
+        "hangar_space": true,
+        "maintenance_capable": true,
+        "customs_available": true,
+        "24_hour_service": true
+      }
+    ],
+    "facilities": ["fbo", "customs", "charter", "air_traffic_control", "weather_service", "fire_rescue"],
+    "special_services": ["aircraft_management", "charter_services", "aircraft_sales", "flight_planning", "ground_transportation"]
+  },
+  {
+    "icao": "KVNY",
+    "iata": "VNY",
+    "name": "Van Nuys Airport",
+    "city": "Van Nuys",
+    "state": "California",
+    "country": "United States",
+    "latitude": 34.2092,
+    "longitude": -118.4015,
+    "timezone": "America/Los_Angeles",
+    "is_corporate_hub": true,
+    "popularity_score": 98,
+    "aircraft_types": ["business_jet", "turboprop", "helicopter"],
+    "runway_count": 2,
+    "longest_runway_ft": 8000,
+    "fbo_count": 4,
+    "fbo_details": [
+      {
+        "name": "Clay Lacy Aviation",
+        "services": ["fuel", "hangar", "maintenance", "crew_rest", "conference_rooms", "customs", "car_rental", "catering", "aircraft_management", "charter"],
+        "fuel_types": ["Jet_A", "Jet_A1"],
+        "hangar_space": true,
+        "maintenance_capable": true,
+        "customs_available": true,
+        "24_hour_service": true
+      },
+      {
+        "name": "Signature Flight Support",
+        "services": ["fuel", "hangar", "maintenance", "crew_rest", "conference_rooms", "customs", "car_rental", "catering"],
+        "fuel_types": ["Jet_A", "Jet_A1"],
+        "hangar_space": true,
+        "maintenance_capable": true,
+        "customs_available": true,
+        "24_hour_service": true
+      },
+      {
+        "name": "Atlantic Aviation",
+        "services": ["fuel", "hangar", "maintenance", "crew_rest", "conference_rooms", "customs", "car_rental", "catering"],
+        "fuel_types": ["Jet_A", "Jet_A1"],
+        "hangar_space": true,
+        "maintenance_capable": true,
+        "customs_available": true,
+        "24_hour_service": true
+      },
+      {
+        "name": "Million Air",
+        "services": ["fuel", "hangar", "maintenance", "crew_rest", "conference_rooms", "customs", "car_rental", "catering"],
+        "fuel_types": ["Jet_A", "Jet_A1"],
+        "hangar_space": true,
+        "maintenance_capable": true,
+        "customs_available": true,
+        "24_hour_service": true
+      }
+    ],
+    "facilities": ["fbo", "customs", "charter", "air_traffic_control", "weather_service", "fire_rescue", "helicopter_services"],
+    "special_services": ["aircraft_management", "charter_services", "aircraft_sales", "flight_planning", "ground_transportation", "film_production_support"]
+  },
+  {
+    "icao": "LFPB",
+    "iata": "LBG",
+    "name": "Paris-Le Bourget Airport",
+    "city": "Paris",
+    "country": "France",
+    "latitude": 48.9694,
+    "longitude": 2.4414,
+    "timezone": "Europe/Paris",
+    "is_corporate_hub": true,
+    "popularity_score": 97,
+    "aircraft_types": ["business_jet", "turboprop"],
+    "runway_count": 3,
+    "longest_runway_ft": 8858,
+    "fbo_count": 6,
+    "fbo_details": [
+      {
+        "name": "Jet Aviation Paris",
+        "services": ["fuel", "hangar", "maintenance", "crew_rest", "conference_rooms", "customs", "car_rental", "catering"],
+        "fuel_types": ["Jet_A", "Jet_A1"],
+        "hangar_space": true,
+        "maintenance_capable": true,
+        "customs_available": true,
+        "24_hour_service": true
+      },
+      {
+        "name": "Signature Flight Support Paris",
+        "services": ["fuel", "hangar", "maintenance", "crew_rest", "conference_rooms", "customs", "car_rental", "catering"],
+        "fuel_types": ["Jet_A", "Jet_A1"],
+        "hangar_space": true,
+        "maintenance_capable": true,
+        "customs_available": true,
+        "24_hour_service": true
+      },
+      {
+        "name": "Air France Corporate",
+        "services": ["fuel", "hangar", "maintenance", "crew_rest", "conference_rooms", "customs", "car_rental", "catering"],
+        "fuel_types": ["Jet_A", "Jet_A1"],
+        "hangar_space": true,
+        "maintenance_capable": true,
+        "customs_available": true,
+        "24_hour_service": true
+      },
+      {
+        "name": "Damyns Hall",
+        "services": ["fuel", "hangar", "maintenance", "crew_rest", "conference_rooms", "customs", "car_rental", "catering"],
+        "fuel_types": ["Jet_A", "Jet_A1"],
+        "hangar_space": true,
+        "maintenance_capable": true,
+        "customs_available": true,
+        "24_hour_service": true
+      },
+      {
+        "name": "Menzies Aviation",
+        "services": ["fuel", "hangar", "maintenance", "crew_rest", "conference_rooms", "customs", "car_rental", "catering"],
+        "fuel_types": ["Jet_A", "Jet_A1"],
+        "hangar_space": true,
+        "maintenance_capable": true,
+        "customs_available": true,
+        "24_hour_service": true
+      },
+      {
+        "name": "Universal Aviation",
+        "services": ["fuel", "hangar", "maintenance", "crew_rest", "conference_rooms", "customs", "car_rental", "catering"],
+        "fuel_types": ["Jet_A", "Jet_A1"],
+        "hangar_space": true,
+        "maintenance_capable": true,
+        "customs_available": true,
+        "24_hour_service": true
+      }
+    ],
+    "facilities": ["fbo", "customs", "charter", "air_traffic_control", "weather_service", "fire_rescue"],
+    "special_services": ["aircraft_management", "charter_services", "aircraft_sales", "flight_planning", "ground_transportation", "vip_services"]
+  },
+  {
+    "icao": "EGLF",
+    "iata": "FAB",
+    "name": "Farnborough Airport",
+    "city": "Farnborough",
+    "country": "United Kingdom",
+    "latitude": 51.2835,
+    "longitude": -0.765,
+    "timezone": "Europe/London",
+    "is_corporate_hub": true,
+    "popularity_score": 96,
+    "aircraft_types": ["business_jet", "turboprop"],
+    "runway_count": 1,
+    "longest_runway_ft": 8051,
+    "fbo_count": 3,
+    "fbo_details": [
+      {
+        "name": "Farnborough Airport FBO",
+        "services": ["fuel", "hangar", "maintenance", "crew_rest", "conference_rooms", "customs", "car_rental", "catering"],
+        "fuel_types": ["Jet_A", "Jet_A1"],
+        "hangar_space": true,
+        "maintenance_capable": true,
+        "customs_available": true,
+        "24_hour_service": true
+      },
+      {
+        "name": "Signature Flight Support Farnborough",
+        "services": ["fuel", "hangar", "maintenance", "crew_rest", "conference_rooms", "customs", "car_rental", "catering"],
+        "fuel_types": ["Jet_A", "Jet_A1"],
+        "hangar_space": true,
+        "maintenance_capable": true,
+        "customs_available": true,
+        "24_hour_service": true
+      },
+      {
+        "name": "Universal Aviation Farnborough",
+        "services": ["fuel", "hangar", "maintenance", "crew_rest", "conference_rooms", "customs", "car_rental", "catering"],
+        "fuel_types": ["Jet_A", "Jet_A1"],
+        "hangar_space": true,
+        "maintenance_capable": true,
+        "customs_available": true,
+        "24_hour_service": true
+      }
+    ],
+    "facilities": ["fbo", "customs", "charter", "air_traffic_control", "weather_service", "fire_rescue"],
+    "special_services": ["aircraft_management", "charter_services", "aircraft_sales", "flight_planning", "ground_transportation", "air_show_facilities"]
+  },
+  {
+    "icao": "KHPN",
+    "iata": "HPN",
+    "name": "Westchester County Airport",
+    "city": "White Plains",
+    "state": "New York",
+    "country": "United States",
+    "latitude": 41.067,
+    "longitude": -73.7075,
+    "timezone": "America/New_York",
+    "is_corporate_hub": true,
+    "popularity_score": 95,
+    "aircraft_types": ["business_jet", "turboprop"],
+    "runway_count": 2,
+    "longest_runway_ft": 6523,
+    "fbo_count": 3,
+    "fbo_details": [
+      {
+        "name": "Signature Flight Support",
+        "services": ["fuel", "hangar", "maintenance", "crew_rest", "conference_rooms", "customs", "car_rental", "catering"],
+        "fuel_types": ["Jet_A", "Jet_A1"],
+        "hangar_space": true,
+        "maintenance_capable": true,
+        "customs_available": true,
+        "24_hour_service": true
+      },
+      {
+        "name": "Atlantic Aviation",
+        "services": ["fuel", "hangar", "maintenance", "crew_rest", "conference_rooms", "customs", "car_rental", "catering"],
+        "fuel_types": ["Jet_A", "Jet_A1"],
+        "hangar_space": true,
+        "maintenance_capable": true,
+        "customs_available": true,
+        "24_hour_service": true
+      },
+      {
+        "name": "Million Air",
+        "services": ["fuel", "hangar", "maintenance", "crew_rest", "conference_rooms", "customs", "car_rental", "catering"],
+        "fuel_types": ["Jet_A", "Jet_A1"],
+        "hangar_space": true,
+        "maintenance_capable": true,
+        "customs_available": true,
+        "24_hour_service": true
+      }
+    ],
+    "facilities": ["fbo", "customs", "charter", "air_traffic_control", "weather_service", "fire_rescue"],
+    "special_services": ["aircraft_management", "charter_services", "aircraft_sales", "flight_planning", "ground_transportation"]
+  },
+  {
+    "icao": "LSGG",
+    "iata": "GVA",
+    "name": "Geneva Airport",
+    "city": "Geneva",
+    "country": "Switzerland",
+    "latitude": 46.2381,
+    "longitude": 6.1089,
+    "timezone": "Europe/Zurich",
+    "is_corporate_hub": true,
+    "popularity_score": 94,
+    "aircraft_types": ["business_jet", "turboprop"],
+    "runway_count": 2,
+    "longest_runway_ft": 12795,
+    "fbo_count": 4,
+    "fbo_details": [
+      {
+        "name": "Jet Aviation Geneva",
+        "services": ["fuel", "hangar", "maintenance", "crew_rest", "conference_rooms", "customs", "car_rental", "catering"],
+        "fuel_types": ["Jet_A", "Jet_A1"],
+        "hangar_space": true,
+        "maintenance_capable": true,
+        "customs_available": true,
+        "24_hour_service": true
+      },
+      {
+        "name": "Signature Flight Support Geneva",
+        "services": ["fuel", "hangar", "maintenance", "crew_rest", "conference_rooms", "customs", "car_rental", "catering"],
+        "fuel_types": ["Jet_A", "Jet_A1"],
+        "hangar_space": true,
+        "maintenance_capable": true,
+        "customs_available": true,
+        "24_hour_service": true
+      },
+      {
+        "name": "Universal Aviation Geneva",
+        "services": ["fuel", "hangar", "maintenance", "crew_rest", "conference_rooms", "customs", "car_rental", "catering"],
+        "fuel_types": ["Jet_A", "Jet_A1"],
+        "hangar_space": true,
+        "maintenance_capable": true,
+        "customs_available": true,
+        "24_hour_service": true
+      },
+      {
+        "name": "Menzies Aviation Geneva",
+        "services": ["fuel", "hangar", "maintenance", "crew_rest", "conference_rooms", "customs", "car_rental", "catering"],
+        "fuel_types": ["Jet_A", "Jet_A1"],
+        "hangar_space": true,
+        "maintenance_capable": true,
+        "customs_available": true,
+        "24_hour_service": true
+      }
+    ],
+    "facilities": ["fbo", "customs", "charter", "air_traffic_control", "weather_service", "fire_rescue"],
+    "special_services": ["aircraft_management", "charter_services", "aircraft_sales", "flight_planning", "ground_transportation", "diplomatic_services"]
+  },
+  {
+    "icao": "KFXE",
+    "iata": "FXE",
+    "name": "Fort Lauderdale Executive Airport",
+    "city": "Fort Lauderdale",
+    "state": "Florida",
+    "country": "United States",
+    "latitude": 26.197,
+    "longitude": -80.1705,
+    "timezone": "America/New_York",
+    "is_corporate_hub": true,
+    "popularity_score": 93,
+    "aircraft_types": ["business_jet", "turboprop", "helicopter"],
+    "runway_count": 2,
+    "longest_runway_ft": 6000,
+    "fbo_count": 4,
+    "fbo_details": [
+      {
+        "name": "Signature Flight Support",
+        "services": ["fuel", "hangar", "maintenance", "crew_rest", "conference_rooms", "customs", "car_rental", "catering"],
+        "fuel_types": ["Jet_A", "Jet_A1"],
+        "hangar_space": true,
+        "maintenance_capable": true,
+        "customs_available": true,
+        "24_hour_service": true
+      },
+      {
+        "name": "Atlantic Aviation",
+        "services": ["fuel", "hangar", "maintenance", "crew_rest", "conference_rooms", "customs", "car_rental", "catering"],
+        "fuel_types": ["Jet_A", "Jet_A1"],
+        "hangar_space": true,
+        "maintenance_capable": true,
+        "customs_available": true,
+        "24_hour_service": true
+      },
+      {
+        "name": "Banyan Air Service",
+        "services": ["fuel", "hangar", "maintenance", "crew_rest", "conference_rooms", "customs", "car_rental", "catering", "aircraft_sales"],
+        "fuel_types": ["Jet_A", "Jet_A1"],
+        "hangar_space": true,
+        "maintenance_capable": true,
+        "customs_available": true,
+        "24_hour_service": true
+      },
+      {
+        "name": "SheltAir",
+        "services": ["fuel", "hangar", "maintenance", "crew_rest", "conference_rooms", "customs", "car_rental", "catering"],
+        "fuel_types": ["Jet_A", "Jet_A1"],
+        "hangar_space": true,
+        "maintenance_capable": true,
+        "customs_available": true,
+        "24_hour_service": true
+      }
+    ],
+    "facilities": ["fbo", "customs", "charter", "air_traffic_control", "weather_service", "fire_rescue", "helicopter_services"],
+    "special_services": ["aircraft_management", "charter_services", "aircraft_sales", "flight_planning", "ground_transportation", "aircraft_interiors"]
+  },
+  {
+    "icao": "KADS",
+    "iata": "ADS",
+    "name": "Addison Airport",
+    "city": "Addison",
+    "state": "Texas",
+    "country": "United States",
+    "latitude": 32.9676,
+    "longitude": -96.8355,
+    "timezone": "America/Chicago",
+    "is_corporate_hub": true,
+    "popularity_score": 92,
+    "aircraft_types": ["business_jet", "turboprop", "helicopter"],
+    "runway_count": 2,
+    "longest_runway_ft": 7200,
+    "fbo_count": 3,
+    "fbo_details": [
+      {
+        "name": "Signature Flight Support",
+        "services": ["fuel", "hangar", "maintenance", "crew_rest", "conference_rooms", "customs", "car_rental", "catering"],
+        "fuel_types": ["Jet_A", "Jet_A1"],
+        "hangar_space": true,
+        "maintenance_capable": true,
+        "customs_available": true,
+        "24_hour_service": true
+      },
+      {
+        "name": "Atlantic Aviation",
+        "services": ["fuel", "hangar", "maintenance", "crew_rest", "conference_rooms", "customs", "car_rental", "catering"],
+        "fuel_types": ["Jet_A", "Jet_A1"],
+        "hangar_space": true,
+        "maintenance_capable": true,
+        "customs_available": true,
+        "24_hour_service": true
+      },
+      {
+        "name": "Million Air",
+        "services": ["fuel", "hangar", "maintenance", "crew_rest", "conference_rooms", "customs", "car_rental", "catering"],
+        "fuel_types": ["Jet_A", "Jet_A1"],
+        "hangar_space": true,
+        "maintenance_capable": true,
+        "customs_available": true,
+        "24_hour_service": true
+      }
+    ],
+    "facilities": ["fbo", "customs", "charter", "air_traffic_control", "weather_service", "fire_rescue", "helicopter_services"],
+    "special_services": ["aircraft_management", "charter_services", "aircraft_sales", "flight_planning", "ground_transportation"]
+  },
+  {
+    "icao": "EGLB",
+    "iata": "BQH",
+    "name": "London Biggin Hill Airport",
+    "city": "London",
+    "country": "United Kingdom",
+    "latitude": 51.3309,
+    "longitude": -0.0325,
+    "timezone": "Europe/London",
+    "is_corporate_hub": true,
+    "popularity_score": 91,
+    "aircraft_types": ["business_jet", "turboprop"],
+    "runway_count": 2,
+    "longest_runway_ft": 5906,
+    "fbo_count": 3,
+    "fbo_details": [
+      {
+        "name": "Biggin Hill Airport FBO",
+        "services": ["fuel", "hangar", "maintenance", "crew_rest", "conference_rooms", "customs", "car_rental", "catering"],
+        "fuel_types": ["Jet_A", "Jet_A1"],
+        "hangar_space": true,
+        "maintenance_capable": true,
+        "customs_available": true,
+        "24_hour_service": true
+      },
+      {
+        "name": "Signature Flight Support Biggin Hill",
+        "services": ["fuel", "hangar", "maintenance", "crew_rest", "conference_rooms", "customs", "car_rental", "catering"],
+        "fuel_types": ["Jet_A", "Jet_A1"],
+        "hangar_space": true,
+        "maintenance_capable": true,
+        "customs_available": true,
+        "24_hour_service": true
+      },
+      {
+        "name": "Universal Aviation Biggin Hill",
+        "services": ["fuel", "hangar", "maintenance", "crew_rest", "conference_rooms", "customs", "car_rental", "catering"],
+        "fuel_types": ["Jet_A", "Jet_A1"],
+        "hangar_space": true,
+        "maintenance_capable": true,
+        "customs_available": true,
+        "24_hour_service": true
+      }
+    ],
+    "facilities": ["fbo", "customs", "charter", "air_traffic_control", "weather_service", "fire_rescue"],
+    "special_services": ["aircraft_management", "charter_services", "aircraft_sales", "flight_planning", "ground_transportation", "flight_training"]
+  },
+  {
+    "icao": "KRYY",
+    "iata": "RYY",
+    "name": "Cobb County International Airport - McCollum Field",
+    "city": "Marietta",
+    "state": "Georgia",
+    "country": "United States",
+    "latitude": 33.9795,
+    "longitude": -84.6655,
+    "timezone": "America/New_York",
+    "is_corporate_hub": true,
+    "popularity_score": 90,
+    "aircraft_types": ["business_jet", "turboprop"],
+    "runway_count": 2,
+    "longest_runway_ft": 6305,
+    "fbo_count": 3,
+    "fbo_details": [
+      {
+        "name": "Signature Flight Support",
+        "services": ["fuel", "hangar", "maintenance", "crew_rest", "conference_rooms", "customs", "car_rental", "catering"],
+        "fuel_types": ["Jet_A", "Jet_A1"],
+        "hangar_space": true,
+        "maintenance_capable": true,
+        "customs_available": true,
+        "24_hour_service": true
+      },
+      {
+        "name": "Atlantic Aviation",
+        "services": ["fuel", "hangar", "maintenance", "crew_rest", "conference_rooms", "customs", "car_rental", "catering"],
+        "fuel_types": ["Jet_A", "Jet_A1"],
+        "hangar_space": true,
+        "maintenance_capable": true,
+        "customs_available": true,
+        "24_hour_service": true
+      },
+      {
+        "name": "Million Air",
+        "services": ["fuel", "hangar", "maintenance", "crew_rest", "conference_rooms", "customs", "car_rental", "catering"],
+        "fuel_types": ["Jet_A", "Jet_A1"],
+        "hangar_space": true,
+        "maintenance_capable": true,
+        "customs_available": true,
+        "24_hour_service": true
+      }
+    ],
+    "facilities": ["fbo", "customs", "charter", "air_traffic_control", "weather_service", "fire_rescue"],
+    "special_services": ["aircraft_management", "charter_services", "aircraft_sales", "flight_planning", "ground_transportation"]
+  },
+  {
+    "icao": "KOPF",
+    "iata": "OPF",
+    "name": "Opa-locka Executive Airport",
+    "city": "Miami",
+    "state": "Florida",
+    "country": "United States",
+    "latitude": 25.9096,
+    "longitude": -80.2805,
+    "timezone": "America/New_York",
+    "is_corporate_hub": true,
+    "popularity_score": 89,
+    "aircraft_types": ["business_jet", "turboprop", "helicopter"],
+    "runway_count": 3,
+    "longest_runway_ft": 8000,
+    "fbo_count": 4,
+    "fbo_details": [
+      {
+        "name": "Signature Flight Support",
+        "services": ["fuel", "hangar", "maintenance", "crew_rest", "conference_rooms", "customs", "car_rental", "catering"],
+        "fuel_types": ["Jet_A", "Jet_A1"],
+        "hangar_space": true,
+        "maintenance_capable": true,
+        "customs_available": true,
+        "24_hour_service": true
+      },
+      {
+        "name": "Atlantic Aviation",
+        "services": ["fuel", "hangar", "maintenance", "crew_rest", "conference_rooms", "customs", "car_rental", "catering"],
+        "fuel_types": ["Jet_A", "Jet_A1"],
+        "hangar_space": true,
+        "maintenance_capable": true,
+        "customs_available": true,
+        "24_hour_service": true
+      },
+      {
+        "name": "SheltAir",
+        "services": ["fuel", "hangar", "maintenance", "crew_rest", "conference_rooms", "customs", "car_rental", "catering"],
+        "fuel_types": ["Jet_A", "Jet_A1"],
+        "hangar_space": true,
+        "maintenance_capable": true,
+        "customs_available": true,
+        "24_hour_service": true
+      },
+      {
+        "name": "Million Air",
+        "services": ["fuel", "hangar", "maintenance", "crew_rest", "conference_rooms", "customs", "car_rental", "catering"],
+        "fuel_types": ["Jet_A", "Jet_A1"],
+        "hangar_space": true,
+        "maintenance_capable": true,
+        "customs_available": true,
+        "24_hour_service": true
+      }
+    ],
+    "facilities": ["fbo", "customs", "charter", "air_traffic_control", "weather_service", "fire_rescue", "helicopter_services"],
+    "special_services": ["aircraft_management", "charter_services", "aircraft_sales", "flight_planning", "ground_transportation", "aircraft_modification"]
+  },
+  {
+    "icao": "KMDW",
+    "iata": "MDW",
+    "name": "Chicago Midway International Airport",
+    "city": "Chicago",
+    "state": "Illinois",
+    "country": "United States",
+    "latitude": 41.784,
+    "longitude": -87.7535,
+    "timezone": "America/Chicago",
+    "is_corporate_hub": true,
+    "popularity_score": 88,
+    "aircraft_types": ["business_jet", "turboprop"],
+    "runway_count": 3,
+    "longest_runway_ft": 6522,
+    "fbo_count": 2,
+    "fbo_details": [
+      {
+        "name": "Signature Flight Support",
+        "services": ["fuel", "hangar", "maintenance", "crew_rest", "conference_rooms", "customs", "car_rental", "catering"],
+        "fuel_types": ["Jet_A", "Jet_A1"],
+        "hangar_space": true,
+        "maintenance_capable": true,
+        "customs_available": true,
+        "24_hour_service": true
+      },
+      {
+        "name": "Atlantic Aviation",
+        "services": ["fuel", "hangar", "maintenance", "crew_rest", "conference_rooms", "customs", "car_rental", "catering"],
+        "fuel_types": ["Jet_A", "Jet_A1"],
+        "hangar_space": true,
+        "maintenance_capable": true,
+        "customs_available": true,
+        "24_hour_service": true
+      }
+    ],
+    "facilities": ["fbo", "customs", "charter", "air_traffic_control", "weather_service", "fire_rescue"],
+    "special_services": ["aircraft_management", "charter_services", "aircraft_sales", "flight_planning", "ground_transportation"]
+  },
+  {
+    "icao": "KBUR",
+    "iata": "BUR",
+    "name": "Hollywood Burbank Airport",
+    "city": "Burbank",
+    "state": "California",
+    "country": "United States",
+    "latitude": 34.2007,
+    "longitude": -118.3586,
+    "timezone": "America/Los_Angeles",
+    "is_corporate_hub": true,
+    "popularity_score": 87,
+    "aircraft_types": ["business_jet", "turboprop"],
+    "runway_count": 2,
+    "longest_runway_ft": 6888,
+    "fbo_count": 3,
+    "fbo_details": [
+      {
+        "name": "Signature Flight Support",
+        "services": ["fuel", "hangar", "maintenance", "crew_rest", "conference_rooms", "customs", "car_rental", "catering"],
+        "fuel_types": ["Jet_A", "Jet_A1"],
+        "hangar_space": true,
+        "maintenance_capable": true,
+        "customs_available": true,
+        "24_hour_service": true
+      },
+      {
+        "name": "Atlantic Aviation",
+        "services": ["fuel", "hangar", "maintenance", "crew_rest", "conference_rooms", "customs", "car_rental", "catering"],
+        "fuel_types": ["Jet_A", "Jet_A1"],
+        "hangar_space": true,
+        "maintenance_capable": true,
+        "customs_available": true,
+        "24_hour_service": true
+      },
+      {
+        "name": "Million Air",
+        "services": ["fuel", "hangar", "maintenance", "crew_rest", "conference_rooms", "customs", "car_rental", "catering"],
+        "fuel_types": ["Jet_A", "Jet_A1"],
+        "hangar_space": true,
+        "maintenance_capable": true,
+        "customs_available": true,
+        "24_hour_service": true
+      }
+    ],
+    "facilities": ["fbo", "customs", "charter", "air_traffic_control", "weather_service", "fire_rescue"],
+    "special_services": ["aircraft_management", "charter_services", "aircraft_sales", "flight_planning", "ground_transportation", "entertainment_industry_support"]
+  },
+  {
+    "icao": "KSDL",
+    "iata": "SDL",
+    "name": "Scottsdale Airport",
+    "city": "Scottsdale",
+    "state": "Arizona",
+    "country": "United States",
+    "latitude": 33.623,
+    "longitude": -111.911,
+    "timezone": "America/Phoenix",
+    "is_corporate_hub": true,
+    "popularity_score": 86,
+    "aircraft_types": ["business_jet", "turboprop"],
+    "runway_count": 1,
+    "longest_runway_ft": 8242,
+    "fbo_count": 3,
+    "fbo_details": [
+      {
+        "name": "Signature Flight Support",
+        "services": ["fuel", "hangar", "maintenance", "crew_rest", "conference_rooms", "customs", "car_rental", "catering"],
+        "fuel_types": ["Jet_A", "Jet_A1"],
+        "hangar_space": true,
+        "maintenance_capable": true,
+        "customs_available": true,
+        "24_hour_service": true
+      },
+      {
+        "name": "Atlantic Aviation",
+        "services": ["fuel", "hangar", "maintenance", "crew_rest", "conference_rooms", "customs", "car_rental", "catering"],
+        "fuel_types": ["Jet_A", "Jet_A1"],
+        "hangar_space": true,
+        "maintenance_capable": true,
+        "customs_available": true,
+        "24_hour_service": true
+      },
+      {
+        "name": "Million Air",
+        "services": ["fuel", "hangar", "maintenance", "crew_rest", "conference_rooms", "customs", "car_rental", "catering"],
+        "fuel_types": ["Jet_A", "Jet_A1"],
+        "hangar_space": true,
+        "maintenance_capable": true,
+        "customs_available": true,
+        "24_hour_service": true
+      }
+    ],
+    "facilities": ["fbo", "customs", "charter", "air_traffic_control", "weather_service", "fire_rescue"],
+    "special_services": ["aircraft_management", "charter_services", "aircraft_sales", "flight_planning", "ground_transportation", "golf_resort_access"]
+  },
+  {
+    "icao": "KDAL",
+    "iata": "DAL",
+    "name": "Dallas Love Field",
+    "city": "Dallas",
+    "state": "Texas",
+    "country": "United States",
+    "latitude": 32.8471,
+    "longitude": -96.8518,
+    "timezone": "America/Chicago",
+    "is_corporate_hub": true,
+    "popularity_score": 85,
+    "aircraft_types": ["business_jet", "turboprop"],
+    "runway_count": 2,
+    "longest_runway_ft": 8800,
+    "fbo_count": 2,
+    "fbo_details": [
+      {
+        "name": "Signature Flight Support",
+        "services": ["fuel", "hangar", "maintenance", "crew_rest", "conference_rooms", "customs", "car_rental", "catering"],
+        "fuel_types": ["Jet_A", "Jet_A1"],
+        "hangar_space": true,
+        "maintenance_capable": true,
+        "customs_available": true,
+        "24_hour_service": true
+      },
+      {
+        "name": "Atlantic Aviation",
+        "services": ["fuel", "hangar", "maintenance", "crew_rest", "conference_rooms", "customs", "car_rental", "catering"],
+        "fuel_types": ["Jet_A", "Jet_A1"],
+        "hangar_space": true,
+        "maintenance_capable": true,
+        "customs_available": true,
+        "24_hour_service": true
+      }
+    ],
+    "facilities": ["fbo", "customs", "charter", "air_traffic_control", "weather_service", "fire_rescue"],
+    "special_services": ["aircraft_management", "charter_services", "aircraft_sales", "flight_planning", "ground_transportation"]
+  },
+  {
+    "icao": "KHOU",
+    "iata": "HOU",
+    "name": "Houston Hobby Airport",
+    "city": "Houston",
+    "state": "Texas",
+    "country": "United States",
+    "latitude": 29.6454,
+    "longitude": -95.2789,
+    "timezone": "America/Chicago",
+    "is_corporate_hub": true,
+    "popularity_score": 84,
+    "aircraft_types": ["business_jet", "turboprop"],
+    "runway_count": 3,
+    "longest_runway_ft": 7612,
+    "fbo_count": 2,
+    "fbo_details": [
+      {
+        "name": "Signature Flight Support",
+        "services": ["fuel", "hangar", "maintenance", "crew_rest", "conference_rooms", "customs", "car_rental", "catering"],
+        "fuel_types": ["Jet_A", "Jet_A1"],
+        "hangar_space": true,
+        "maintenance_capable": true,
+        "customs_available": true,
+        "24_hour_service": true
+      },
+      {
+        "name": "Atlantic Aviation",
+        "services": ["fuel", "hangar", "maintenance", "crew_rest", "conference_rooms", "customs", "car_rental", "catering"],
+        "fuel_types": ["Jet_A", "Jet_A1"],
+        "hangar_space": true,
+        "maintenance_capable": true,
+        "customs_available": true,
+        "24_hour_service": true
+      }
+    ],
+    "facilities": ["fbo", "customs", "charter", "air_traffic_control", "weather_service", "fire_rescue"],
+    "special_services": ["aircraft_management", "charter_services", "aircraft_sales", "flight_planning", "ground_transportation"]
+  },
+  {
+    "icao": "KSMO",
+    "iata": "SMO",
+    "name": "Santa Monica Municipal Airport",
+    "city": "Santa Monica",
+    "state": "California",
+    "country": "United States",
+    "latitude": 34.0155,
+    "longitude": -118.4519,
+    "timezone": "America/Los_Angeles",
+    "is_corporate_hub": true,
+    "popularity_score": 83,
+    "aircraft_types": ["business_jet", "turboprop"],
+    "runway_count": 1,
+    "longest_runway_ft": 3497,
+    "fbo_count": 2,
+    "fbo_details": [
+      {
+        "name": "Atlantic Aviation",
+        "services": ["fuel", "hangar", "maintenance", "crew_rest", "conference_rooms", "customs", "car_rental", "catering"],
+        "fuel_types": ["Jet_A", "Jet_A1"],
+        "hangar_space": true,
+        "maintenance_capable": true,
+        "customs_available": true,
+        "24_hour_service": true
+      },
+      {
+        "name": "Signature Flight Support",
+        "services": ["fuel", "hangar", "maintenance", "crew_rest", "conference_rooms", "customs", "car_rental", "catering"],
+        "fuel_types": ["Jet_A", "Jet_A1"],
+        "hangar_space": true,
+        "maintenance_capable": true,
+        "customs_available": true,
+        "24_hour_service": true
+      }
+    ],
+    "facilities": ["fbo", "customs", "charter", "air_traffic_control", "weather_service", "fire_rescue"],
+    "special_services": ["aircraft_management", "charter_services", "aircraft_sales", "flight_planning", "ground_transportation", "beach_access"]
+  },
+  {
+    "icao": "KPBI",
+    "iata": "PBI",
+    "name": "Palm Beach International Airport",
+    "city": "West Palm Beach",
+    "state": "Florida",
+    "country": "United States",
+    "latitude": 26.6832,
+    "longitude": -80.0956,
+    "timezone": "America/New_York",
+    "is_corporate_hub": true,
+    "popularity_score": 82,
+    "aircraft_types": ["business_jet", "turboprop"],
+    "runway_count": 2,
+    "longest_runway_ft": 10008,
+    "fbo_count": 3,
+    "fbo_details": [
+      {
+        "name": "Signature Flight Support",
+        "services": ["fuel", "hangar", "maintenance", "crew_rest", "conference_rooms", "customs", "car_rental", "catering"],
+        "fuel_types": ["Jet_A", "Jet_A1"],
+        "hangar_space": true,
+        "maintenance_capable": true,
+        "customs_available": true,
+        "24_hour_service": true
+      },
+      {
+        "name": "Atlantic Aviation",
+        "services": ["fuel", "hangar", "maintenance", "crew_rest", "conference_rooms", "customs", "car_rental", "catering"],
+        "fuel_types": ["Jet_A", "Jet_A1"],
+        "hangar_space": true,
+        "maintenance_capable": true,
+        "customs_available": true,
+        "24_hour_service": true
+      },
+      {
+        "name": "Million Air",
+        "services": ["fuel", "hangar", "maintenance", "crew_rest", "conference_rooms", "customs", "car_rental", "catering"],
+        "fuel_types": ["Jet_A", "Jet_A1"],
+        "hangar_space": true,
+        "maintenance_capable": true,
+        "customs_available": true,
+        "24_hour_service": true
+      }
+    ],
+    "facilities": ["fbo", "customs", "charter", "air_traffic_control", "weather_service", "fire_rescue"],
+    "special_services": ["aircraft_management", "charter_services", "aircraft_sales", "flight_planning", "ground_transportation", "luxury_resort_access"]
+  },
+  {
+    "icao": "KAPA",
+    "iata": "APA",
+    "name": "Centennial Airport",
+    "city": "Denver",
+    "state": "Colorado",
+    "country": "United States",
+    "latitude": 39.543,
+    "longitude": -104.8493,
+    "timezone": "America/Denver",
+    "is_corporate_hub": true,
+    "popularity_score": 81,
+    "aircraft_types": ["business_jet", "turboprop"],
+    "runway_count": 2,
+    "longest_runway_ft": 8200,
+    "fbo_count": 4,
+    "fbo_details": [
+      {
+        "name": "Signature Flight Support",
+        "services": ["fuel", "hangar", "maintenance", "crew_rest", "conference_rooms", "customs", "car_rental", "catering"],
+        "fuel_types": ["Jet_A", "Jet_A1"],
+        "hangar_space": true,
+        "maintenance_capable": true,
+        "customs_available": true,
+        "24_hour_service": true
+      },
+      {
+        "name": "Atlantic Aviation",
+        "services": ["fuel", "hangar", "maintenance", "crew_rest", "conference_rooms", "customs", "car_rental", "catering"],
+        "fuel_types": ["Jet_A", "Jet_A1"],
+        "hangar_space": true,
+        "maintenance_capable": true,
+        "customs_available": true,
+        "24_hour_service": true
+      },
+      {
+        "name": "Million Air",
+        "services": ["fuel", "hangar", "maintenance", "crew_rest", "conference_rooms", "customs", "car_rental", "catering"],
+        "fuel_types": ["Jet_A", "Jet_A1"],
+        "hangar_space": true,
+        "maintenance_capable": true,
+        "customs_available": true,
+        "24_hour_service": true
+      },
+      {
+        "name": "SheltAir",
+        "services": ["fuel", "hangar", "maintenance", "crew_rest", "conference_rooms", "customs", "car_rental", "catering"],
+        "fuel_types": ["Jet_A", "Jet_A1"],
+        "hangar_space": true,
+        "maintenance_capable": true,
+        "customs_available": true,
+        "24_hour_service": true
+      }
+    ],
+    "facilities": ["fbo", "customs", "charter", "air_traffic_control", "weather_service", "fire_rescue"],
+    "special_services": ["aircraft_management", "charter_services", "aircraft_sales", "flight_planning", "ground_transportation", "mountain_flying_support"]
+  },
+  {
+    "icao": "KFXE",
+    "iata": "FXE",
+    "name": "Fort Lauderdale Executive Airport",
+    "city": "Fort Lauderdale",
+    "state": "Florida",
+    "country": "United States",
+    "latitude": 26.197,
+    "longitude": -80.1705,
+    "timezone": "America/New_York",
+    "is_corporate_hub": true,
+    "popularity_score": 80,
+    "aircraft_types": ["business_jet", "turboprop", "helicopter"],
+    "runway_count": 2,
+    "longest_runway_ft": 6000,
+    "fbo_count": 4,
+    "fbo_details": [
+      {
+        "name": "Signature Flight Support",
+        "services": ["fuel", "hangar", "maintenance", "crew_rest", "conference_rooms", "customs", "car_rental", "catering"],
+        "fuel_types": ["Jet_A", "Jet_A1"],
+        "hangar_space": true,
+        "maintenance_capable": true,
+        "customs_available": true,
+        "24_hour_service": true
+      },
+      {
+        "name": "Atlantic Aviation",
+        "services": ["fuel", "hangar", "maintenance", "crew_rest", "conference_rooms", "customs", "car_rental", "catering"],
+        "fuel_types": ["Jet_A", "Jet_A1"],
+        "hangar_space": true,
+        "maintenance_capable": true,
+        "customs_available": true,
+        "24_hour_service": true
+      },
+      {
+        "name": "Banyan Air Service",
+        "services": ["fuel", "hangar", "maintenance", "crew_rest", "conference_rooms", "customs", "car_rental", "catering", "aircraft_sales"],
+        "fuel_types": ["Jet_A", "Jet_A1"],
+        "hangar_space": true,
+        "maintenance_capable": true,
+        "customs_available": true,
+        "24_hour_service": true
+      },
+      {
+        "name": "SheltAir",
+        "services": ["fuel", "hangar", "maintenance", "crew_rest", "conference_rooms", "customs", "car_rental", "catering"],
+        "fuel_types": ["Jet_A", "Jet_A1"],
+        "hangar_space": true,
+        "maintenance_capable": true,
+        "customs_available": true,
+        "24_hour_service": true
+      }
+    ],
+    "facilities": ["fbo", "customs", "charter", "air_traffic_control", "weather_service", "fire_rescue", "helicopter_services"],
+    "special_services": ["aircraft_management", "charter_services", "aircraft_sales", "flight_planning", "ground_transportation", "aircraft_interiors"]
+  }
+]

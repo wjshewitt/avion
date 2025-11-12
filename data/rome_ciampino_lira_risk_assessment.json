@@ -1,0 +1,195 @@
+{
+  "airport_code": "LIRA",
+  "airport_name": "Rome Ciampino G.B. Pastine International Airport",
+  "location": "Rome, Italy",
+  "data_collection_date": "2025-11-10",
+  "sources": {
+    "primary": [
+      "Aeroporti di Roma official website (adr.it)",
+      "ENAC (Ente Nazionale per l'Aviazione Civile) - Italian Civil Aviation Authority",
+      "Boeing Noise Abatement Procedures Documentation",
+      "Universal Weather Business Aviation Destination Guide 2025",
+      "SKYbrary Aviation Safety Database"
+    ],
+    "secondary": [
+      "Universal Aviation ground handling services documentation",
+      "FlightAware airport information",
+      "PilotNav airport database",
+      "Airport-Data.com comprehensive airport information"
+    ]
+  },
+  "risk_factors": {
+    "operational_hours": {
+      "opens_utc": "04:00",
+      "closes_utc": "23:00",
+      "night_curfew": true,
+      "curfew_start_utc": "23:00",
+      "curfew_end_utc": "06:00",
+      "weekend_restrictions": false,
+      "holiday_closures": false,
+      "notes": "General aviation flights restricted 21:30-04:00 UTC with limited exceptions. Operating hours 06:00-23:00 local time (LT) for standard operations."
+    },
+    "slot_requirements": {
+      "slot_controlled": true,
+      "advance_booking_required_hours": 48,
+      "slot_availability_typical": "Slots required for all operations, particularly challenging during peak season (June-September)",
+      "peak_congestion_times": "Summer months (June-August), major events, holidays. Daily flight cap discussions ongoing.",
+      "notes": "Prior Permission Required (PPR) mandatory. Slots for charter flights with 19+ passengers."
+    },
+    "weather_vulnerability": {
+      "fog_prone": false,
+      "snow_closure_frequency": "Rare - Mediterranean climate",
+      "wind_limitations": false,
+      "requires_cat_ii_iii_capability": false,
+      "seasonal_risk_periods": "Summer thunderstorms (July-August), occasional winter storms with rain",
+      "cat_capability": "Not equipped with CAT II/III ILS",
+      "weather_patterns": "Dry-summer subtropical Mediterranean climate (Köppen: Csa). Hot, dry summers; mild winters with periodic storms. Thunderstorms possible summer months.",
+      "notes": "Single runway 15/33 (2,207m) with standard approach capabilities only."
+    },
+    "runway_specifications": {
+      "minimum_runway_length_meters": 2207,
+      "runway_surface_type": "Asphalt",
+      "number_of_runways": 1,
+      "crosswind_limitations": "7 knots maximum for runway changes",
+      "weight_restrictions": "None published, but limited by runway length relative to larger aircraft",
+      "runway_details": {
+        "runway_id": "15/33",
+        "length_meters": 2207,
+        "length_feet": 7242,
+        "width_meters": 47,
+        "width_feet": 154,
+        "elevation_feet": 427,
+        "elevation_meters": 130,
+        "surface": "Asphalt/Bitumen",
+        "markings": "Precision approach"
+      },
+      "approaches": ["ILS", "VOR/DME"],
+      "notes": "Limited runway length restricts larger aircraft operations. Stage 1 and Stage 2 aircraft generally prohibited."
+    },
+    "crew_requirements": {
+      "special_crew_training_required": false,
+      "mountain_airport_rating": false,
+      "cat_ii_iii_rating_required": false,
+      "captain_only_airport": false,
+      "minimum_pilot_hours": "Per standard Italian and EASA regulations",
+      "notes": "Standard EASA certified crew requirements. No special mountain or high-altitude certifications required. Handling personnel mandatory during aircraft exits."
+    },
+    "handling_complexity": {
+      "handler_availability_24_7": true,
+      "fuel_availability": true,
+      "customs_hours": "24 hours",
+      "immigration_processing_time_avg": "Minimal - EU processing",
+      "minimum_notice_hours": 24,
+      "weekend_surcharges": false,
+      "certified_handlers": [
+        "Universal Aviation",
+        "Sky Echlipse",
+        "Multiple ENAC-certified operators"
+      ],
+      "notes": "Handling is mandatory. IS-BAH Stage 1 accredited ground services. Multiple handling agents available. Ground services generally efficient."
+    },
+    "congestion_metrics": {
+      "average_taxi_time_minutes": 15,
+      "peak_hour_delays_typical": "30-60 minutes during peak season",
+      "airspace_complexity": "Medium - proximity to Fiumicino and Rome airspace",
+      "atc_delays_frequency": "Frequent during summer peak",
+      "seasonal_congestion_multiplier": 2.5,
+      "notes": "Congestion significant June-September. 42,317 movements recorded in 2022. Traffic often below theoretical capacity but slot management creates apparent congestion."
+    },
+    "permits_and_clearances": {
+      "requires_prior_permission": true,
+      "ppr_notice_period_hours": 24,
+      "overflight_permit_required": false,
+      "landing_permit_processing_time": "0-24 hours",
+      "diplomatic_clearance_required": false,
+      "notes": "PPR mandatory for all operations. Landing permits required for some flight types. No diplomatic clearance needed for civilian operations.",
+      "documents_required": [
+        "Flight schedule",
+        "ATS routing",
+        "Crew passport copies",
+        "Flight manifest (for passenger flights)",
+        "Cargo details (for cargo flights)"
+      ]
+    },
+    "noise_restrictions": {
+      "noise_category_required": "Stage 3 or better",
+      "chapter_requirements": "Chapter 3 compliance mandatory",
+      "noise_surcharges": "Yes - ENAC-established surcharges for higher noise operations",
+      "preferred_departure_routes": [
+        "Runway 15: departures 06:01-23:00 LT",
+        "Runway 33: departures 23:01-06:00 LT"
+      ],
+      "noise_complaints_risk": "Medium - proximity to Rome residential areas, though Ciampino is secondary airport",
+      "noise_abatement_procedures": "Initial climb and approach procedures established by ENAC. Voluntary compliance except in adverse weather/safety situations."
+    },
+    "infrastructure_reliability": {
+      "power_outage_frequency": "Very rare",
+      "equipment_failure_rate": "Low - modern facility",
+      "maintenance_closure_days_annual": "Minimal, coordinated during low-traffic periods",
+      "backup_systems_available": true,
+      "historical_closure_incidents": "None reported in recent years",
+      "notes": "Joint civil/military airport with maintained infrastructure."
+    },
+    "security_requirements": {
+      "security_screening_time_avg": "15-30 minutes",
+      "enhanced_security_periods": "High-alert periods during major events, EU summits",
+      "vip_security_delays": "Possible with diplomatic traffic",
+      "passenger_background_check_required": "Standard EU/Schengen requirements",
+      "notes": "Standard EU security protocols apply. Military presence may require coordination for some operations."
+    },
+    "seasonal_factors": {
+      "high_season_months": ["June", "July", "August", "September"],
+      "ski_season_congestion": "Minimal - limited ski traffic destination",
+      "summer_thunderstorm_frequency": "Occasional (July-August)",
+      "winter_deicing_delays_avg": "Rare - Mediterranean climate means snow/ice uncommon",
+      "holiday_peak_dates": ["Easter", "July-August", "Christmas-New Year"],
+      "notes": "Summer tourism creates primary congestion. Winter generally mild. Spring and fall typically low congestion."
+    },
+    "alternate_airport_proximity": {
+      "nearest_suitable_alternate_code": "LIRF",
+      "alternate_airport_name": "Leonardo da Vinci-Fiumicino International Airport",
+      "distance_to_alternate_km": 30,
+      "distance_to_alternate_nm": 16.2,
+      "alternate_typically_available": true,
+      "ground_transport_time_to_alternate_minutes": 45,
+      "backup_alternates": [
+        {
+          "code": "LIRF",
+          "name": "Fiumicino",
+          "distance_km": 30,
+          "notes": "Larger international hub, more facilities"
+        }
+      ],
+      "notes": "Fiumicino is primary alternate. Different operating hours - general aviation limited 23:00-06:00. Limited by Fiumicino's own congestion during summer."
+    },
+    "payment_and_fees": {
+      "advance_payment_required": false,
+      "credit_account_needed": false,
+      "handling_agent_prepayment": "Often required for fuel and ground services",
+      "fuel_payment_terms": "Prepayment or post-flight settlement with fuel contract",
+      "landing_fees": "Yes - variable based on aircraft weight and operation type",
+      "passenger_fees": "Yes - per-passenger charges apply",
+      "parking_fees": "Yes - hourly rates, discounts for longer stays",
+      "notes": "Multiple payment methods available. Aeroporti di Roma maintains published tariff schedule. EU credit cards generally accepted."
+    }
+  },
+  "summary": {
+    "risk_level": "Medium-High",
+    "primary_challenges": [
+      "Slot availability during peak season",
+      "Single runway limitation",
+      "PPR requirement and advance coordination",
+      "Congestion June-September",
+      "Limited CAT II/III capability"
+    ],
+    "operational_advantages": [
+      "Closer to Rome city center than Fiumicino",
+      "24/7 customs availability",
+      "Multiple certified handling agents",
+      "Efficient ground services (IS-BAH Stage 1)",
+      "Mediterranean climate minimizes weather disruptions"
+    ],
+    "crew_considerations": "Standard certification sufficient; no special mountain or high-altitude ratings required. Handling personnel must attend aircraft exits.",
+    "planning_recommendation": "Plan minimum 48 hours advance booking. Contact ground handler early for PPR coordination. Summer travel requires particular attention to slot availability. Consider Fiumicino as backup, though it has different operational hours for general aviation."
+  }
+}

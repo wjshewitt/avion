@@ -1,0 +1,201 @@
+{
+  "airport_code": "LEPA",
+  "airport_name": "Palma de Mallorca International Airport",
+  "iata_code": "PMI",
+  "country": "Spain",
+  "city": "Palma de Mallorca",
+  "region": "Balearic Islands",
+  "location": "8 km east of Palma, Mallorca island",
+  "coordinates": {
+    "latitude": 39.5469,
+    "longitude": 2.7407
+  },
+  "elevation_feet": 50,
+  "risk_assessment_date": "2025-11-10",
+  "data_sources": {
+    "primary": [
+      "Spanish AESA (Agencia Estatal de Seguridad Aérea)",
+      "AENA (Aeropuertos Españoles y Navegación Aérea)",
+      "Palma de Mallorca Airport Official Authority",
+      "Spanish AIP (Aeronautical Information Publication)"
+    ],
+    "secondary": [
+      "Universal Weather and Aviation Services",
+      "FlightAware Airport Database",
+      "SKYbrary Aviation Safety Database",
+      "Ground handling providers (Swissport, Menzies, Just Aviation)"
+    ]
+  },
+  "risk_factors": {
+    "operational_hours": {
+      "opens_utc": "00:00",
+      "closes_utc": "23:59",
+      "night_curfew": false,
+      "curfew_start_utc": null,
+      "curfew_end_utc": null,
+      "weekend_restrictions": false,
+      "holiday_closures": false,
+      "notes": "24/7 operations year-round with no curfew restrictions. Control tower operational continuously. Continuous customs and immigration processing available."
+    },
+    "slot_requirements": {
+      "slot_controlled": true,
+      "advance_booking_required_hours": 72,
+      "slot_availability_typical": "High during summer peak (June-September), moderate off-season",
+      "peak_congestion_times": "June-September 09:00-17:00 LT, particularly July-August",
+      "notes": "Slots required for scheduled operations. Non-scheduled (charter) flights require AESA landing permit (24-48 hour processing). Parking confirmation only 15 days pre-arrival during summer peak."
+    },
+    "weather_vulnerability": {
+      "fog_prone": false,
+      "snow_closure_frequency": "Never (Mediterranean climate)",
+      "wind_limitations": false,
+      "requires_cat_ii_iii_capability": false,
+      "seasonal_risk_periods": "October-November (occasional autumn storms/rain), July-August (heat)",
+      "notes": "Mediterranean climate ensures excellent weather reliability. Fog extremely rare; snow virtually impossible. Occasional thunderstorms October-November but minimal disruption. Wind generally not a limiting factor. Overall among Europe's most weather-reliable airports."
+    },
+    "runway_specifications": {
+      "minimum_runway_length_meters": 2996,
+      "runway_surface_type": "Asphalt",
+      "number_of_runways": 2,
+      "crosswind_limitations": "Not specified; generally accommodating",
+      "weight_restrictions": "No specified weight restrictions; accommodates international traffic",
+      "runway_details": [
+        {
+          "runway": "06L/24R",
+          "length_meters": 3270,
+          "width_meters": 45,
+          "surface": "Asphalt",
+          "designation": "Primary runway",
+          "overrun_meters": 226
+        },
+        {
+          "runway": "06R/24L",
+          "length_meters": 3000,
+          "width_meters": 45,
+          "surface": "Asphalt",
+          "designation": "Secondary runway",
+          "overrun_meters": 0
+        }
+      ],
+      "notes": "Modern long runways suitable for international commercial traffic. Both runways equipped with precision approach lighting (ALSF-I, ALSF-II, REIL-OMNI). Capable of handling large wide-body aircraft."
+    },
+    "crew_requirements": {
+      "special_crew_training_required": false,
+      "mountain_airport_rating": "Not applicable",
+      "cat_ii_iii_rating_required": false,
+      "captain_only_airport": false,
+      "minimum_pilot_hours": "Not specified; EASA Part-FCL requirements apply",
+      "notes": "Standard EASA licensing requirements (Regulation 1178/2011) for operations to Spain. No special qualifications required. Straightforward operations for standard aircrews."
+    },
+    "handling_complexity": {
+      "handler_availability_24_7": true,
+      "fuel_availability": true,
+      "customs_hours": "24/7 continuous processing",
+      "immigration_processing_time_avg": "10-20 minutes (Schengen streamlined)",
+      "minimum_notice_hours": 12,
+      "weekend_surcharges": true,
+      "notes": "Multiple handlers available: Swissport, Menzies Aviation, Just Aviation, Acciona. Fuel suppliers include Air BP, Vitol Aviation, Shell Aviation. 24/7 ground services. Customs typically completed within 30-60 minutes. Saturday/Sunday surcharges apply."
+    },
+    "congestion_metrics": {
+      "average_taxi_time_minutes": 12,
+      "peak_hour_delays_typical": "10-25 minutes during summer peak",
+      "airspace_complexity": "Medium (Class C/D airspace)",
+      "atc_delays_frequency": "Occasional during June-August peak",
+      "seasonal_congestion_multiplier": 3.0,
+      "notes": "Summer season (June-August) sees 3x normal traffic. 2024 traffic data shows consistent operations. Peak delays during 09:00-17:00 in summer. Efficient ground operations minimize taxi times. Winter operations smooth with minimal delays."
+    },
+    "permits_and_clearances": {
+      "requires_prior_permission": false,
+      "ppr_notice_period_hours": 24,
+      "overflight_permit_required": false,
+      "landing_permit_processing_time": "24-48 hours for non-scheduled flights (AESA)",
+      "diplomatic_clearance_required": false,
+      "notes": "EU-registered aircraft: no permit required for scheduled operations. Non-scheduled (charter): AESA landing permit needed (3-month advance recommended for peak season). EU/Schengen streamlined processing. Mandatory ADS-B equipped."
+    },
+    "noise_restrictions": {
+      "noise_category_required": "Chapter 4 aircraft (ICAO Annex 16) preferred",
+      "chapter_requirements": "No formal strict restrictions; Spanish noise regulations apply",
+      "noise_surcharges": false,
+      "preferred_departure_routes": "Standard SIDs, coastal routing to minimize land overflight",
+      "noise_complaints_risk": "Low-Medium (tourist-heavy airport, limited residential noise impacts)",
+      "notes": "No severe noise restrictions like northern European airports. Reverse thrust limitations during night hours (2100-0500 and 2200-0600). Boeing/Airbus standard noise procedures apply. Limited noise complaint history due to location and residential patterns."
+    },
+    "infrastructure_reliability": {
+      "power_outage_frequency": "Rare (< 1 per year)",
+      "equipment_failure_rate": "Low (< 0.4%)",
+      "maintenance_closure_days_annual": 10,
+      "backup_systems_available": true,
+      "historical_closure_incidents": "Minimal; generally reliable",
+      "notes": "Modern international airport infrastructure. Backup power systems in place. Well-maintained facilities. Minimal closure history. Joint civil/military operations add redundancy."
+    },
+    "security_requirements": {
+      "security_screening_time_avg": "15-30 minutes (peak times)",
+      "enhanced_security_periods": "During elevated threat levels, summer peak",
+      "vip_security_delays": "10-15 minutes (fast-track available)",
+      "passenger_background_check_required": true,
+      "notes": "EU/Schengen security standards. ETIAS implementation May 2025 for non-EU visitors. Enhanced security during summer tourist season. Fast-track and VIP procedures available. Standard EU protocols apply."
+    },
+    "seasonal_factors": {
+      "high_season_months": "June-September (summer tourism), Easter holidays, Christmas/New Year",
+      "ski_season_congestion": "Not applicable (Mediterranean island)",
+      "summer_thunderstorm_frequency": "Low (1-2 incidents per summer)",
+      "winter_deicing_delays_avg": "0 minutes (never required)",
+      "holiday_peak_dates": "Easter (March-April), Mid-July to mid-August (peak summer), December holidays",
+      "notes": "Extreme summer season peak (June-August) with 3x normal traffic. Tourism-driven congestion. Winter mild (~57-63°F day temps). Virtually no winter weather disruptions. Overall excellent year-round operations."
+    },
+    "alternate_airport_proximity": {
+      "nearest_suitable_alternate_code": "LELC",
+      "nearest_suitable_alternate_name": "Valencia International Airport",
+      "distance_to_alternate_km": 245,
+      "alternate_typically_available": true,
+      "ground_transport_time_to_alternate_minutes": 180,
+      "additional_alternates": [
+        {
+          "code": "LEAL",
+          "name": "Alicante-Elche Airport",
+          "distance_km": 220,
+          "ground_transport_minutes": 160
+        },
+        {
+          "code": "LEIB",
+          "name": "Ibiza Airport",
+          "distance_km": 125,
+          "ground_transport_minutes": 90
+        },
+        {
+          "code": "LEMG",
+          "name": "Málaga-Costa del Sol Airport",
+          "distance_km": 320,
+          "ground_transport_minutes": 240
+        }
+      ],
+      "notes": "Valencia and Alicante are primary alternates for larger aircraft. Ibiza and Menorca (LEM) closer for smaller aircraft. All have customs/immigration services. Relatively isolated location on island increases alternate importance."
+    },
+    "payment_and_fees": {
+      "advance_payment_required": false,
+      "credit_account_needed": "Available through handling agents",
+      "handling_agent_prepayment": "Depends on operator agreement",
+      "fuel_payment_terms": "Typically post-delivery; credit terms available for established operators",
+      "notes": "AENA (airport operator) charges per aircraft size and operation type. Handling fees variable by provider. EU-regulated fee structure. Weekend/night surcharges 20-40% typical. Competitive pricing due to multiple handlers."
+    }
+  },
+  "operational_summary": {
+    "risk_level": "MEDIUM",
+    "primary_risk_factors": [
+      "Extreme seasonal congestion (3x summer multiplier June-August)",
+      "Limited parking availability during peak (15-day confirmation window)",
+      "High volume tourist traffic affecting airport infrastructure",
+      "Landing permit requirements for non-scheduled operations"
+    ],
+    "advantages": [
+      "24/7 operations with no curfew restrictions",
+      "Exceptional Mediterranean weather reliability",
+      "Modern, well-maintained facilities",
+      "Excellent ground services with multiple handlers",
+      "Competitive fuel pricing due to handler competition",
+      "EU/Schengen streamlined processing",
+      "Multiple nearby alternate airports",
+      "No weather-related delays (fog/snow/ice virtually never occur)"
+    ],
+    "key_operational_considerations": "Palma is a high-volume tourist destination airport suitable for year-round operations. Critical advantage: 24/7 operations enable scheduling flexibility unavailable at many European airports. Weather is exceptionally reliable. Peak season (June-August) requires advance coordination—parking must be confirmed, slots pre-booked, and handling arranged minimum 15 days ahead. Off-season (November-April) offers smooth operations with minimal congestion. Ground handling is efficient and competitively priced. Landing permits for charter flights require 24-48 hours but are routinely granted. Excellent alternate airports nearby. Airport location on island increases alternate importance but alternatives are readily available."
+  }
+}

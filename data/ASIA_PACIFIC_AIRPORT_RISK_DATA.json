@@ -1,0 +1,426 @@
+{
+  "airports": {
+    "VHHH": {
+      "iata_code": "HKG",
+      "name": "Hong Kong International Airport",
+      "region": "Asia Pacific",
+      "country": "Hong Kong SAR",
+      "data_collection_date": "2025-11-10",
+      "sources": [
+        "Hong Kong CAD Official AIP (AIS.gov.hk) - valid 2025-02-20, 2025-05-15, 2025-09-04",
+        "Universal Weather - Hong Kong Business Aviation Destination Guide (2025)",
+        "Boeing Aircraft Noise Documentation - Hong Kong International",
+        "Airport Authority Hong Kong - Three Runway System Documentation",
+        "Hong Kong Observatory - Aviation Weather Services",
+        "Civil Aviation Department - Slot Coordination Guidelines"
+      ],
+      "risk_factors": {
+        "operational_hours": {
+          "opens_utc": "00:00",
+          "closes_utc": "24:00",
+          "night_curfew": false,
+          "curfew_start_utc": null,
+          "curfew_end_utc": null,
+          "weekend_restrictions": false,
+          "holiday_closures": false,
+          "notes": "24/7 operations with no curfews. All services including customs, immigration, health, and ATC available continuously."
+        },
+        "slot_requirements": {
+          "slot_controlled": true,
+          "advance_booking_required_hours": 72,
+          "slot_availability_typical": "High (airport near capacity but slots generally available)",
+          "peak_congestion_times": "Summer months (May-September), Golden Week, Chinese New Year",
+          "notes": "PPR (Prior Permission Required) mandatory for private/charter flights. Minimum 3 business days for charter permits. Confirmed parking stand required before landing. 30-day booking window available."
+        },
+        "weather_vulnerability": {
+          "fog_prone": true,
+          "snow_closure_frequency": false,
+          "wind_limitations": false,
+          "requires_cat_ii_iii_capability": true,
+          "seasonal_risk_periods": "May-September (typhoon season). Fog most common in winter months.",
+          "notes": "Typhoon procedures well-established with Flight Rescheduling Control System. Airport handled 1,500 flights during Typhoon Wipha (July 2025). METAR/SPECI reports required if visibility <1,500m or prevailing visibility <3,000m."
+        },
+        "runway_specifications": {
+          "minimum_runway_length_meters": 3800,
+          "runway_surface_type": "Asphalt",
+          "number_of_runways": 3,
+          "crosswind_limitations": "Standard (typically 20 knots for most aircraft)",
+          "weight_restrictions": "None specified for standard commercial operations",
+          "runway_details": [
+            {"designation": "07L/25R", "length_meters": 3800, "width_meters": 60},
+            {"designation": "07R/25L", "length_meters": 3800, "width_meters": 60},
+            {"designation": "07C/25C", "length_meters": 3800, "width_meters": 60, "status": "New runway operational from 28-NOV-2024"}
+          ],
+          "notes": "Centre Runway (07C/25C) opened 28-NOV-2024 with updated taxiway specifications (29m standard width, variations 10.5m-60m)."
+        },
+        "crew_requirements": {
+          "special_crew_training_required": false,
+          "mountain_airport_rating": false,
+          "cat_ii_iii_rating_required": false,
+          "captain_only_airport": false,
+          "minimum_pilot_hours": null,
+          "notes": "Standard crew requirements. Aircraft require valid noise certificate compliant with international standards. Crew documentation required for landing permits."
+        },
+        "handling_complexity": {
+          "handler_availability_24_7": true,
+          "fuel_availability": true,
+          "customs_hours": "24/7",
+          "immigration_processing_time_avg": "30-45 minutes",
+          "minimum_notice_hours": 72,
+          "weekend_surcharges": false,
+          "notes": "Modern cargo handling facilities available. De-icing not available (tropical climate). Stringent insurance requirements mandatory - Combined Single Limit (CSL) insurance required with minimum coverage based on aircraft weight."
+        },
+        "congestion_metrics": {
+          "average_taxi_time_minutes": "15-25",
+          "peak_hour_delays_typical": "10-30 minutes during peak times",
+          "airspace_complexity": "High - busy Hong Kong airspace",
+          "atc_delays_frequency": "Moderate - common during summer",
+          "seasonal_congestion_multiplier": 1.3,
+          "notes": "Airport operating near capacity (420,000 annual movements historical). On-time performance: 67.9% (2017). Extended flight times on top 10 routes due to congestion."
+        },
+        "permits_and_clearances": {
+          "requires_prior_permission": true,
+          "ppr_notice_period_hours": 72,
+          "overflight_permit_required": true,
+          "landing_permit_processing_time": "3-5 business days",
+          "diplomatic_clearance_required": false,
+          "notes": "Landing permits required for all operations. Charter flights require specific documentation including charter contract. Air Operator Certificate (AOC) and Certificate of Airworthiness (COA) mandatory. Overflight fees apply. Route Navigation Facility Charges applicable."
+        },
+        "noise_restrictions": {
+          "noise_category_required": "Subsonic jet aircraft require noise certificate compliant with international standards",
+          "chapter_requirements": "Chapter 3 compliance required (ICAO Annex 16)",
+          "noise_surcharges": false,
+          "preferred_departure_routes": "RWY 07L/07R preferred 1601-2300 UTC. Departures over northeast, arrivals over southwest (over water).",
+          "noise_complaints_risk": "Low-Medium",
+          "notes": "NADP 1 and NADP 2 implemented. Continuous Descent Approach (CDA) required for arrivals from northeast 1501-2300 UTC. Night arrivals 93.7% over water, departures 99.6% over water (2003 data)."
+        },
+        "infrastructure_reliability": {
+          "power_outage_frequency": "Very low",
+          "equipment_failure_rate": "Low",
+          "maintenance_closure_days_annual": 0,
+          "backup_systems_available": true,
+          "historical_closure_incidents": "None significant documented",
+          "notes": "Category 10 fire fighting capability available. Specialized aircraft recovery equipment on site. No reported infrastructure failures. Three-runway system provides operational redundancy."
+        },
+        "security_requirements": {
+          "security_screening_time_avg": "20-30 minutes",
+          "enhanced_security_periods": "Following international incidents",
+          "vip_security_delays": "15-30 minutes additional",
+          "passenger_background_check_required": false,
+          "notes": "Standard international aviation security. All civil aircraft must have valid insurance documentation meeting HKCAD requirements."
+        },
+        "seasonal_factors": {
+          "high_season_months": "May-September",
+          "ski_season_congestion": "Not applicable",
+          "summer_thunderstorm_frequency": "High (May-September)",
+          "winter_deicing_delays_avg": 0,
+          "holiday_peak_dates": "Chinese New Year, Easter, summer holidays (June-August)",
+          "notes": "Typhoon season May-September. Fog common December-February. Summer monsoon brings thunderstorms. Golden Week (May 1-5) experiences peak congestion."
+        },
+        "alternate_airport_proximity": {
+          "nearest_suitable_alternate_code": "VHHH has sufficient capacity for alternates internally. Nearest international: Guangzhou (ZGGG) ~140km. Macau (ZMAC) ~40km.",
+          "distance_to_alternate_km": 40,
+          "alternate_typically_available": true,
+          "ground_transport_time_to_alternate_minutes": 60,
+          "notes": "HKIA is primary hub. Macau (ZMAC) serves as nearby alternate. Guangzhou (ZGGG) increasingly used for overflow."
+        },
+        "payment_and_fees": {
+          "advance_payment_required": false,
+          "credit_account_needed": false,
+          "handling_agent_prepayment": false,
+          "fuel_payment_terms": "Standard post-delivery payment accepted",
+          "notes": "Landing fees and handling charges typical for major international hub. No special payment restrictions reported. Overflight permit fees apply."
+        }
+      }
+    },
+    "RJAA": {
+      "iata_code": "NRT",
+      "name": "Tokyo Narita International Airport",
+      "region": "Asia Pacific",
+      "country": "Japan",
+      "data_collection_date": "2025-11-10",
+      "sources": [
+        "Narita International Airport Official Website (narita-airport.jp)",
+        "Universal Aviation - Tokyo Narita Business Aviation (2024-2025)",
+        "Flytag Flight Support - RJAA Landing Permits Documentation",
+        "Japan Schedule Coordination (JSC) Slot Management",
+        "Ministry of Land, Infrastructure, Transport and Tourism (MLIT)",
+        "Universal Weather - Japan Business Aviation Guide (2025)",
+        "Tokyo Narita AIS/AIP documentation",
+        "FlightAware and Aviation Weather Services"
+      ],
+      "risk_factors": {
+        "operational_hours": {
+          "opens_utc": "21:00",
+          "closes_utc": "14:00",
+          "night_curfew": true,
+          "curfew_start_utc": "14:00",
+          "curfew_end_utc": "21:00",
+          "weekend_restrictions": false,
+          "holiday_closures": false,
+          "notes": "Standard hours 06:00-23:00 JST (21:00 UTC - 14:00 UTC next day). Night ban 14:00-21:00 UTC. Approval possible outside hours under certain conditions but not guaranteed."
+        },
+        "slot_requirements": {
+          "slot_controlled": true,
+          "advance_booking_required_hours": 720,
+          "slot_availability_typical": "Limited - airport highly congested",
+          "peak_congestion_times": "June-September, New Year (Jan 1-7), Golden Week (Apr 29-May 5), Obon (Aug 13-15)",
+          "notes": "Mandatory slots for all operations. Japan Schedule Coordination (JSC) manages slots using Worldwide Slot Guidelines with 'Use It or Lose It' rule. Request by 15th of month prior for high-demand periods."
+        },
+        "weather_vulnerability": {
+          "fog_prone": true,
+          "snow_closure_frequency": true,
+          "wind_limitations": false,
+          "requires_cat_ii_iii_capability": true,
+          "seasonal_risk_periods": "December-February (winter snow), June-July (monsoon/rain), September (typhoons)",
+          "notes": "Winter snow can cause temporary runway closures. Snow removal equipment and procedures in place. Deicing delays possible during winter operations. Rain and reduced visibility common in rainy season."
+        },
+        "runway_specifications": {
+          "minimum_runway_length_meters": 2180,
+          "runway_surface_type": "Asphalt",
+          "number_of_runways": 2,
+          "crosswind_limitations": "Standard (20 knots typical)",
+          "weight_restrictions": "None specified for standard operations",
+          "runway_details": [
+            {"designation": "16R/34L", "length_meters": 4000, "width_meters": 60},
+            {"designation": "16L/34R", "length_meters": 2180, "width_meters": 60}
+          ],
+          "notes": "Third runway under development as part of expansion plan (target completion end of decade). Existing two-runway capacity: 68-71 movements/hour (segregated ops)."
+        },
+        "crew_requirements": {
+          "special_crew_training_required": false,
+          "mountain_airport_rating": false,
+          "cat_ii_iii_rating_required": false,
+          "captain_only_airport": false,
+          "minimum_pilot_hours": null,
+          "notes": "Standard ICAO requirements. Commercial airline captain requirements: 1,000+ hours flight experience, First Officer: 1,500+ hours. JCAB compliance required."
+        },
+        "handling_complexity": {
+          "handler_availability_24_7": true,
+          "fuel_availability": true,
+          "customs_hours": "Operating hours only (06:00-23:00 JST)",
+          "immigration_processing_time_avg": "45-60 minutes",
+          "minimum_notice_hours": 48,
+          "weekend_surcharges": false,
+          "notes": "Ground handler coordination critical for slot requests. 14-19 GA parking spaces available. Maximum consecutive overnight parking 30 days (extendable in hangar). GA availability generally straightforward."
+        },
+        "congestion_metrics": {
+          "average_taxi_time_minutes": "20-30",
+          "peak_hour_delays_typical": "15-40 minutes during peak",
+          "airspace_complexity": "High - major Tokyo metropolitan airspace",
+          "atc_delays_frequency": "Frequent during peak hours",
+          "seasonal_congestion_multiplier": 1.5,
+          "notes": "Recent disruptions: 132 delays at RJAA (Oct 2025). Security congestion reported at Terminal 3 during peak hours (07:00-11:00, 13:00-16:00, 19:00-21:00). Expansion plan aims to increase slots from 300,000 to 500,000 annually."
+        },
+        "permits_and_clearances": {
+          "requires_prior_permission": true,
+          "ppr_notice_period_hours": 48,
+          "overflight_permit_required": false,
+          "landing_permit_processing_time": "24-48 hours",
+          "diplomatic_clearance_required": false,
+          "notes": "Landing permit required from JCAB. Air Operator Certificate (AOC), Certificate of Airworthiness (COA), crew details with passports mandatory. For new cargo charter operators, safety audit required (30-40 days). Passenger flights need charter contract and passenger manifest."
+        },
+        "noise_restrictions": {
+          "noise_category_required": "Standard ICAO Annex 16 Chapter 3/4 compliance",
+          "chapter_requirements": "Chapter 3+ required",
+          "noise_surcharges": false,
+          "preferred_departure_routes": "Standard procedures per MLIT guidelines",
+          "noise_complaints_risk": "Low",
+          "notes": "Noise management procedures in place. MLIT oversees compliance. Night restrictions (21:00-06:00) partly noise-related."
+        },
+        "infrastructure_reliability": {
+          "power_outage_frequency": "Very low",
+          "equipment_failure_rate": "Low",
+          "maintenance_closure_days_annual": 0,
+          "backup_systems_available": true,
+          "historical_closure_incidents": "Earthquake preparedness measures in place, Business Continuity Plan (BCP)",
+          "notes": "Earthquake and natural disaster preparedness protocols implemented. Disaster Management Plan with structured response framework. BCP ensures resilience during emergencies."
+        },
+        "security_requirements": {
+          "security_screening_time_avg": "30-45 minutes",
+          "enhanced_security_periods": "Peak travel times (Golden Week, Obon, New Year)",
+          "vip_security_delays": "15-30 minutes typical",
+          "passenger_background_check_required": false,
+          "notes": "Peak security congestion during major holidays. Early arrival (60+ minutes pre-departure) recommended. Standard international security protocols."
+        },
+        "seasonal_factors": {
+          "high_season_months": "June-September, December-January",
+          "ski_season_congestion": "Not applicable",
+          "summer_thunderstorm_frequency": "June-July (monsoon season)",
+          "winter_deicing_delays_avg": "15-45 minutes during snow events",
+          "holiday_peak_dates": "New Year (Jan 1-7), Golden Week (Apr 29-May 5), Obon (Aug 13-15)",
+          "notes": "Summer heat and humidity. Monsoon rains June-July. Winter snow December-February. Golden Week and Obon see peak passenger volumes."
+        },
+        "alternate_airport_proximity": {
+          "nearest_suitable_alternate_code": "Tokyo Haneda (RJTT) ~60km. Osaka International (RJOO) ~400km.",
+          "distance_to_alternate_km": 60,
+          "alternate_typically_available": true,
+          "ground_transport_time_to_alternate_minutes": "90-120 by car",
+          "notes": "Haneda (RJTT) preferred for central Tokyo access (30-45 min). Narita is 60km east of downtown. Haneda handles significantly more traffic (87M passengers vs 30M at Narita) but prioritizes domestic/short-haul."
+        },
+        "payment_and_fees": {
+          "advance_payment_required": false,
+          "credit_account_needed": false,
+          "handling_agent_prepayment": false,
+          "fuel_payment_terms": "Standard market terms",
+          "notes": "Landing charges and handling fees apply. No specific prepayment requirements documented. Standard commercial terms."
+        }
+      }
+    },
+    "KOPF": {
+      "iata_code": "OPF",
+      "name": "Miami Opa-locka Executive Airport",
+      "region": "North America (includes Caribbean operations)",
+      "country": "United States (Florida)",
+      "data_collection_date": "2025-11-10",
+      "sources": [
+        "US Customs and Border Protection (CBP) Official Fact Sheet (2024)",
+        "FAA Flight Deck Pilot Information - OPF",
+        "Miami-Dade County Aviation Department",
+        "Universal Weather - Miami Business Aviation",
+        "AirNav and SkyVector Airport Data",
+        "AOPA Airport Directory",
+        "FlightAware and Weather Services",
+        "Wikipedia and Aviation Databases"
+      ],
+      "risk_factors": {
+        "operational_hours": {
+          "opens_utc": "13:00",
+          "closes_utc": "04:00",
+          "night_curfew": false,
+          "curfew_start_utc": null,
+          "curfew_end_utc": null,
+          "weekend_restrictions": false,
+          "holiday_closures": false,
+          "notes": "Operates 0900-2400 Eastern Time (13:00-04:00 UTC). Control tower hours 0700-2300 ET. Airspace Class D during tower hours, Class G after hours."
+        },
+        "slot_requirements": {
+          "slot_controlled": false,
+          "advance_booking_required_hours": null,
+          "slot_availability_typical": "Generally available",
+          "peak_congestion_times": "Summer months (June-September), weekends, early morning (07:00-11:00 ET)",
+          "notes": "No slot requirements. First-come, first-served basis. Landing permission from CBP required for international operations."
+        },
+        "weather_vulnerability": {
+          "fog_prone": false,
+          "snow_closure_frequency": false,
+          "wind_limitations": false,
+          "requires_cat_ii_iii_capability": false,
+          "seasonal_risk_periods": "June-November (Atlantic hurricane season, highest risk Aug-Oct)",
+          "notes": "Tropical climate with warm temperatures year-round. Hurricane season June-November presents significant risk. Thunderstorm activity common May-October."
+        },
+        "runway_specifications": {
+          "minimum_runway_length_meters": 1313,
+          "runway_surface_type": "Asphalt",
+          "number_of_runways": 3,
+          "crosswind_limitations": "Standard 20 knots",
+          "weight_restrictions": "None specified",
+          "runway_details": [
+            {"designation": "09L/27R", "length_feet": 8002, "length_meters": 2439, "width_feet": 150},
+            {"designation": "09R/27L", "length_feet": 4309, "length_meters": 1313, "width_feet": 100},
+            {"designation": "12/30", "length_feet": 6800, "length_meters": 2073, "width_feet": 150}
+          ],
+          "notes": "Multiple sources cite varying primary runway lengths (5,000-10,000 ft in some sources - conflicting data). Wikipedia confirms 8,002 ft, 4,309 ft, 6,800 ft. Longest runway 09L/27R supports large aircraft."
+        },
+        "crew_requirements": {
+          "special_crew_training_required": false,
+          "mountain_airport_rating": false,
+          "cat_ii_iii_rating_required": false,
+          "captain_only_airport": false,
+          "minimum_pilot_hours": null,
+          "notes": "Standard US pilot certification required. No special training beyond normal requirements."
+        },
+        "handling_complexity": {
+          "handler_availability_24_7": true,
+          "fuel_availability": true,
+          "customs_hours": "0900-2400 ET (daily)",
+          "immigration_processing_time_avg": "30-45 minutes at Federal Inspection Services (FIS)",
+          "minimum_notice_hours": 2,
+          "weekend_surcharges": false,
+          "notes": "CBP permission required minimum 2 hours before departure from foreign location (+/- 30 min tolerance). All aircraft must land at CBP ramp for inspection. Crew/passengers present docs at separate FIS facility."
+        },
+        "congestion_metrics": {
+          "average_taxi_time_minutes": "10-15",
+          "peak_hour_delays_typical": "5-15 minutes during peak",
+          "airspace_complexity": "Moderate - Class D during tower ops, within Miami TCA",
+          "atc_delays_frequency": "Low-Moderate",
+          "seasonal_congestion_multiplier": 1.2,
+          "notes": "Reliever airport for Miami International (MIA). Generally low congestion compared to MIA. 134,500 flight operations recorded in 2016."
+        },
+        "permits_and_clearances": {
+          "requires_prior_permission": true,
+          "ppr_notice_period_hours": 2,
+          "overflight_permit_required": false,
+          "landing_permit_processing_time": "Immediate upon CBP approval",
+          "diplomatic_clearance_required": false,
+          "notes": "CBP permission required for international flights. Contact CBP minimum 2 hours pre-departure. Permission tolerance +/- 30 minutes from ETA/ETD. No inbound cargo permitted. Diversions possible for late arrivals."
+        },
+        "noise_restrictions": {
+          "noise_category_required": false,
+          "chapter_requirements": "No specific FAA Chapter requirements for general aviation",
+          "noise_surcharges": false,
+          "preferred_departure_routes": "Runway 12/30 preferred. No specific noise-based routing.",
+          "noise_complaints_risk": "Low",
+          "notes": "Engine maintenance run-up restrictions: No run-ups 21:00-07:00 ET Mon-Fri, 21:00-09:00 ET weekends. No specific curfews or operating quotas."
+        },
+        "infrastructure_reliability": {
+          "power_outage_frequency": "Low",
+          "equipment_failure_rate": "Low",
+          "maintenance_closure_days_annual": 0,
+          "backup_systems_available": true,
+          "historical_closure_incidents": "None significant documented",
+          "notes": "Modern airport infrastructure. Category D airspace. Home to US Coast Guard Air/Sea Rescue Station. Backup systems standard FAA requirements."
+        },
+        "security_requirements": {
+          "security_screening_time_avg": "15-20 minutes (CBP processing)",
+          "enhanced_security_periods": "Post-terrorist incidents, hurricane season",
+          "vip_security_delays": "Minimal (general aviation)",
+          "passenger_background_check_required": false,
+          "notes": "Standard US customs and immigration processing. All crew and passengers must present passports, visas, pilot licenses, medical certificates, and aircraft registration at FIS."
+        },
+        "seasonal_factors": {
+          "high_season_months": "December-March (snowbirds), June-September",
+          "ski_season_congestion": "Not applicable",
+          "summer_thunderstorm_frequency": "High (May-October)",
+          "winter_deicing_delays_avg": 0,
+          "holiday_peak_dates": "Christmas/New Year, Easter, summer holidays (July-August)",
+          "notes": "Hurricane season June-November (peak Aug-Oct) significant operational factor. Tropical climate year-round. Summer heat and thunderstorms common."
+        },
+        "alternate_airport_proximity": {
+          "nearest_suitable_alternate_code": "Miami International (KMIA) ~20km, Fort Lauderdale Executive (KFXE) ~20km",
+          "distance_to_alternate_km": 20,
+          "alternate_typically_available": true,
+          "ground_transport_time_to_alternate_minutes": "20-30 by car",
+          "notes": "KOPF serves as reliever for KMIA. FLL (Fort Lauderdale International) also available. KOPF only 10 miles north of downtown Miami, convenient location for southern Florida operations."
+        },
+        "payment_and_fees": {
+          "advance_payment_required": false,
+          "credit_account_needed": false,
+          "handling_agent_prepayment": false,
+          "fuel_payment_terms": "Post-delivery standard terms",
+          "notes": "NO LANDING FEES at KOPF (major advantage vs Miami International). Fuel prices (Sept 2025): 100LL $8.80-$9.21, Jet A $6.80-$6.87 (FBO dependent). Potential additional fees: $35 security fee, $45 habitat fee at some FBOs (not clearly communicated)."
+        }
+      }
+    }
+  },
+  "data_quality_notes": {
+    "overall_assessment": "Comprehensive data collected from authoritative sources with cross-referencing across multiple official documents and aviation authorities.",
+    "key_findings": {
+      "VHHH": "Operates 24/7 with no curfews, modern 3-runway system operational Nov 2024. Strictly regulated by CAD with mandatory permits and PPR for private/charter. Typhoon season (May-Sept) primary weather risk.",
+      "RJAA": "Highly congested slot-controlled airport with 07:00-23:00 operating hours and night ban 23:00-07:00. Expansion plan underway. Winter snow and seasonal demand spikes significant operational factors.",
+      "KOPF": "Reliever airport with no landing fees, minimal congestion, CBP international clearance required. Hurricane season (June-Nov) primary risk. Tropical weather and thunderstorms common."
+    },
+    "data_gaps_addressed": {
+      "conflicting_runway_data": "Multiple sources cited varying KOPF runway lengths. Resolved using Wikipedia and aviation databases confirming 8,002ft, 4,309ft, 6,800ft specifications.",
+      "RJAA_crew_requirements": "Not explicitly documented in official sources. Derived from JCAB standards and airline pilot recruitment requirements (1,000+ captain hours, 1,500+ FO hours).",
+      "VHHH_taxi_times": "Not officially published. Estimated 15-25 min based on congestion studies and historical data.",
+      "maintenance_closure_data": "No airports identified with scheduled maintenance closures. All operate continuously."
+    },
+    "source_reliability": {
+      "primary_sources": "Official CAD, MLIT, FAA, CBP, and airport authority documents - highest reliability",
+      "secondary_sources": "Commercial aviation guides (Universal Weather), AirNav, FlightAware - high reliability for operational data",
+      "research_date": "2025-11-10",
+      "information_freshness": "Current as of Oct-Nov 2025 with references to AIP updates through September 2025"
+    }
+  }
+}

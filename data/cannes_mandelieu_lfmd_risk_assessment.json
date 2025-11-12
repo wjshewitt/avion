@@ -1,0 +1,206 @@
+{
+  "airport_code": "LFMD",
+  "airport_name": "Cannes Mandelieu Airport",
+  "iata_code": "CEQ",
+  "country": "France",
+  "city": "Cannes",
+  "region": "Provence-Alpes-Côte d'Azur (PACA)",
+  "location": "5 km west of Cannes, French Riviera",
+  "coordinates": {
+    "latitude": 43.1058,
+    "longitude": 6.9847
+  },
+    "risk_assessment_date": "2025-11-10",
+  "data_sources": {
+    "primary": [
+      "French DGAC (Direction Générale de l'Aviation Civile)",
+      "Cannes Airport Official Authority",
+      "French AIP (Aeronautical Information Publication)",
+      "Aéroports de la Côte d'Azur"
+    ],
+    "secondary": [
+      "Universal Weather and Aviation Services",
+      "FlightAware Airport Database",
+      "SKYbrary Aviation Safety Database",
+      "FBO providers (Sky Valet, G-OPS)"
+    ]
+  },
+  "risk_factors": {
+    "operational_hours": {
+      "opens_utc": "06:00",
+      "closes_utc": "19:00",
+      "night_curfew": true,
+      "curfew_start_utc": "19:30",
+      "curfew_end_utc": "05:30",
+      "weekend_restrictions": false,
+      "holiday_closures": false,
+      "notes": "Seasonal variations: Summer (May 16-Sept 17) 08:00 LT-sunset+30min or 18:00 LT latest. Winter 07:00-19:00 UTC. Strict night curfew with NO exceptions for night operations. Control tower operates 08:00-20:00 LT seasonal."
+    },
+    "slot_requirements": {
+      "slot_controlled": true,
+      "advance_booking_required_hours": 72,
+      "slot_availability_typical": "Generally available except during special events",
+      "peak_congestion_times": "May (Cannes Film Festival), July-August (summer tourism)",
+      "notes": "Slots required for all operations, especially during Cannes Film Festival and Monaco Grand Prix period. Early coordination recommended through handling agents (SKY VALET primary). Events can cause significant congestion."
+    },
+    "weather_vulnerability": {
+      "fog_prone": false,
+      "snow_closure_frequency": "Never (Mediterranean climate)",
+      "wind_limitations": false,
+      "requires_cat_ii_iii_capability": false,
+      "seasonal_risk_periods": "October-November (occasional autumn storms), Mediterranean heat in summer",
+      "notes": "Mediterranean climate with VFR conditions typical. Fog extremely rare. Wind generally not limiting factor. Occasional coastal thunderstorms October-November. Overall excellent weather reliability."
+    },
+    "runway_specifications": {
+      "minimum_runway_length_meters": 760,
+      "runway_surface_type": "Asphalt",
+      "number_of_runways": 3,
+      "crosswind_limitations": "Not specified; generally accommodating",
+      "weight_restrictions": "MTOM 5.7 tons on Runway 04/22; larger aircraft use Runway 17/35",
+      "runway_details": [
+        {
+          "runway": "17/35",
+          "length_meters": 1610,
+          "width_meters": 45,
+          "surface": "Asphalt",
+          "designation": "Primary runway for business aviation",
+          "weight_limit": "No specific restriction"
+        },
+        {
+          "runway": "04/22",
+          "length_meters": 760,
+          "width_meters": 18,
+          "surface": "Asphalt",
+          "designation": "Secondary/crosswind runway",
+          "weight_limit": "5.7 tons MTOM"
+        },
+        {
+          "runway": "17L/35R",
+          "length_meters": 550,
+          "width_meters": 50,
+          "surface": "Grass",
+          "designation": "General aviation/helicopter runway"
+        }
+      ],
+      "notes": "Aircraft exceeding 35 tonnes (turbojets) or 22 tonnes (propeller) must use Nice Côte d'Azur (LFPG). Designed for business and light commercial aviation."
+    },
+    "crew_requirements": {
+      "special_crew_training_required": false,
+      "mountain_airport_rating": "Not applicable",
+      "cat_ii_iii_rating_required": false,
+      "captain_only_airport": false,
+      "minimum_pilot_hours": "Not specified; EASA Part-FCL requirements apply",
+      "notes": "Standard EASA licensing requirements (Regulation 1178/2011). No special qualifications required. Mandatory pilot web briefing required before operations at Cannes."
+    },
+    "handling_complexity": {
+      "handler_availability_24_7": false,
+      "fuel_availability": true,
+      "customs_hours": "08:00-20:00 LT (can arrange after-hours)",
+      "immigration_processing_time_avg": "15-20 minutes",
+      "minimum_notice_hours": 24,
+      "weekend_surcharges": true,
+      "notes": "Two main FBOs: SKY VALET (primary) and G-OPS. Fuel available (JET A-1, AVGAS). EU/Schengen streamlined processing. VIP-level services standard. Weekend/evening surcharges apply. Handling agents require advance notification."
+    },
+    "congestion_metrics": {
+      "average_taxi_time_minutes": 8,
+      "peak_hour_delays_typical": "5-15 minutes during event periods",
+      "airspace_complexity": "Low-Medium (Class D/E airspace)",
+      "atc_delays_frequency": "Rare except during Cannes Film Festival/Grand Prix",
+      "seasonal_congestion_multiplier": 2.5,
+      "notes": "Generally efficient operations. Film Festival (May) and Monaco Grand Prix period (May 20-23) cause significant congestion multiplier. Summer tourism increases traffic 2.5x. Otherwise smooth operations."
+    },
+    "permits_and_clearances": {
+      "requires_prior_permission": false,
+      "ppr_notice_period_hours": 24,
+      "overflight_permit_required": false,
+      "landing_permit_processing_time": "24 hours (expedited through handling agent)",
+      "diplomatic_clearance_required": false,
+      "notes": "No formal permits required for EU-registered aircraft. Non-EU operators should arrange through handling agent. Mandatory briefing at Cannes.aeroport.fr/en required."
+    },
+    "noise_restrictions": {
+      "noise_category_required": "Not formally specified (VFR operations only)",
+      "chapter_requirements": "No specific Chapter designation; French noise regulations apply",
+      "noise_surcharges": false,
+      "preferred_departure_routes": "Standard departure procedures toward Mediterranean",
+      "noise_complaints_risk": "Low (small airport, limited traffic)",
+      "notes": "No strict noise restrictions. Runway selection accommodates coastal wind patterns. Limited residential areas around airport. Noise complaints minimal."
+    },
+    "infrastructure_reliability": {
+      "power_outage_frequency": "Rare (< 1 per year)",
+      "equipment_failure_rate": "Low (< 0.3%)",
+      "maintenance_closure_days_annual": 5,
+      "backup_systems_available": true,
+      "historical_closure_incidents": "Minimal; generally very reliable",
+      "notes": "Modern facilities with good reliability record. Backup power systems available. Rarely requires closure. Well-maintained infrastructure for business aviation."
+    },
+    "security_requirements": {
+      "security_screening_time_avg": "10-15 minutes",
+      "enhanced_security_periods": "During Cannes Film Festival and major events",
+      "vip_security_delays": "5-10 minutes (VIP fast-track common)",
+      "passenger_background_check_required": true,
+      "notes": "Schengen airport with EU security standards. Streamlined processing for regular business aviation. Enhanced security during festival/Grand Prix. VIP services standard for executive aviation."
+    },
+    "seasonal_factors": {
+      "high_season_months": "May (Film Festival), June-August (summer tourism), September-October (yacht shows)",
+      "ski_season_congestion": "Not applicable",
+      "summer_thunderstorm_frequency": "Low-Occasional (Mediterranean climate)",
+      "winter_deicing_delays_avg": "0 minutes (virtually never needed)",
+      "holiday_peak_dates": "May (Cannes Film Festival), July-August (European holidays), September (Yacht Shows)",
+      "notes": "May peak season dominated by Film Festival and Grand Prix. Summer steady tourism. Weather excellent year-round with no winter weather delays. Mediterranean climate provides consistent operations."
+    },
+    "alternate_airport_proximity": {
+      "nearest_suitable_alternate_code": "LFPG",
+      "nearest_suitable_alternate_name": "Nice Côte d'Azur Airport",
+      "distance_to_alternate_km": 38,
+      "alternate_typically_available": true,
+      "ground_transport_time_to_alternate_minutes": 45,
+      "additional_alternates": [
+        {
+          "code": "LFLJ",
+          "name": "Antibes d'Azur Airport",
+          "distance_km": 22,
+          "ground_transport_minutes": 25
+        },
+        {
+          "code": "LFMN",
+          "name": "Grenoble-Isère Airport",
+          "distance_km": 165,
+          "ground_transport_minutes": 120
+        },
+        {
+          "code": "LFLY",
+          "name": "Lyon-Bâle Airport",
+          "distance_km": 220,
+          "ground_transport_minutes": 150
+        }
+      ],
+      "notes": "Nice is primary alternate for larger aircraft (>35 tons). Antibes nearby for smaller aircraft. Multiple options within reasonable distance."
+    },
+    "payment_and_fees": {
+      "advance_payment_required": false,
+      "credit_account_needed": "Recommended for regular operators",
+      "handling_agent_prepayment": "Varies by provider",
+      "fuel_payment_terms": "Typically post-delivery credit arrangements available",
+      "notes": "Airport charges structured per light (<4 tons) and heavy aircraft. Handling fees set annually (2023-2025 rates documented). Weekend surcharges apply. EU-regulated fee structure."
+    }
+  },
+  "operational_summary": {
+    "risk_level": "LOW-MEDIUM",
+    "primary_risk_factors": [
+      "Strict night curfew (NO night operations allowed)",
+      "Event-driven congestion (Film Festival, Grand Prix)",
+      "Limited runway capacity for heavy aircraft",
+      "Seasonal tourism traffic spikes (2.5x multiplier May-August)"
+    ],
+    "advantages": [
+      "Excellent Mediterranean climate, minimal weather disruptions",
+      "Streamlined operations for business aviation",
+      "VIP-level services standard",
+      "Short taxi times and efficient turnarounds",
+      "Reliable infrastructure",
+      "Schengen/EU simplified processing",
+      "Multiple nearby alternates"
+    ],
+    "key_operational_considerations": "Cannes is an excellent choice for business aviation when daytime operations are feasible. Strict night curfew is critical constraint—no flexibility. Must coordinate advance for Film Festival (May) and Grand Prix period (May 20-23). Weather is exceptionally reliable year-round. VIP-level ground services and efficient handling are standard. Aircraft over 35 tons must use Nice. Advance handling coordination recommended, especially during peak seasons."
+  }
+}

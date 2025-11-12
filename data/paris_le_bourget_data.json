@@ -1,0 +1,184 @@
+{
+  "Paris Le Bourget": {
+    "operational_hours": {
+      "description": "Operating hours and curfews",
+      "fields": {
+        "opens_utc": "24 hours for arrivals",
+        "closes_utc": "N/A (24 hours for arrivals)",
+        "night_curfew": "Yes, strict departure restrictions for jet engines from apron between 10:15 PM and 6:00 AM local time. Exceptions for pre-approved medical evacuation flights. Stage 2 aircraft operations restricted between 11:30 PM and 6:15 AM.",
+        "curfew_start_utc": "22:15 local time (for jet engine departures from apron), 23:30 local time (for Stage 2 aircraft operations)",
+        "curfew_end_utc": "06:00 local time (for jet engine departures from apron), 06:15 local time (for Stage 2 aircraft operations)",
+        "weekend_restrictions": "Not explicitly mentioned, but implied by daily curfew.",
+        "holiday_closures": "Not mentioned."
+      },
+      "risk_impact": "High - flights outside hours will be cancelled"
+    },
+    "slot_requirements": {
+      "description": "Whether airport requires pre-allocated slots",
+      "fields": {
+        "slot_controlled": "No (does not require airport slots for private and business jet operations)",
+        "advance_booking_required_hours": "N/A",
+        "slot_availability_typical": "N/A",
+        "peak_congestion_times": "Not explicitly mentioned, but it becomes slot-coordinated during major events (e.g., World Rugby Cup 2023, Summer Olympic Games 2024)."
+      },
+      "risk_impact": "High - delays common at slot-controlled airports"
+    },
+    "weather_vulnerability": {
+      "description": "Weather conditions that cause disruptions",
+      "fields": {
+        "fog_prone": "Yes, significant factor affecting operations. Low Visibility Procedures (LVPs) implemented when visibility drops below 1,500 meters, leading to delays.",
+        "snow_closure_frequency": "Vulnerable to snow and ice, necessitating de-icing and snow removal, causing operational delays. Runway clearing takes 15-35 minutes.",
+        "wind_limitations": "Not explicitly mentioned.",
+        "requires_cat_ii_iii_capability": "Not explicitly mentioned, but modern aircraft with auto-land systems can handle low-visibility landings.",
+        "seasonal_risk_periods": "Winter (snow, ice), periods of fog."
+      },
+      "risk_impact": "High - weather is leading cause of delays"
+    },
+    "runway_specifications": {
+      "description": "Runway requirements and limitations",
+      "fields": {
+        "minimum_runway_length_meters": "Not explicitly mentioned, but 'capable of accommodating various aircraft types, including light, midsize, and large jets.'",
+        "runway_surface_type": "Not mentioned.",
+        "number_of_runways": "Three",
+        "crosswind_limitations": "Not mentioned.",
+        "weight_restrictions": "Not mentioned."
+      },
+      "risk_impact": "Medium - affects aircraft eligibility"
+    },
+    "crew_requirements": {
+      "description": "Special qualifications needed",
+      "fields": {
+        "special_crew_training_required": "Yes, for VIP/corporate jets, experience in corporate flying, adaptability, VIP catering skills.",
+        "mountain_airport_rating": "Not applicable.",
+        "cat_ii_iii_rating_required": "Not explicitly mentioned, but modern aircraft with auto-land systems can handle low-visibility landings.",
+        "captain_only_airport": "Not mentioned.",
+        "minimum_pilot_hours": "Not mentioned.",
+        "language_proficiency": "Fluency in English often mandatory, French highly desired.",
+        "certifications_medical": "Valid European Cabin Crew Attestation (CCA) and Class 2 Cabin Crew medical certificate for cabin crew.",
+        "documentation": "Valid passport, visa (if applicable), licenses, medical certificates, crew ID, up-to-date vaccinations. General Declaration (Gendec) and passenger manifest for all flights.",
+        "location_accessibility": "Paris-based or willing to relocate, ability to reach Le Bourget within specified timeframe (e.g., 60 minutes)."
+      },
+      "risk_impact": "High - limits crew availability"
+    },
+    "handling_complexity": {
+      "description": "Ground handling and service factors",
+      "fields": {
+        "handler_availability_24_7": "Implied by 24-hour arrivals and numerous FBOs.",
+        "fuel_availability": "Yes, offered by FBOs.",
+        "customs_hours": "On-site customs and immigration clearance. Hours not specified.",
+        "immigration_processing_time_avg": "Not specified.",
+        "minimum_notice_hours": "Not specified.",
+        "weekend_surcharges": "Not specified."
+      },
+      "risk_impact": "Medium - affects turnaround time"
+    },
+    "congestion_metrics": {
+      "description": "Traffic and capacity issues",
+      "fields": {
+        "average_taxi_time_minutes": "Not specified.",
+        "peak_hour_delays_typical": "Not specified, but 'significant hub' and '55,751 aircraft movements annually'.",
+        "airspace_complexity": "Not specified.",
+        "atc_delays_frequency": "Not specified.",
+        "seasonal_congestion_multiplier": "Not specified."
+      },
+      "risk_impact": "Medium - predictable delay patterns"
+    },
+    "permits_and_clearances": {
+      "description": "Authorization requirements",
+      "fields": {
+        "requires_prior_permission": "No (does not require PPRs)",
+        "ppr_notice_period_hours": "N/A",
+        "overflight_permit_required": "Not specified.",
+        "landing_permit_processing_time": "N/A",
+        "diplomatic_clearance_required": "Not specified."
+      },
+      "risk_impact": "High - missing permits cause cancellations"
+    },
+    "noise_restrictions": {
+      "description": "Noise abatement procedures",
+      "fields": {
+        "noise_category_required": "ICAO Annex 16 Chapter 16 acoustic certificate required for French metropolitan airfields.",
+        "chapter_requirements": "Chapter 2 aircraft banned for night-time flights.",
+        "noise_surcharges": "Not explicitly mentioned, but fines for non-compliance.",
+        "preferred_departure_routes": "Specific runway usage modalities, e.g., Runway 07 for jet-engined aircraft during certain night hours.",
+        "noise_complaints_risk": "High, due to strict enforcement and monitoring by ACNUSA.",
+        "nighttime_restrictions": "Jet aircraft generally prohibited from taking off between 10:15 PM and 6:00 AM local time. Landings restricted between 11:30 PM and 6:15 AM local time. Exceptions for sanitary, emergency, government flights.",
+        "engine_run_up_apu_restrictions": "Ban on engine testing between 10:00 PM and 6:00 AM (possible exemptions 10-11 PM and 5-6 AM). Limit APU use.",
+        "take_off_procedures": "Pilots select climbing procedures to reach 3000 feet AAL rapidly, reducing to noise abatement thrust at 700 feet AAL.",
+        "landing_procedures": "Pilots maintain last assigned altitude by ATC until intercepting ILS glide path. Final approach without flying below glide path.",
+        "reverse_thrust_restrictions": "Only permitted between 9:15 PM and 5:00 AM (winter) or 8:15 PM and 4:00 AM (summer) for security."
+      },
+      "risk_impact": "Low-Medium - may affect routing/timing"
+    },
+    "infrastructure_reliability": {
+      "description": "Airport facility dependability",
+      "fields": {
+        "power_outage_frequency": "Not explicitly mentioned.",
+        "equipment_failure_rate": "Not explicitly mentioned.",
+        "maintenance_closure_days_annual": "Runway 03/21 underwent significant refurbishment in 2020. Proactive maintenance.",
+        "backup_systems_available": "Not explicitly mentioned.",
+        "historical_closure_incidents": "Most recent major event cited was Air France Flight 4590 in 2000 (attempted diversion). Incidents typically involve specific aircraft operations, not widespread infrastructure failures.",
+        "maintenance_providers": "Over 60 firms specializing in aircraft maintenance, equipment, and airport services.",
+        "safety_management_systems": "Implements Safety Management Systems (SMS) aligned with ICAO guidelines."
+      },
+      "risk_impact": "Low - rare but high impact events"
+    },
+    "security_requirements": {
+      "description": "Security processing factors",
+      "fields": {
+        "security_screening_time_avg": "Not specified.",
+        "enhanced_security_periods": "Not specified.",
+        "vip_security_delays": "Not specified.",
+        "passenger_background_check_required": "Not explicitly mentioned, but border controls verify ID against databases.",
+        "liquids_gels_aerosols_restrictions": "Limited to 100ml per container, in a single transparent, sealed bag (max 1 liter).",
+        "electronic_devices_metal_objects_removal": "Must be removed from cabin baggage and placed in separate trays.",
+        "medicines_baby_food_inspection": "Must be presented separately for inspection.",
+        "border_controls": "All individuals entering/leaving Schengen Area must show ID for verification. Biometric passports can use PARAFE. EU Entry/Exit System for non-EU nationals.",
+        "prohibited_items": "Knives, sharp objects, firearms, cartridges, ammunition, liquids/aerosols > 100ml.",
+        "slot_landing_permits": "Slot approval mandatory for all arrivals/departures. Landing permit required for all international charter/private flights.",
+        "ciq_clearance": "Available non-stop at FBOs.",
+        "airport_access_badges": "Required for airside access (TCA). Involves application, security awareness, business operations permit.",
+        "ramp_driving_permits": "Required for driving in airside areas (permis T).",
+        "aircraft_security_search": "Required before departure to check for prohibited articles, performed by cockpit crew, form submitted to ground handler."
+      },
+      "risk_impact": "Low-Medium - affects departure timing"
+    },
+    "seasonal_factors": {
+      "description": "Time-based operational changes",
+      "fields": {
+        "high_season_months": "Not explicitly mentioned, but major events like the Paris Air Show (odd-numbered years), World Rugby Cup (Sept 2023), and Summer Olympic Games (2024) cause increased traffic and slot coordination.",
+        "ski_season_congestion": "Not mentioned.",
+        "summer_thunderstorm_frequency": "Not mentioned.",
+        "winter_deicing_delays_avg": "Winter months require de-icing.",
+        "holiday_peak_dates": "Major events cause peak periods.",
+        "parking_limitations": "Temporary limitations during major events (e.g., Paris Air Show). Hangar space reduced in winter.",
+        "atc_system_implementation": "Ongoing implementation of new 4-flight ATC system impacts slot coordination."
+      },
+      "risk_impact": "Medium - predictable seasonal patterns"
+    },
+    "alternate_airport_proximity": {
+      "description": "Backup options availability",
+      "fields": {
+        "nearest_suitable_alternate_code": "CDG (Paris Charles de Gaulle), ORY (Paris Orly), POX (Pontoise – Cormeilles aerodrome), TNF (Toussus Le Noble Airport), BVA (Beauvais), LIL (Lille Lesquin), CRL (Charleroi).",
+        "distance_to_alternate_km": "CDG: 13.1 km, ORY: 23.3 km, POX: 33 km, TNF: 34 km, BVA: 59 km, LIL: 188.5 km.",
+        "alternate_typically_available": "Not explicitly mentioned, but the presence of multiple nearby airports suggests good availability.",
+        "ground_transport_time_to_alternate_minutes": "CRL: 3 hours 7 minutes. Others not specified."
+      },
+      "risk_impact": "Medium - affects contingency planning"
+    },
+    "payment_and_fees": {
+      "description": "Financial arrangements that may cause delays",
+      "fields": {
+        "advance_payment_required": "Not explicitly mentioned, but implied that charter companies handle this.",
+        "credit_account_needed": "Not explicitly mentioned.",
+        "handling_agent_prepayment": "Not explicitly mentioned.",
+        "fuel_payment_terms": "Not explicitly mentioned.",
+        "landing_fees": "Based on MTOW and noise level coefficient (varies by time of day). Example: Group 1 aircraft landing at night (€4.000), day/evening (€1.300).",
+        "parking_fees": "Based on duration, MTOW, and parking area type. Example: €3.834 per MTOW ton for active parking areas (CDG/Orly, implied similar for LBG).",
+        "discounts": "50% for helicopters, 50% for positioning flights between Paris-Orly/CDG and LBG, 75% for training flights. No fees for test flights/emergency landings.",
+        "additional_services_cost": "Influenced by aircraft type, flight duration/distance, departure location, availability, and additional services (VIP, ground transport)."
+      },
+      "risk_impact": "Low - administrative delays possible"
+    }
+  }
+}

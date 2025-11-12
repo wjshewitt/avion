@@ -1,0 +1,232 @@
+{
+  "airport_code": "KSJC",
+  "airport_name": "Norman Y. Mineta San Jose International Airport",
+  "location": "San Jose, California, USA (Silicon Valley)",
+  "data_collection_date": "2025-11-10",
+  "sources": {
+    "primary": [
+      "FAA Western-Pacific Region official documentation",
+      "San Jose Airport official website (flysanjose.com)",
+      "FAA AirNav database",
+      "Customs and Border Protection (CBP) General Aviation Fact Sheet",
+      "National Weather Service - San Francisco Bay Area",
+      "FAA Flight Deck Pilot Information publications"
+    ],
+    "secondary": [
+      "FlightAware airport information",
+      "AirNav airport guide",
+      "AC-U-KWIK airport reference",
+      "Universal Weather airport data",
+      "AOPA airport resources",
+      "AvnWx airport reference"
+    ]
+  },
+  "risk_factors": {
+    "operational_hours": {
+      "opens_utc": "Open 24 hours",
+      "closes_utc": "Open 24 hours",
+      "night_curfew": false,
+      "curfew_start_utc": null,
+      "curfew_end_utc": null,
+      "weekend_restrictions": false,
+      "holiday_closures": false,
+      "tower_hours": "06:00-00:00 (midnight) local time",
+      "notes": "Airport open 24 hours. Control tower operates 06:00-00:00 PST. Class E airspace outside tower hours.",
+      "airspace_class_tower_hours": "Class C",
+      "airspace_class_after_hours": "Class E"
+    },
+    "slot_requirements": {
+      "slot_controlled": false,
+      "advance_booking_required_hours": 0,
+      "slot_availability_typical": "No formal slot system",
+      "peak_congestion_times": "Business hours (08:00-17:00 weekdays), seasonal peaks",
+      "notes": "No slot requirement system. However, international arrivals require US Customs pre-clearance with 24-hour advance notice."
+    },
+    "weather_vulnerability": {
+      "fog_prone": true,
+      "snow_closure_frequency": "Rare to none",
+      "wind_limitations": false,
+      "requires_cat_ii_iii_capability": false,
+      "seasonal_risk_periods": "May-September (occasional thunderstorms)",
+      "weather_patterns": "Mediterranean climate. Summer: warm and dry (avg temps 85-95°F). Winter: mild with occasional rain. Fog common early mornings, especially June-August.",
+      "fog_characteristics": "Frequent morning/early afternoon fog, particularly June-August",
+      "thunderstorm_risk": "Low to moderate (peak May-September)"
+    },
+    "runway_specifications": {
+      "minimum_runway_length_meters": 3353,
+      "minimum_runway_length_feet": 11000,
+      "runway_surface_type": "Concrete (grooved)",
+      "number_of_runways": 2,
+      "crosswind_limitations": "Standard 15 knot crosswind limitation",
+      "weight_restrictions": "No specific restrictions noted",
+      "runway_details": [
+        {
+          "runway_id": "12L/30R",
+          "length_meters": 3353,
+          "length_feet": 11000,
+          "width_feet": 150,
+          "width_meters": 46,
+          "surface": "Concrete (grooved)",
+          "lighting": "High-intensity",
+          "condition": "Good",
+          "approaches": ["ILS/DME", "GPS"],
+          "tora_feet": 10139,
+          "lda_feet": 8831
+        },
+        {
+          "runway_id": "12R/30L",
+          "length_meters": 3353,
+          "length_feet": 11000,
+          "width_feet": 150,
+          "width_meters": 46,
+          "surface": "Concrete (grooved)",
+          "lighting": "High-intensity",
+          "condition": "Good",
+          "approaches": ["ILS/DME", "GPS"]
+        }
+      ],
+      "elevation_feet": 62,
+      "elevation_meters": 19,
+      "parallel_runway_spacing": "Closely spaced parallel runways",
+      "notes": "Two parallel runways at 11,000 feet each. Modern concrete surface with groving for traction. Excellent approach capabilities."
+    },
+    "crew_requirements": {
+      "special_crew_training_required": false,
+      "mountain_airport_rating": false,
+      "cat_ii_iii_rating_required": false,
+      "captain_only_airport": false,
+      "minimum_pilot_hours": "Private pilot certificate minimum",
+      "special_training": [
+        "Awareness of closely-spaced parallel runways (CSPR)",
+        "Understanding of Silicon Valley airspace complexity",
+        "Familiarization with Reid-Hillview (KRHV) and Moffett (KNUQ) nearby airports (wrong airport prevention)",
+        "Transponder with altitude reporting and ADS-B required"
+      ],
+      "notes": "Standard pilot qualifications. Emphasis on preventing wrong airport landings due to proximity to other facilities."
+    },
+    "handling_complexity": {
+      "handler_availability_24_7": true,
+      "fuel_availability": true,
+      "customs_hours": "Available (inspection services 09:00-18:00 daily)",
+      "immigration_processing_time_avg": "30-60 minutes for international arrivals",
+      "minimum_notice_hours": 24,
+      "weekend_surcharges": false,
+      "handling_options": [
+        "Multiple FBOs available",
+        "24/7 ground support",
+        "Fuel services (AVGAS and Jet A)",
+        "Fixed Base Operators: Signature Flight Support, BBA Aviation"
+      ],
+      "notes": "Good handling infrastructure. US Customs pre-clearance available for international arrivals (24-hour notice required). CBP inspection services 09:00-18:00."
+    },
+    "congestion_metrics": {
+      "average_taxi_time_minutes": 12,
+      "peak_hour_delays_typical": "15-40 minutes during business hours",
+      "airspace_complexity": "Moderate - Class C airspace under San Francisco Class B",
+      "atc_delays_frequency": "Occasional during peak hours",
+      "seasonal_congestion_multiplier": 1.2,
+      "notes": "Congestion moderate; influenced by Silicon Valley business travel patterns. Potential delays during tech conference seasons."
+    },
+    "permits_and_clearances": {
+      "requires_prior_permission": true,
+      "ppr_notice_period_hours": 24,
+      "overflight_permit_required": false,
+      "landing_permit_processing_time": "Immediate via ATC (Class C airspace)",
+      "diplomatic_clearance_required": false,
+      "customs_requirement": "24-hour advance notice for international arrivals",
+      "notes": "International arrivals require US Customs pre-clearance. Landing permit may be required based on flight type.",
+      "international_flights": "Customs landing rights available with 24-hour PPR"
+    },
+    "noise_restrictions": {
+      "noise_category_required": "No specific restrictions noted",
+      "chapter_requirements": "Standard FAA regulations apply",
+      "noise_surcharges": "No",
+      "preferred_departure_routes": "Standard SID/STAR procedures for noise management",
+      "noise_complaints_risk": "Low - airport in commercial/industrial area",
+      "notes": "Minimal noise restrictions compared to other California airports."
+    },
+    "infrastructure_reliability": {
+      "power_outage_frequency": "Rare",
+      "equipment_failure_rate": "Low",
+      "maintenance_closure_days_annual": "Minimal (under 3 days)",
+      "backup_systems_available": true,
+      "historical_closure_incidents": "None in recent years",
+      "runway_condition": "Well-maintained, grooved concrete provides good traction"
+    },
+    "security_requirements": {
+      "security_screening_time_avg": "Standard TSA screening for commercial terminals",
+      "enhanced_security_periods": "None typical for general aviation",
+      "vip_security_delays": "Minimal for general aviation operations",
+      "passenger_background_check_required": "For international arrivals (standard customs)",
+      "notes": "General aviation area separate from commercial terminals. Standard TSA procedures for commercial passengers."
+    },
+    "seasonal_factors": {
+      "high_season_months": ["March", "April", "September", "October", "December"],
+      "ski_season_congestion": "Minimal (not a ski destination)",
+      "summer_thunderstorm_frequency": "Low - 5-10 days with activity (May-September)",
+      "winter_deicing_delays_avg": "None - weather generally mild",
+      "holiday_peak_dates": ["Thanksgiving", "Christmas-New Year"],
+      "tech_conference_peaks": "April (conferences), June-September (business travel)",
+      "notes": "Summer fog (June-August) most notable weather factor. Silicon Valley business patterns drive seasonal variation. Year-round mild weather."
+    },
+    "alternate_airport_proximity": {
+      "nearest_suitable_alternate_code": "KOAK",
+      "alternate_airport_name": "Oakland International Airport",
+      "distance_to_alternate_km": 47.5,
+      "distance_to_alternate_nm": 25.7,
+      "distance_to_alternate_miles": 29.5,
+      "ground_transport_time_to_alternate_minutes": 45,
+      "alternate_typically_available": true,
+      "backup_alternates": [
+        {
+          "code": "KSFO",
+          "name": "San Francisco International Airport",
+          "distance_km": 48.3,
+          "distance_miles": 30,
+          "distance_nm": 26.1,
+          "notes": "Major international hub, can experience fog-related delays"
+        },
+        {
+          "code": "KRHV",
+          "name": "Reid-Hillview Airport",
+          "distance_km": 16,
+          "distance_miles": 10,
+          "notes": "General aviation nearby (potential wrong airport risk)"
+        }
+      ],
+      "notes": "Good alternate airports available. Oakland and San Francisco both within 30 miles. Must be aware of nearby Reid-Hillview (KRHV) and Moffett (KNUQ) to prevent wrong airport approaches."
+    },
+    "payment_and_fees": {
+      "advance_payment_required": false,
+      "credit_account_needed": false,
+      "handling_agent_prepayment": "Not typically required",
+      "fuel_payment_terms": "Post-flight settlement available",
+      "landing_fees": "Yes - per airport schedule",
+      "handling_fees": "Yes - variable by FBO",
+      "parking_fees": "Yes - based on duration",
+      "notes": "Standard fee structure. Competitive FBO pricing available."
+    }
+  },
+  "summary": {
+    "risk_level": "Low-Medium",
+    "primary_challenges": [
+      "Summer fog (June-August) affecting visibility and operations",
+      "Customs clearance requirement (24-hour notice) for international arrivals",
+      "Wrong airport landing risk due to proximity to Reid-Hillview and Moffett",
+      "Silicon Valley business traffic patterns creating peak-hour congestion",
+      "Closely-spaced parallel runways requiring specific procedures",
+      "Class C airspace coordination requirements"
+    ],
+    "operational_advantages": [
+      "24/7 operations",
+      "Modern, well-maintained runways (11,000 ft concrete)",
+      "Excellent weather overall (mild climate)",
+      "Dual parallel runways providing capacity",
+      "US Customs pre-clearance available for international flights",
+      "Good alternate airports nearby (OAK, SFO)",
+      "Strong FBO services for private operations"
+    ],
+    "crew_considerations": "Standard pilot qualifications sufficient. Must be familiar with closely-spaced parallel runway procedures. Awareness of nearby wrong-airport landing risks (KRHV, KNUQ). For international arrivals, must contact customs 24 hours in advance.",
+    "planning_recommendation": "Summer fog (June-August) may cause early morning delays; plan flexible schedules. Business hours (08:00-17:00 weekdays) experience moderate congestion from Silicon Valley traffic. International arrivals require 24-hour customs notice. Consider nearby airports for diversions (OAK at 30 miles). Year-round mild weather allows predictable operations. Tech conference seasons (March-April, September) may increase congestion."
+  }
+}

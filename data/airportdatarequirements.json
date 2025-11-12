@@ -1,0 +1,157 @@
+{
+"airport_risk_factors": {
+"operational_hours": {
+"description": "Operating hours and curfews",
+"fields": [
+"opens_utc",
+"closes_utc",
+"night_curfew",
+"curfew_start_utc",
+"curfew_end_utc",
+"weekend_restrictions",
+"holiday_closures"
+],
+"risk_impact": "High - flights outside hours will be cancelled"
+},
+"slot_requirements": {
+"description": "Whether airport requires pre-allocated slots",
+"fields": [
+"slot_controlled",
+"advance_booking_required_hours",
+"slot_availability_typical",
+"peak_congestion_times"
+],
+"risk_impact": "High - delays common at slot-controlled airports"
+},
+"weather_vulnerability": {
+"description": "Weather conditions that cause disruptions",
+"fields": [
+"fog_prone",
+"snow_closure_frequency",
+"wind_limitations",
+"requires_cat_ii_iii_capability",
+"seasonal_risk_periods"
+],
+"risk_impact": "High - weather is leading cause of delays"
+},
+"runway_specifications": {
+"description": "Runway requirements and limitations",
+"fields": [
+"minimum_runway_length_meters",
+"runway_surface_type",
+"number_of_runways",
+"crosswind_limitations",
+"weight_restrictions"
+],
+"risk_impact": "Medium - affects aircraft eligibility"
+},
+"crew_requirements": {
+"description": "Special qualifications needed",
+"fields": [
+"special_crew_training_required",
+"mountain_airport_rating",
+"cat_ii_iii_rating_required",
+"captain_only_airport",
+"minimum_pilot_hours"
+],
+"risk_impact": "High - limits crew availability"
+},
+"handling_complexity": {
+"description": "Ground handling and service factors",
+"fields": [
+"handler_availability_24_7",
+"fuel_availability",
+"customs_hours",
+"immigration_processing_time_avg",
+"minimum_notice_hours",
+"weekend_surcharges"
+],
+"risk_impact": "Medium - affects turnaround time"
+},
+"congestion_metrics": {
+"description": "Traffic and capacity issues",
+"fields": [
+"average_taxi_time_minutes",
+"peak_hour_delays_typical",
+"airspace_complexity",
+"atc_delays_frequency",
+"seasonal_congestion_multiplier"
+],
+"risk_impact": "Medium - predictable delay patterns"
+},
+"permits_and_clearances": {
+"description": "Authorization requirements",
+"fields": [
+"requires_prior_permission",
+"ppr_notice_period_hours",
+"overflight_permit_required",
+"landing_permit_processing_time",
+"diplomatic_clearance_required"
+],
+"risk_impact": "High - missing permits cause cancellations"
+},
+"noise_restrictions": {
+"description": "Noise abatement procedures",
+"fields": [
+"noise_category_required",
+"chapter_requirements",
+"noise_surcharges",
+"preferred_departure_routes",
+"noise_complaints_risk"
+],
+"risk_impact": "Low-Medium - may affect routing/timing"
+},
+"infrastructure_reliability": {
+"description": "Airport facility dependability",
+"fields": [
+"power_outage_frequency",
+"equipment_failure_rate",
+"maintenance_closure_days_annual",
+"backup_systems_available",
+"historical_closure_incidents"
+],
+"risk_impact": "Low - rare but high impact events"
+},
+"security_requirements": {
+"description": "Security processing factors",
+"fields": [
+"security_screening_time_avg",
+"enhanced_security_periods",
+"vip_security_delays",
+"passenger_background_check_required"
+],
+"risk_impact": "Low-Medium - affects departure timing"
+},
+"seasonal_factors": {
+"description": "Time-based operational changes",
+"fields": [
+"high_season_months",
+"ski_season_congestion",
+"summer_thunderstorm_frequency",
+"winter_deicing_delays_avg",
+"holiday_peak_dates"
+],
+"risk_impact": "Medium - predictable seasonal patterns"
+},
+"alternate_airport_proximity": {
+"description": "Backup options availability",
+"fields": [
+"nearest_suitable_alternate_code",
+"distance_to_alternate_km",
+"alternate_typically_available",
+"ground_transport_time_to_alternate_minutes"
+],
+"risk_impact": "Medium - affects contingency planning"
+},
+"payment_and_fees": {
+"description": "Financial arrangements that may cause delays",
+"fields": [
+"advance_payment_required",
+"credit_account_needed",
+"handling_agent_prepayment",
+"fuel_payment_terms"
+],
+"risk_impact": "Low - administrative delays possible"
+}
+}
+}

@@ -1,0 +1,74 @@
+[
+  {
+    "code": "KSFO",
+    "lat": 37.6213,
+    "lon": -122.379,
+    "name": "San Francisco International Airport"
+  },
+  {
+    "code": "KLAX",
+    "lat": 33.9416,
+    "lon": -118.4085,
+    "name": "Los Angeles International Airport"
+  },
+  {
+    "code": "KJFK",
+    "lat": 40.6413,
+    "lon": -73.7781,
+    "name": "John F. Kennedy International Airport"
+  },
+  {
+    "code": "KORD",
+    "lat": 41.9742,
+    "lon": -87.9073,
+    "name": "Chicago O'Hare International Airport"
+  },
+  {
+    "code": "KDEN",
+    "lat": 39.8561,
+    "lon": -104.6737,
+    "name": "Denver International Airport"
+  },
+  {
+    "code": "KATL",
+    "lat": 33.6407,
+    "lon": -84.4277,
+    "name": "Hartsfield-Jackson Atlanta International Airport"
+  },
+  {
+    "code": "KMIA",
+    "lat": 25.7959,
+    "lon": -80.287,
+    "name": "Miami International Airport"
+  },
+  {
+    "code": "KSEA",
+    "lat": 47.4502,
+    "lon": -122.3088,
+    "name": "Seattle-Tacoma International Airport"
+  },
+  {
+    "code": "KPHX",
+    "lat": 33.4352,
+    "lon": -112.0101,
+    "name": "Phoenix Sky Harbor International Airport"
+  },
+  {
+    "code": "KBOS",
+    "lat": 42.3656,
+    "lon": -71.0096,
+    "name": "Boston Logan International Airport"
+  },
+  {
+    "code": "KDFW",
+    "lat": 32.8998,
+    "lon": -97.0403,
+    "name": "Dallas/Fort Worth International Airport"
+  },
+  {
+    "code": "KLAS",
+    "lat": 36.084,
+    "lon": -115.1537,
+    "name": "Harry Reid International Airport"
+  }
+]

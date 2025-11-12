@@ -1,26 +1,435 @@
-@import "tailwindcss";
+@import"tailwindcss";
+@import"tw-animate-css";
 
+/* 
+┌─────────────────────────────────────────────────────────────────┐
+│ TAILWIND V4 DARK MODE CONFIGURATION                             │
+│ Use data-theme attribute instead of media query                 │
+└─────────────────────────────────────────────────────────────────┘
+*/
+@variant dark ([data-theme="dark"] &);
+
+/* 
+┌─────────────────────────────────────────────────────────────────┐
+│ PRODUCTION THEME SYSTEM - 3-TIER TOKEN ARCHITECTURE             │
+├─────────────────────────────────────────────────────────────────┤
+│ Tier 1: Primitive Tokens (Base colors)                           │
+│ Tier 2: Semantic Tokens (Usage context)                         │  
+│ Tier 3: Component Tokens (Specific use)                         │
+└─────────────────────────────────────────────────────────────────┘
+*/
+
+/* TIER 1: PRIMITIVE TOKENS - BASE COLOR SYSTEM */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+ /* Brand Colors */
+ --color-brand-50: #f0f9ff;
+ --color-brand-100: #e0f2fe;
+ --color-brand-500: #3b82f6;
+ --color-brand-600: #2563eb;
+ --color-brand-900: #1e3a8a;
+
+ /* Scale Grays */
+ --color-gray-50: #f8fafc;
+ --color-gray-100: #f1f5f9;
+ --color-gray-200: #e2e8f0;
+ --color-gray-300: #cbd5e1;
+ --color-gray-400: #94a3b8;
+ --color-gray-500: #64748b;
+ --color-gray-600: #475569;
+ --color-gray-700: #334155;
+ --color-gray-800: #1e293b;
+ --color-gray-900: #0f172a;
+
+ /* Semantic Colors */
+ --color-success: #10b981;
+ --color-warning: #f59e0b;
+ --color-error: #ef4444;
+
+ /* TIER 2: SEMANTIC TOKENS - USAGE CONTEXT */
+ /* Theme Agnostic - Reference primitives */
+ --color-background-primary: var(--color-gray-50);
+ --color-background-secondary: var(--color-gray-100);
+ --color-surface: var(--color-white);
+ --color-surface-subtle: var(--color-gray-50);
+ --color-text-primary: var(--color-gray-900);
+ --color-text-secondary: var(--color-gray-600);
+ --color-text-muted: var(--color-gray-400);
+ --color-text-inverse: #ffffff; /* Only for colored backgrounds where white is absolutely necessary */
+ --color-border: var(--color-gray-200);
+ --color-border-subtle: var(--color-gray-200);
+ --color-blue: var(--color-brand-600);
+ --color-green: var(--color-success);
+ --color-amber: var(--color-warning);
+ --color-red: var(--color-error);
+ --color-gray: var(--color-gray-500);
+
+ /* Standard CSS Variables for Tailwind tokens */
+ --radius: 0.625rem;
+ --background: var(--color-background-primary);
+ --foreground: var(--color-text-primary);
+ --card: var(--color-surface);
+ --card-foreground: var(--color-text-primary);
+ --popover: var(--color-surface);
+ --popover-foreground: var(--color-text-primary);
+ --primary: #2563eb;
+ --primary-foreground: #ffffff;
+ --secondary: var(--color-background-secondary);
+ --secondary-foreground: var(--color-text-primary);
+ --muted: var(--color-background-secondary);
+ --muted-foreground: var(--color-text-secondary);
+ --accent: var(--color-surface-subtle);
+ --accent-foreground: var(--color-text-primary);
+ --destructive: #dc2626;
+ --border: var(--color-border);
+ --input: var(--color-border);
+ --ring: #2563eb;
+ --chart-1: #3b82f6;
+ --chart-2: #10b981;
+ --chart-3: #f59e0b;
+ --chart-4: #8b5cf6;
+ --chart-5: #ec4899;
+ --sidebar: var(--color-surface);
+ --sidebar-foreground: var(--color-text-primary);
+ --sidebar-primary: #2563eb;
+ --sidebar-primary-foreground: #ffffff;
+ --sidebar-accent: var(--color-background-secondary);
+ --sidebar-accent-foreground: var(--color-text-primary);
+ --sidebar-border: var(--color-border);
+ --sidebar-ring: #2563eb;
+}
+
+/* 
+┌─────────────────────────────────────────────────────────────────┐
+│ COMPLETE THEME SEPARATION - NO OVERLAP                          │
+├─────────────────────────────────────────────────────────────────┤
+│ Light mode uses ONLY light colors                                │  
+│ Dark mode uses ONLY dark colors                                 │
+│ No mixed states or dark:bg-slate-900 classes allowed            │
+└─────────────────────────────────────────────────────────────────┘
+*/
+
+/* LIGHT THEME - PURE LIGHT COLORS ONLY */
+[data-theme="light"] {
+ --color-background-primary: #ffffff;
+ --color-background-secondary: #f1f5f9;
+ --color-surface: #ffffff;
+ --color-surface-subtle: #f8fafc;
+ --color-text-primary: #0f172a;
+ --color-text-secondary: #475569;
+ --color-text-muted: #94a3b8;
+ --color-text-inverse: #ffffff; /* White text stays white for colored backgrounds */
+ --color-border: #e2e8f0;
+ --color-border-subtle: #e2e8f0;
+ --color-foreground: #0f172a; /* Ensure text in inputs is dark */
+ --color-muted-foreground: #64748b; /* Ensure placeholder text is visible */
+}
+
+/* DARK THEME - PURE DARK COLORS ONLY */
+[data-theme="dark"] {
+ --color-background-primary: #0f172a;
+ --color-background-secondary: #1e293b;
+ --color-surface: #1e293b;
+ --color-surface-subtle: #334155;
+ --color-text-primary: #e2e8f0;
+ --color-text-secondary: #94a3b8;
+ --color-text-muted: #64748b;
+ --color-text-inverse: #ffffff; /* White text stays white for colored backgrounds */
+ --color-border: #334155;
+ --color-border-subtle: #475569;
+ --color-foreground: #e2e8f0; /* Ensure text in inputs is light in dark mode */
+ --color-muted-foreground: #94a3b8; /* Ensure placeholder text is visible */
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+ /* Colors - Keep Tailwind default palette for utilities like blue-500, purple-500, etc. */
+ /* Override Tailwind defaults with our custom design system colors */
+ /* Theme-aware variables - reference the [data-theme] CSS variables */
+ --color-background: var(--color-background-primary);
+ --color-foreground: var(--color-text-primary);
+ --color-white: #ffffff;
+ --color-surface: var(--color-surface);
+ --color-background-main: var(--color-background-secondary);
+ --color-background-secondary: var(--color-background-secondary);
+ --color-text-primary: var(--color-text-primary);
+ --color-text-secondary: var(--color-text-secondary);
+ --color-text-muted: var(--color-text-muted);
+ --color-text-inverse: #ffffff;
+ --color-border: var(--color-border);
+ --color-border-subtle: var(--color-border-subtle);
+ --color-muted-foreground: var(--color-text-muted);
+ --color-blue: #2563eb;
+ --color-green: #10b981;
+ --color-amber: #f59e0b;
+ --color-red: #ef4444;
+ --color-gray: #64748b;
+
+ /* Typography */
+ --font-sans: ui-sans-serif, system-ui, sans-serif;
+ --font-mono: ui-monospace, 'JetBrains Mono', 'SF Mono', monospace;
+
+ /* Font sizes */
+ --font-size-xs: 0.6875rem; /* 11px - labels */
+ --font-size-sm: 0.75rem; /* 12px - caption */
+ --font-size-base: 0.8125rem; /* 13px - body */
+ --font-size-md: 0.875rem; /* 14px - body */
+ --font-size-data: 1rem; /* 16px - data/mono */
+ --font-size-lg: 1.125rem; /* 18px - titles */
+ --font-size-xl: 2rem;
+ --color-sidebar-ring: var(--sidebar-ring);
+ --color-sidebar-border: var(--sidebar-border);
+ --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+ --color-sidebar-accent: var(--sidebar-accent);
+ --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+ --color-sidebar-primary: var(--sidebar-primary);
+ --color-sidebar-foreground: var(--sidebar-foreground);
+ --color-sidebar: var(--sidebar);
+ --color-chart-5: var(--chart-5);
+ --color-chart-4: var(--chart-4);
+ --color-chart-3: var(--chart-3);
+ --color-chart-2: var(--chart-2);
+ --color-chart-1: var(--chart-1);
+ --color-ring: var(--ring);
+ --color-input: var(--input);
+ --color-destructive: var(--destructive);
+ --color-accent-foreground: var(--accent-foreground);
+ --color-accent: var(--accent);
+ --color-muted-foreground: var(--muted-foreground);
+ --color-muted: var(--muted);
+ --color-secondary-foreground: var(--secondary-foreground);
+ --color-secondary: var(--secondary);
+ --color-primary-foreground: var(--primary-foreground);
+ --color-primary: var(--primary);
+ --color-popover-foreground: var(--popover-foreground);
+ --color-popover: var(--popover);
+ --color-card-foreground: var(--card-foreground);
+ --color-card: var(--card);
+ --color-foreground: var(--foreground);
+ --color-background: var(--background);
+ --color-text-muted: #94a3b8;
+ --color-background-main: #f8fafc;
+ --color-background-secondary: #f1f5f9;
+ --color-border-subtle: #e2e8f0;
+ 
+ /* Radius */
+ --radius-sm: calc(var(--radius) - 4px);
+ --radius-md: calc(var(--radius) - 2px);
+ --radius-lg: var(--radius);
+ --radius-xl: calc(var(--radius) + 4px);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* Ensure body uses theme-aware background */
+html, body {
+ background-color: var(--color-background-primary);
+}
+
+/* Global styles */
+* {
+ box-sizing: border-box;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+ margin: 0;
+ padding: 0;
+ color: var(--color-text-primary);
+ font-family: var(--font-sans);
+ font-size: 0.875rem;
+ line-height: 1.5;
+ -webkit-font-smoothing: antialiased;
+ -moz-osx-font-smoothing: grayscale;
+}
+
+/* Remove conflicting OS-level dark preference override (let next-themes control) */
+
+/* Utility classes for gradients */
+.gradient-blue-subtle {
+ background: linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(147, 197, 253, 0.05) 100%);
+}
+
+.gradient-blue-glow {
+ box-shadow: 0 4px 20px rgba(59, 130, 246, 0.15);
+}
+
+.gradient-text-blue {
+ background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 50%, #1e3a8a 100%);
+ -webkit-background-clip: text;
+ background-clip: text;
+ -webkit-text-fill-color: transparent;
+}
+
+/* Corner Bracket Design System */
+.corner-brackets {
+ position: relative;
+}
+
+.corner-brackets::before,
+.corner-brackets::after,
+.corner-brackets-inner::before,
+.corner-brackets-inner::after {
+ content: '';
+ position: absolute;
+ pointer-events: none;
+ transition: border-color 150ms ease-out;
+}
+
+/* Sizes */
+.corner-brackets-sm::before,
+.corner-brackets-sm::after,
+.corner-brackets-sm .corner-brackets-inner::before,
+.corner-brackets-sm .corner-brackets-inner::after {
+ width: 12px;
+ height: 12px;
+}
+
+.corner-brackets-md::before,
+.corner-brackets-md::after,
+.corner-brackets-md .corner-brackets-inner::before,
+.corner-brackets-md .corner-brackets-inner::after {
+ width: 16px;
+ height: 16px;
+}
+
+.corner-brackets-lg::before,
+.corner-brackets-lg::after,
+.corner-brackets-lg .corner-brackets-inner::before,
+.corner-brackets-lg .corner-brackets-inner::after {
+ width: 24px;
+ height: 24px;
+}
+
+/* Top-left corner */
+.corner-brackets::before {
+ top: -1px;
+ left: -1px;
+ border-top: 2px solid;
+ border-left: 2px solid;
+}
+
+/* Top-right corner */
+.corner-brackets::after {
+ top: -1px;
+ right: -1px;
+ border-top: 2px solid;
+ border-right: 2px solid;
+}
+
+/* Bottom-left corner */
+.corner-brackets-inner::before {
+ bottom: -1px;
+ left: -1px;
+ border-bottom: 2px solid;
+ border-left: 2px solid;
+}
+
+/* Bottom-right corner */
+.corner-brackets-inner::after {
+ bottom: -1px;
+ right: -1px;
+ border-bottom: 2px solid;
+ border-right: 2px solid;
+}
+
+/* Variants */
+.corner-brackets-default::before,
+.corner-brackets-default::after,
+.corner-brackets-default .corner-brackets-inner::before,
+.corner-brackets-default .corner-brackets-inner::after {
+ border-color: #e2e8f0;
+}
+
+
+.corner-brackets-active::before,
+.corner-brackets-active::after,
+.corner-brackets-active .corner-brackets-inner::before,
+.corner-brackets-active .corner-brackets-inner::after {
+ border-color: #3b82f6;
+ filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.5));
+ animation: pulse-border 3s ease-in-out infinite;
+}
+
+
+@keyframes pulse-border {
+ 0%, 100% {
+ opacity: 1;
+ filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.5));
+ }
+ 50% {
+ opacity: 0.8;
+ filter: drop-shadow(0 0 12px rgba(59, 130, 246, 0.7));
+ }
+}
+
+.corner-brackets-hover::before,
+.corner-brackets-hover::after,
+.corner-brackets-hover .corner-brackets-inner::before,
+.corner-brackets-hover .corner-brackets-inner::after {
+ border-color: #e2e8f0;
+ transition: all 0.3s ease;
+}
+
+
+.corner-brackets-hover:hover::before,
+.corner-brackets-hover:hover::after,
+.corner-brackets-hover:hover .corner-brackets-inner::before,
+.corner-brackets-hover:hover .corner-brackets-inner::after {
+ border-color: #60a5fa;
+ filter: drop-shadow(0 0 4px rgba(96, 165, 250, 0.3));
+}
+
+.corner-brackets-critical::before,
+.corner-brackets-critical::after,
+.corner-brackets-critical .corner-brackets-inner::before,
+.corner-brackets-critical .corner-brackets-inner::after {
+ border-color: #ef4444;
+}
+
+.corner-brackets-success::before,
+.corner-brackets-success::after,
+.corner-brackets-success .corner-brackets-inner::before,
+.corner-brackets-success .corner-brackets-inner::after {
+ border-color: #10b981;
+}
+
+/* Corner visibility utilities for stacked elements */
+.corner-brackets-hide-top::before,
+.corner-brackets-hide-top::after {
+ display: none;
+}
+
+.corner-brackets-hide-bottom .corner-brackets-inner::before,
+.corner-brackets-hide-bottom .corner-brackets-inner::after {
+ display: none;
+}
+
+.corner-brackets-hide-top-left::before {
+ display: none;
+}
+
+.corner-brackets-hide-top-right::after {
+ display: none;
+}
+
+.corner-brackets-hide-bottom-left .corner-brackets-inner::before {
+ display: none;
+}
+
+.corner-brackets-hide-bottom-right .corner-brackets-inner::after {
+ display: none;
+}
+
+/* Removed OKLCH dark palette block */
+
+@layer base {
+ * {
+ @apply border-border outline-ring/50;
+ }
+ body {
+ @apply bg-background text-foreground;
+ }
+}
+
+/* Onboarding Wizard: Dieter Rams Aesthetic */
+[data-onboarding] *,
+[data-onboarding] *::before,
+[data-onboarding] *::after {
+ border-radius: 0 !important;
 }

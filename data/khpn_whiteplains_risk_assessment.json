@@ -1,0 +1,241 @@
+{
+  "airport_code": "KHPN",
+  "airport_name": "Westchester County Airport (White Plains)",
+  "location": "White Plains, Westchester County, New York, USA",
+  "data_collection_date": "2025-11-10",
+  "sources": {
+    "primary": [
+      "FAA Eastern Region official documentation",
+      "Westchester County Airport official website (airport.westchestergov.com)",
+      "FAA AirNav database",
+      "National Weather Service - New York (forecast.weather.gov)",
+      "Customs and Border Protection (CBP) General Aviation Fact Sheet",
+      "FAA Eastern Region aeronautical publications"
+    ],
+    "secondary": [
+      "FlightAware airport information",
+      "AirNav airport guide",
+      "AC-U-KWIK airport reference",
+      "GlobalAir.com airport data",
+      "FlightPlan Database",
+      "AOPA airport resources"
+    ]
+  },
+  "risk_factors": {
+    "operational_hours": {
+      "opens_utc": "Open 24 hours",
+      "closes_utc": "Open 24 hours",
+      "night_curfew": true,
+      "curfew_start_utc": "00:00 (midnight local)",
+      "curfew_end_utc": "06:30 (local)",
+      "weekend_restrictions": false,
+      "holiday_closures": false,
+      "tower_hours": "06:00-23:00 local time",
+      "notes": "Voluntary Restraint From Flying (VRFF) program requests aircraft refrain from operations between midnight and 6:30 AM local time. This is voluntary but monitored. Tower operations limited to 06:00-23:00 local.",
+      "curfew_type": "Voluntary restraint program"
+    },
+    "slot_requirements": {
+      "slot_controlled": false,
+      "advance_booking_required_hours": 0,
+      "slot_availability_typical": "No formal slot system; first-come, first-served basis",
+      "peak_congestion_times": "Business hours (08:00-17:00 weekdays), summer period (May-September)",
+      "notes": "No slot system in place. However, aircraft over 120,000 lbs maximum ramp weight require Prior Permission from Airport Manager with 2-hour notice for customs clearance."
+    },
+    "weather_vulnerability": {
+      "fog_prone": true,
+      "snow_closure_frequency": "Occasional (2-5 events annually)",
+      "wind_limitations": false,
+      "requires_cat_ii_iii_capability": true,
+      "seasonal_risk_periods": "December-February (winter snow/ice), May-September (thunderstorms)",
+      "cat_capability": "ILS approach available; CAT II/III capable",
+      "weather_patterns": "Temperate continental climate. Winter: occasional snow (avg 20-24 inches annually), ice events. Spring/Summer: thunderstorms (peak July-August). Fall: generally stable. Fog common in early morning and evenings.",
+      "thunderstorm_risk": "Significant summer risk (July-August peak)",
+      "historical_fog_incidence": "Patchy fog common during overnight/early morning hours"
+    },
+    "runway_specifications": {
+      "minimum_runway_length_meters": 1356.7,
+      "minimum_runway_length_feet": 4451,
+      "runway_surface_type": "Asphalt (grooved)",
+      "number_of_runways": 2,
+      "crosswind_limitations": "Standard 15 knot crosswind limitation",
+      "weight_restrictions": "Maximum 120,000 lbs double-wheel bearing capacity",
+      "runway_details": [
+        {
+          "runway_id": "16/34",
+          "length_meters": 1996,
+          "length_feet": 6549,
+          "width_feet": 150,
+          "surface": "Asphalt (grooved)",
+          "lighting": "High-intensity",
+          "condition": "Good",
+          "approaches": ["ILS", "RNAV", "GPS"],
+          "weight_capacity_double_wheel": "120,000 lbs"
+        },
+        {
+          "runway_id": "11/29",
+          "length_meters": 1356,
+          "length_feet": 4451,
+          "width_feet": 150,
+          "surface": "Asphalt (grooved)",
+          "lighting": "Medium-intensity",
+          "condition": "Fair",
+          "approaches": ["ILS", "GPS"],
+          "weight_capacity_single_wheel": "70,000 lbs",
+          "weight_capacity_double_wheel": "120,000 lbs"
+        }
+      ],
+      "elevation_feet": 430,
+      "elevation_meters": 131,
+      "notes": "Limited runway options; longest is 6,549 feet. Runway 11/29 in fair condition. Aircraft weight restrictions apply."
+    },
+    "crew_requirements": {
+      "special_crew_training_required": true,
+      "mountain_airport_rating": false,
+      "cat_ii_iii_rating_required": "Recommended",
+      "captain_only_airport": false,
+      "minimum_pilot_hours": "Private pilot certificate minimum; instrument rating recommended",
+      "special_training": [
+        "Knowledge of NYC Class D airspace procedures",
+        "Familiarity with Westchester airspace and procedures",
+        "Understanding of noise abatement procedures and voluntary flight restraint (VRFF)",
+        "Customs procedures and PPR requirements for heavy aircraft"
+      ],
+      "notes": "FAA provides detailed pilot briefing materials. Aircraft over 120,000 lbs require Airport Manager permission."
+    },
+    "handling_complexity": {
+      "handler_availability_24_7": true,
+      "fuel_availability": true,
+      "customs_hours": "0730-2315 ET daily (with 2-hour prior notice)",
+      "immigration_processing_time_avg": "15-30 minutes",
+      "minimum_notice_hours": 2,
+      "weekend_surcharges": false,
+      "handling_options": [
+        "Multiple Fixed Base Operators (FBOs)",
+        "24/7 ground support",
+        "Fuel services (Jet A and 100LL)",
+        "US Customs pre-clearance available"
+      ],
+      "notes": "Excellent handling infrastructure. Multiple FBO options available. Customs clearance requires 2-hour advance notice."
+    },
+    "congestion_metrics": {
+      "average_taxi_time_minutes": 8,
+      "peak_hour_delays_typical": "10-30 minutes during business hours",
+      "airspace_complexity": "High - proximity to NYC Class B airspace (adjacent to LGA, JFK, EWR Class B)",
+      "atc_delays_frequency": "Common during peak hours",
+      "seasonal_congestion_multiplier": 1.3,
+      "notes": "Congestion primarily driven by NYC airspace proximity rather than airport capacity. Summer thunderstorm season (May-September) can cause delays."
+    },
+    "permits_and_clearances": {
+      "requires_prior_permission": true,
+      "ppr_notice_period_hours": 2,
+      "overflight_permit_required": false,
+      "landing_permit_processing_time": "Immediate via ATC (Class D airspace)",
+      "diplomatic_clearance_required": false,
+      "customs_requirement": "PPR minimum 2 hours in advance for international arrivals",
+      "notes": "Aircraft over 120,000 lbs ramp weight must obtain Airport Manager permission. Jet-powered aircraft may require operational clearance.",
+      "international_flights": "US Customs pre-clearance available with 2-hour notice"
+    },
+    "noise_restrictions": {
+      "noise_category_required": "Chapter 3 (Stage 3) minimum",
+      "chapter_requirements": "Chapter 3 or better; Chapter 2 aircraft have operational restrictions",
+      "noise_surcharges": "Yes - violations assessed",
+      "preferred_departure_routes": [
+        "Standard noise abatement procedures required",
+        "Specific runways may be restricted during noise-sensitive periods"
+      ],
+      "noise_complaints_risk": "High - airport surrounded by residential areas",
+      "maximum_noise_levels": "Operators causing noise at or above 93 dBA will be contacted",
+      "violation_consequences": "Operational restrictions and surcharges possible",
+      "notes": "Noise abatement procedures in effect at all times. Operators must comply with voluntary restraint program 00:00-06:30 local."
+    },
+    "infrastructure_reliability": {
+      "power_outage_frequency": "Rare",
+      "equipment_failure_rate": "Low",
+      "maintenance_closure_days_annual": "Minimal (under 5 days)",
+      "backup_systems_available": true,
+      "historical_closure_incidents": "None reported in recent years",
+      "winter_maintenance": "Active snow removal and maintenance programs"
+    },
+    "security_requirements": {
+      "security_screening_time_avg": "0 minutes (general aviation facility - no TSA screening)",
+      "enhanced_security_periods": "None typically",
+      "vip_security_delays": "Minimal",
+      "passenger_background_check_required": false,
+      "notes": "General aviation facility without TSA screening - major advantage for private operations."
+    },
+    "seasonal_factors": {
+      "high_season_months": ["May", "June", "July", "August", "September", "December"],
+      "ski_season_congestion": "Minimal direct impact",
+      "summer_thunderstorm_frequency": "High - peak July-August (30-40 days with thunderstorm activity)",
+      "winter_deicing_delays_avg": "20-30 minutes (when required)",
+      "holiday_peak_dates": ["Thanksgiving", "Christmas-New Year", "Memorial Day", "Labor Day"],
+      "notes": "Summer thunderstorms primary seasonal challenge. Winter snow/ice less frequent but impactful. Business travel patterns influence weekday congestion."
+    },
+    "alternate_airport_proximity": {
+      "nearest_suitable_alternate_code": "KLGA",
+      "alternate_airport_name": "LaGuardia Airport",
+      "distance_to_alternate_km": 35.4,
+      "distance_to_alternate_nm": 19.1,
+      "distance_to_alternate_miles": 22,
+      "ground_transport_time_to_alternate_minutes": 30,
+      "alternate_typically_available": true,
+      "backup_alternates": [
+        {
+          "code": "KTEB",
+          "name": "Teterboro Airport",
+          "distance_km": 39.3,
+          "distance_miles": 24.4,
+          "notes": "General aviation facility, less congested"
+        },
+        {
+          "code": "KEWR",
+          "name": "Newark Liberty International",
+          "distance_km": 56.3,
+          "distance_miles": 35,
+          "notes": "Major hub with more facilities"
+        },
+        {
+          "code": "KJFK",
+          "name": "John F. Kennedy International",
+          "distance_km": 72.4,
+          "distance_miles": 45,
+          "notes": "Largest NYC airport"
+        }
+      ],
+      "notes": "Multiple excellent alternates available within 35 miles. All major NYC airports accessible."
+    },
+    "payment_and_fees": {
+      "advance_payment_required": false,
+      "credit_account_needed": false,
+      "handling_agent_prepayment": "Not required but common for fuel",
+      "fuel_payment_terms": "Post-flight settlement available; credit cards accepted",
+      "landing_fees": "Yes - per airport schedule (variable by aircraft)",
+      "handling_fees": "Yes - variable by FBO",
+      "parking_fees": "Yes - overnight parking charges apply",
+      "notes": "Transparent fee structure. Multiple FBOs allow fee comparison."
+    }
+  },
+  "summary": {
+    "risk_level": "Medium",
+    "primary_challenges": [
+      "Noise restrictions and residential proximity",
+      "Summer thunderstorm season (May-September) with frequent delays",
+      "NYC Class B airspace complexity (adjacent to major metros)",
+      "Limited runway capacity and aging infrastructure",
+      "Weight restrictions on smaller runway (4,451 ft)",
+      "Mandatory noise abatement procedures",
+      "Early morning/late night flight restrictions (voluntary)"
+    ],
+    "operational_advantages": [
+      "24/7 operations capability",
+      "Proximity to NYC (30 miles to Midtown)",
+      "No TSA screening (vs. commercial airports)",
+      "Multiple FBO options with good services",
+      "US Customs pre-clearance available",
+      "Multiple excellent alternate airports",
+      "Modern runway instrumentation (ILS)"
+    ],
+    "crew_considerations": "Must understand NYC Class D airspace procedures, noise abatement rules, and customs PPR requirements. Instrument rating recommended for operations during low-visibility periods. Aircraft over 120,000 lbs require special Airport Manager clearance.",
+    "planning_recommendation": "Business hours (08:00-17:00 weekdays) experience moderate congestion due to NYC airspace; early morning or evening slots preferred. Summer thunderstorm season (July-August) requires flexible scheduling. Verify aircraft not restricted by noise regulations. Comply with voluntary restraint program (midnight-6:30 AM). Plan for 2-hour customs notice. Holiday periods (Dec, Thanksgiving, Memorial Day) require advance awareness."
+  }
+}

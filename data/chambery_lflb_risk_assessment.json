@@ -1,0 +1,210 @@
+{
+  "airport_code": "LFLB",
+  "airport_name": "Chambéry Savoie Mont Blanc Airport (Aix-les-Bains)",
+  "location": "Chambéry, Savoie, French Alps",
+  "data_collection_date": "2025-11-10",
+  "sources": {
+    "primary": [
+      "Aéroport Chambéry Savoie Mont Blanc official website",
+      "French DGAC (Direction Générale de l'Aviation Civile)",
+      "IVAO France documentation (LFLB - Chambéry Aix-les-Bains)",
+      "VFR-Pilote French flight operations database",
+      "EASA Alpine flying procedures documentation"
+    ],
+    "secondary": [
+      "FlightAware airport information",
+      "SKYbrary Aviation Safety Database",
+      "AirwayMap.com aeronautical charts",
+      "Flytag flight support services",
+      "Weather services (meteoblue, Foreca, Windy)"
+    ]
+  },
+  "risk_factors": {
+    "operational_hours": {
+      "opens_utc": "07:00",
+      "closes_utc": "20:00",
+      "night_curfew": true,
+      "curfew_start_utc": "20:00",
+      "curfew_end_utc": "07:00",
+      "weekend_restrictions": "Limited operations weekends (varies by season)",
+      "holiday_closures": false,
+      "notes": "Business Terminal: 09:30-18:30 weekdays, 09:00-18:00 weekends/holidays (winter: 07:30-21:00). Control tower active 07:00-20:00 UTC.",
+      "additional_hours": {
+        "control_tower": "00:00-24:00 (24-hour available via Chambéry Approche/Tour)",
+        "chamb_tour": "118.300 MHz - 24 hours",
+        "chamb_approach": "121.205 MHz - 24 hours"
+      }
+    },
+    "slot_requirements": {
+      "slot_controlled": true,
+      "advance_booking_required_hours": 24,
+      "slot_availability_typical": "Slots required for all operations; availability generally good except peak ski season",
+      "peak_congestion_times": "December-February (ski season), July-August (summer holiday), Easter period",
+      "notes": "Alpine aviation procedures require close coordination with ATC. Handling is mandatory."
+    },
+    "weather_vulnerability": {
+      "fog_prone": true,
+      "snow_closure_frequency": "Frequent December-March - average 2-3 closure days per month during peak winter",
+      "wind_limitations": "Strong mountain winds common; wind warnings can restrict operations",
+      "requires_cat_ii_iii_capability": true,
+      "seasonal_risk_periods": "November-March (winter), occasional spring storms",
+      "cat_capability": "Category I ILS available on runways 18 and 36",
+      "weather_patterns": "Alpine continental climate. Heavy winter snowfall (200-300cm annually at airport). Spring thaw creates avalanche risk. Afternoon thunderstorms common summer.",
+      "fog_characteristics": "Valley fog common in early morning and evening, particularly November-February",
+      "wind_characteristics": "Föhn winds (warm, dry mountain winds) can exceed 60 km/h; valley wind funneling effects"
+    },
+    "runway_specifications": {
+      "minimum_runway_length_meters": 2020,
+      "runway_surface_type": "Asphalt (primary) and Grass",
+      "number_of_runways": 2,
+      "crosswind_limitations": "Variable - mountain terrain effects on wind pattern",
+      "weight_restrictions": "No published restrictions but mountainous terrain limits very large aircraft",
+      "runway_details": [
+        {
+          "runway_id": "18/36",
+          "length_meters": 2020,
+          "length_feet": 6627,
+          "width_meters": 45,
+          "surface": "Asphalt",
+          "ils": "CAT I available",
+          "notes": "Primary runway"
+        },
+        {
+          "runway_id": "18L/36R",
+          "length_meters": 700,
+          "surface": "Grass",
+          "ils": "None",
+          "notes": "Backup/seasonal use"
+        }
+      ],
+      "elevation_meters": 235,
+      "elevation_feet": 779,
+      "magnetic_variation": "1-2 degrees East",
+      "notes": "Relatively short runway for international operations. Alpine terrain requires precise approaches."
+    },
+    "crew_requirements": {
+      "special_crew_training_required": true,
+      "mountain_airport_rating": "Recommended - Alpine flying certificate preferred",
+      "cat_ii_iii_rating_required": true,
+      "captain_only_airport": false,
+      "minimum_pilot_hours": "Mountain flying experience mandatory; specific Alpine certification recommended",
+      "alpine_procedures": "Mandatory familiarity with French Alpine flying procedures and terrain avoidance techniques",
+      "notes": "EASA FCL.815 mountain rating requirements apply. Pilots unfamiliar with Alpine operations should arrange ground training. Special approach procedures for terrain clearance."
+    },
+    "handling_complexity": {
+      "handler_availability_24_7": false,
+      "fuel_availability": true,
+      "customs_hours": "24-hour prior notification required",
+      "immigration_processing_time_avg": "30-45 minutes (EU processing)",
+      "minimum_notice_hours": 24,
+      "weekend_surcharges": "Yes - premium rates for weekend/holiday operations",
+      "certified_handlers": [
+        "Aéroclub de Savoie",
+        "Various DGAC-certified operators"
+      ],
+      "notes": "Mandatory handling. Limited FBO services compared to major airports. Winter operations require specific ground support arrangements.",
+      "winter_considerations": "Snow removal services available; de-icing coordination required in advance"
+    },
+    "congestion_metrics": {
+      "average_taxi_time_minutes": 10,
+      "peak_hour_delays_typical": "15-30 minutes ski season, 10-20 minutes summer",
+      "airspace_complexity": "Medium-High - Alpine terrain requires precise navigation",
+      "atc_delays_frequency": "Occasional during peak ski season",
+      "seasonal_congestion_multiplier": 3.0,
+      "notes": "Ski season (Dec-Feb) creates 3x normal traffic. Small airport can quickly exceed capacity. Summer tourism creates secondary peak."
+    },
+    "permits_and_clearances": {
+      "requires_prior_permission": true,
+      "ppr_notice_period_hours": 24,
+      "overflight_permit_required": false,
+      "landing_permit_processing_time": "Immediate (within slot availability)",
+      "diplomatic_clearance_required": false,
+      "notes": "PPR required for all operations. Alpine procedures briefing may be required for unfamiliar crews.",
+      "special_approvals": "Mountain flying certification verification may be requested"
+    },
+    "noise_restrictions": {
+      "noise_category_required": "Stage 3 minimum",
+      "chapter_requirements": "Chapter 3 or better compliance required",
+      "noise_surcharges": "Yes - applicable for non-compliant aircraft",
+      "preferred_departure_routes": "Mountain departure procedures established per Alpine aviation guidelines",
+      "noise_complaints_risk": "Low-Medium - small airport with few noise-sensitive areas",
+      "notes": "Noise less significant issue than at larger airports. Alpine procedures inherently minimize ground noise."
+    },
+    "infrastructure_reliability": {
+      "power_outage_frequency": "Rare",
+      "equipment_failure_rate": "Low",
+      "maintenance_closure_days_annual": "2-5 days (coordinated with low-traffic periods)",
+      "backup_systems_available": true,
+      "historical_closure_incidents": "Minimal",
+      "winter_reliability": "Generally reliable but heavy snow can temporarily affect operations"
+    },
+    "security_requirements": {
+      "security_screening_time_avg": "10-15 minutes",
+      "enhanced_security_periods": "None typically; EU standard procedures",
+      "vip_security_delays": "Minimal",
+      "passenger_background_check_required": "Standard Schengen requirements",
+      "notes": "Standard EU security protocols. Small airport provides expedited processing."
+    },
+    "seasonal_factors": {
+      "high_season_months": ["December", "January", "February", "July", "August"],
+      "ski_season_congestion": "Extreme - December-February peak tourism to local ski resorts",
+      "summer_thunderstorm_frequency": "Moderate - afternoon storms common July-August",
+      "winter_deicing_delays_avg": "30-60 minutes during heavy snow operations",
+      "holiday_peak_dates": ["Christmas-New Year", "February half-term", "Easter", "Summer holidays"],
+      "notes": "Ski season creates primary operational challenge. Winter weather can cause multi-day closures. Summer relatively quiet except holidays."
+    },
+    "alternate_airport_proximity": {
+      "nearest_suitable_alternate_code": "LSGG",
+      "alternate_airport_name": "Geneva Cointrin International Airport",
+      "distance_to_alternate_km": 66,
+      "distance_to_alternate_nm": 35.6,
+      "alternate_typically_available": true,
+      "ground_transport_time_to_alternate_minutes": 60,
+      "backup_alternates": [
+        {
+          "code": "LFPG-Lyon",
+          "name": "Lyon-Saint-Exupéry",
+          "distance_km": 150,
+          "notes": "Major hub, excellent facilities"
+        },
+        {
+          "code": "LFLS",
+          "name": "Grenoble Alpes-Isère",
+          "distance_km": 100,
+          "notes": "Closer alternative but smaller, limited services"
+        }
+      ],
+      "notes": "Geneva is preferred alternate with better facilities and reliability. Lyon offers international connections. All alternates in moderate to high-altitude terrain."
+    },
+    "payment_and_fees": {
+      "advance_payment_required": false,
+      "credit_account_needed": false,
+      "handling_agent_prepayment": "Often required for fuel and ground services",
+      "fuel_payment_terms": "Post-flight settlement available with handling agent coordination",
+      "landing_fees": "Yes - based on aircraft weight and operation type",
+      "parking_fees": "Yes - hourly rates, Alpine weather surcharges apply in winter",
+      "winter_surcharges": "Yes - additional charges for snow removal and de-icing services",
+      "notes": "Payment methods through handling agents; credit cards accepted. DGAC maintains published tariff schedule."
+    }
+  },
+  "summary": {
+    "risk_level": "High",
+    "primary_challenges": [
+      "Alpine terrain requires specialized crew training",
+      "Severe winter weather (snow, fog, wind)",
+      "Seasonal congestion (ski season Dec-Feb)",
+      "Limited runway length for large aircraft",
+      "Mountain weather makes CAT II/III rating essential",
+      "Limited ground services compared to major airports"
+    ],
+    "operational_advantages": [
+      "Excellent destination during ski season",
+      "Mountain scenery and low traffic outside peak season",
+      "Modern CAT I ILS capability",
+      "Good alternate airports available (Geneva)",
+      "Generally efficient operations when weather permits"
+    ],
+    "crew_considerations": "Mandatory: Alpine mountain flying certification, CAT II/III rating essential. Pre-flight Alpine procedures briefing recommended. Experience with terrain-following procedures required.",
+    "planning_recommendation": "Book minimum 48-72 hours advance. Verify Alpine crew certifications in crew requirements. Winter season (Dec-Feb) requires extra attention to weather forecasting and de-icing arrangements. Summer operations (Jul-Aug) more predictable. Always have Geneva or Lyon as backup alternate. Monitor mountain weather closely."
+  }
+}

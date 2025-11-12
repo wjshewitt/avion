@@ -1,0 +1,58 @@
+{
+  "FLT234": {
+    "flightId": "FLT234",
+    "weatherRisk": 35,
+    "operationalRisk": 20,
+    "terrainRisk": 15,
+    "totalRisk": 25
+  },
+  "FLT567": {
+    "flightId": "FLT567",
+    "weatherRisk": 65,
+    "operationalRisk": 55,
+    "terrainRisk": 30,
+    "totalRisk": 52
+  },
+  "FLT891": {
+    "flightId": "FLT891",
+    "weatherRisk": 25,
+    "operationalRisk": 18,
+    "terrainRisk": 40,
+    "totalRisk": 28
+  },
+  "FLT123": {
+    "flightId": "FLT123",
+    "weatherRisk": 85,
+    "operationalRisk": 75,
+    "terrainRisk": 20,
+    "totalRisk": 68
+  },
+  "FLT456": {
+    "flightId": "FLT456",
+    "weatherRisk": 15,
+    "operationalRisk": 12,
+    "terrainRisk": 25,
+    "totalRisk": 17
+  },
+  "FLT789": {
+    "flightId": "FLT789",
+    "weatherRisk": 70,
+    "operationalRisk": 45,
+    "terrainRisk": 22,
+    "totalRisk": 50
+  },
+  "FLT321": {
+    "flightId": "FLT321",
+    "weatherRisk": 20,
+    "operationalRisk": 15,
+    "terrainRisk": 18,
+    "totalRisk": 18
+  },
+  "FLT654": {
+    "flightId": "FLT654",
+    "weatherRisk": 30,
+    "operationalRisk": 25,
+    "terrainRisk": 35,
+    "totalRisk": 30
+  }
+}

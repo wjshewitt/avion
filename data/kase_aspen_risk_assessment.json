@@ -1,0 +1,236 @@
+{
+  "airport_code": "KASE",
+  "airport_name": "Aspen/Pitkin County Airport (Sardy Field)",
+  "location": "Aspen, Pitkin County, Colorado, USA",
+  "data_collection_date": "2025-11-10",
+  "sources": {
+    "primary": [
+      "FAA Mountain Region official documentation",
+      "Aspen Airport official website (aspenairport.com)",
+      "FAA AirNav database",
+      "National Weather Service - Colorado",
+      "FAA High Altitude Airport operations guides",
+      "Aspen Airport Pilot Information pages"
+    ],
+    "secondary": [
+      "FlightAware airport information",
+      "SkyVector airport data",
+      "IVAO KZDV SOP documentation",
+      "AOPA airport resources",
+      "ForeFlight mountain flying resources",
+      "AC-U-KWIK airport reference"
+    ]
+  },
+  "risk_factors": {
+    "operational_hours": {
+      "opens_utc": "07:00 local time",
+      "closes_utc": "23:00 local time",
+      "night_curfew": true,
+      "curfew_start_utc": "23:00 local",
+      "curfew_end_utc": "07:00 local",
+      "weekend_restrictions": false,
+      "holiday_closures": false,
+      "tower_hours": "07:00-23:00 local time",
+      "notes": "Limited operational window (16 hours/day). Control tower operates same hours. No night operations permitted.",
+      "seasonal_notes": "Temporary closure May 5-June 1 for runway maintenance (seasonal variation)"
+    },
+    "slot_requirements": {
+      "slot_controlled": false,
+      "advance_booking_required_hours": 0,
+      "slot_availability_typical": "No formal slot system",
+      "peak_congestion_times": "Ski season (December-March), summer leisure (June-September)",
+      "notes": "No slot requirement. However, landing permits may be required for specific flight types."
+    },
+    "weather_vulnerability": {
+      "fog_prone": true,
+      "snow_closure_frequency": "High - 10-15 events annually requiring closures",
+      "wind_limitations": true,
+      "requires_cat_ii_iii_capability": false,
+      "seasonal_risk_periods": "November-March (winter snow/ice), May-September (summer thunderstorms)",
+      "cat_capability": "Standard ILS approach capability",
+      "weather_patterns": "High-altitude mountain climate. Winter: frequent snow, ice, wind. Spring: variable. Summer: afternoon thunderstorms, wind. Fall: rapidly changing conditions.",
+      "snow_risk": "High - runway closure frequency 10-15 events/year",
+      "wind_risk": "Significant - mountain valley winds can restrict operations",
+      "thunderstorm_risk": "Moderate to high (May-September peak)",
+      "mountain_turbulence": "Common due to surrounding terrain and high elevation"
+    },
+    "runway_specifications": {
+      "minimum_runway_length_meters": 2440,
+      "minimum_runway_length_feet": 8006,
+      "runway_surface_type": "Asphalt (grooved)",
+      "number_of_runways": 1,
+      "crosswind_limitations": "Standard 15 knot crosswind limitation",
+      "weight_restrictions": "No specific published weight restrictions",
+      "runway_details": [
+        {
+          "runway_id": "15/33",
+          "length_meters": 2440,
+          "length_feet": 8006,
+          "width_feet": 100,
+          "width_meters": 30,
+          "surface": "Asphalt (grooved)",
+          "lighting": "Medium-intensity",
+          "condition": "Good",
+          "approaches": ["ILS", "GPS"],
+          "elevation_runway_15_feet": 7680,
+          "elevation_runway_33_feet": 7838,
+          "weight_bearing": "S-80, D-100, ST-160",
+          "pcr_value": "373/F/B/X/T"
+        }
+      ],
+      "elevation_feet": 7838,
+      "elevation_meters": 2388,
+      "slope": "Runway slopes uphill (Runway 15 preferred for landings)",
+      "density_altitude_summer": "Up to 11,000 feet in summer (critical performance factor)",
+      "notes": "Single runway with significant elevation. Runway extended from 7,006 to 8,006 feet in 2011. Sloped runway affects landing/takeoff calculations significantly. High density altitude in summer requires performance planning.",
+      "performance_consideration": "Density altitude can reach 11,000 feet in July-August, significantly affecting aircraft performance"
+    },
+    "crew_requirements": {
+      "special_crew_training_required": true,
+      "mountain_airport_rating": true,
+      "cat_ii_iii_rating_required": false,
+      "captain_only_airport": false,
+      "minimum_pilot_hours": "No specific minimum, but mountain experience essential",
+      "special_training": [
+        "Mountain flying experience required",
+        "High-altitude operations knowledge",
+        "Density altitude calculations and aircraft performance planning",
+        "Mountain weather interpretation",
+        "Terrain awareness and obstacle clearance procedures",
+        "Winter operations and snow/ice procedures",
+        "Single-runway operations with limited diversion options"
+      ],
+      "notes": "FAA recommends mountain airport rating. Pilots unfamiliar with area encouraged to contact Aspen Approach (123.80) for assistance. Local knowledge highly valuable.",
+      "minimum_experience": "Mountain flying experience strongly recommended"
+    },
+    "handling_complexity": {
+      "handler_availability_24_7": false,
+      "fuel_availability": true,
+      "customs_hours": "Not applicable (domestic)",
+      "immigration_processing_time_avg": "N/A",
+      "minimum_notice_hours": 0,
+      "weekend_surcharges": false,
+      "handling_options": [
+        "FBO services available",
+        "Fuel services (Jet A and 100LL)",
+        "De-ice pad available (east of taxiway Alpha)",
+        "Aircraft ground support services"
+      ],
+      "notes": "Ground handling services available during operational hours. De-ice pad specifically for winter operations. Limited handlers; advance arrangement recommended."
+    },
+    "congestion_metrics": {
+      "average_taxi_time_minutes": 10,
+      "peak_hour_delays_typical": "20-60 minutes during peak season",
+      "airspace_complexity": "Moderate - Class D airspace, mountainous terrain",
+      "atc_delays_frequency": "Common during ski season (Dec-March)",
+      "seasonal_congestion_multiplier": 2.0,
+      "notes": "Single runway creates bottleneck during ski season. Peak congestion Dec-March and summer leisure periods. Mountain weather can restrict operations completely."
+    },
+    "permits_and_clearances": {
+      "requires_prior_permission": false,
+      "ppr_notice_period_hours": 0,
+      "overflight_permit_required": false,
+      "landing_permit_processing_time": "Immediate via ATC",
+      "diplomatic_clearance_required": false,
+      "notes": "No formal PPR system. However, pilots should contact Aspen Approach for assistance, especially if unfamiliar with high-altitude mountain operations."
+    },
+    "noise_restrictions": {
+      "noise_category_required": "No specific restrictions",
+      "chapter_requirements": "Standard FAA regulations apply",
+      "noise_surcharges": false,
+      "preferred_departure_routes": "Standard SID procedures; Runway 33 mandatory for IFR departures with specific climb gradients",
+      "noise_complaints_risk": "Low - airport in mountain area with limited residential proximity",
+      "notes": "IFR departures must use Runway 33 with specific obstacle departure procedures (ODPs). VFR departures may use other runways with procedural guidance."
+    },
+    "infrastructure_reliability": {
+      "power_outage_frequency": "Rare",
+      "equipment_failure_rate": "Low",
+      "maintenance_closure_days_annual": "5-10 days (including runway maintenance)",
+      "backup_systems_available": true,
+      "historical_closure_incidents": "Runway maintenance (subsurface moisture issues) ongoing",
+      "runway_maintenance": "Approximately $10 million runway repair project in progress (subsurface moisture)",
+      "winter_maintenance": "Active snow removal operations; de-ice pad maintained"
+    },
+    "security_requirements": {
+      "security_screening_time_avg": "None (general aviation facility)",
+      "enhanced_security_periods": "None typical",
+      "vip_security_delays": "None",
+      "passenger_background_check_required": false,
+      "notes": "General aviation facility with minimal security requirements."
+    },
+    "seasonal_factors": {
+      "high_season_months": ["December", "January", "February", "March", "July", "August"],
+      "ski_season_congestion": "Very High - Dec-March peak with significant delays",
+      "summer_thunderstorm_frequency": "Moderate - 10-20 days with activity (May-September)",
+      "winter_deicing_delays_avg": "30-60 minutes when required",
+      "holiday_peak_dates": ["Christmas-New Year", "Presidents Day", "Easter", "Thanksgiving"],
+      "summer_peaks": ["July 4th period", "Labor Day period"],
+      "winter_closure_events": "10-15 snow-related closures annually",
+      "notes": "Ski season (Dec-March) drives primary congestion. Summer (July-August) secondary peak. Winter weather frequently restricts operations. Spring (May-June) can have rapid weather changes."
+    },
+    "alternate_airport_proximity": {
+      "nearest_suitable_alternate_code": "KEGE",
+      "alternate_airport_name": "Eagle County Regional Airport (Vail area)",
+      "distance_to_alternate_km": 109,
+      "distance_to_alternate_nm": 59,
+      "distance_to_alternate_miles": 67.7,
+      "ground_transport_time_to_alternate_minutes": 90,
+      "alternate_typically_available": true,
+      "backup_alternates": [
+        {
+          "code": "KDEN",
+          "name": "Denver International Airport",
+          "distance_km": 321,
+          "distance_miles": 199.5,
+          "distance_nm": 173,
+          "notes": "Major hub, better weather, but distant"
+        },
+        {
+          "code": "KGJT",
+          "name": "Grand Junction Regional Airport",
+          "distance_km": 143,
+          "distance_miles": 89,
+          "notes": "Alternative west of mountains"
+        }
+      ],
+      "notes": "Limited alternate options due to mountain terrain. Eagle County (67 miles) primary alternate. Denver (199 miles) distant but reliable. Weather challenges mean alternates themselves may be affected."
+    },
+    "payment_and_fees": {
+      "advance_payment_required": false,
+      "credit_account_needed": false,
+      "handling_agent_prepayment": "Not required",
+      "fuel_payment_terms": "Post-flight settlement available",
+      "landing_fees": "Yes - $6.98-$8.41 per 1,000 lbs MTOW (2025 rates)",
+      "handling_fees": "Yes - variable by FBO",
+      "parking_fees": "Yes - based on duration (parking often full during peak season)",
+      "special_fees": "Terminal rental charges applicable",
+      "notes": "Landing fees decreased 2025 (from $7.75 to $6.98 for signatory airlines). General aviation fee $8.41 per 1,000 lbs. Fees billed at departure through Vector Airport Systems."
+    }
+  },
+  "summary": {
+    "risk_level": "High",
+    "primary_challenges": [
+      "Extreme high altitude (7,838 feet) requiring density altitude calculations",
+      "Winter weather severity (10-15 snow closure events annually)",
+      "Single runway operation (critical during peak seasons)",
+      "Mountain terrain with surrounding peaks to 14,000+ feet",
+      "High winds and turbulence from valley location",
+      "Limited operational hours (07:00-23:00 only)",
+      "Summer thunderstorm risk",
+      "Limited alternate airport options",
+      "Ski season congestion (Dec-March) with 2x normal traffic",
+      "Weather changes can restrict operations completely"
+    ],
+    "operational_advantages": [
+      "Well-maintained runway (extended to 8,006 feet in 2011)",
+      "Modern ILS approach capability",
+      "De-ice pad for winter operations",
+      "Professional ATC and Approach services",
+      "Reasonable handling facilities",
+      "Direct access to major ski resorts",
+      "Modern runway grooved surface"
+    ],
+    "crew_considerations": "Mountain flying experience essential. Must be proficient in high-altitude operations and density altitude calculations. Winter operations require specific training. Single runway limits flexibility. Local knowledge highly valuable - recommended to contact Aspen Approach (123.80) if unfamiliar. Understanding of mountain weather patterns critical. Aircraft performance planning essential (summer density altitude reaches 11,000 feet).",
+    "planning_recommendation": "Ski season (Dec-March) extremely congested with 2x normal delays - avoid if possible or plan for significant waiting time. Summer (July-August) secondary peak with thunderstorm risk. Spring/Fall (April-May, Sept-Oct) best conditions but weather changeable. Always plan for significant alternate distances (67+ miles to Eagle). Verify aircraft performance for high density altitude summer conditions. Winter operations require de-icing procedures. Weather can restrict operations completely - maintain flexibility. Single runway means any emergency or weather event can cause closure. Contact tower before entering Roaring Fork Valley for mountain flying guidance."
+  }
+}

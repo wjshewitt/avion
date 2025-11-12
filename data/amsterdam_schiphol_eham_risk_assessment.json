@@ -1,0 +1,222 @@
+{
+  "airport_code": "EHAM",
+  "airport_name": "Amsterdam Airport Schiphol",
+  "country": "Netherlands",
+  "city": "Amsterdam",
+  "location": "North Holland, Netherlands",
+  "coordinates": {
+    "latitude": 52.3086,
+    "longitude": 4.7639
+  },
+  "risk_assessment_date": "2025-11-10",
+  "data_sources": {
+    "primary": [
+      "Dutch Civil Aviation Authority (ILT)",
+      "Royal Schiphol Group (Koninklijke Luchtvaart Maatschappij)",
+      "Airport Coordination Netherlands (ACNL)",
+      "Netherlands AIP (eAIP)",
+      "EUROCONTROL Performance Review Unit"
+    ],
+    "secondary": [
+      "Boeing Noise Abatement Procedures",
+      "Universal Weather and Aviation Services",
+      "FlightAware Airport Database",
+      "KNMI (Royal Netherlands Meteorological Institute)"
+    ]
+  },
+  "risk_factors": {
+    "operational_hours": {
+      "opens_utc": "00:00",
+      "closes_utc": "23:59",
+      "night_curfew": true,
+      "curfew_start_utc": "22:40",
+      "curfew_end_utc": "06:55",
+      "weekend_restrictions": false,
+      "holiday_closures": false,
+      "notes": "24-hour operations with mandatory night slots. Arrivals allowed 23:00-07:15 LT with allocated night slot. Strict enforcement through ILT with fines up to €1.065M annually."
+    },
+    "slot_requirements": {
+      "slot_controlled": true,
+      "advance_booking_required_hours": 336,
+      "slot_availability_typical": "High congestion; 293,226 planning slots (Summer 2025)",
+      "peak_congestion_times": "06:00-09:00, 16:00-19:00 LT",
+      "notes": "All flights require allocated slots. ACNL coordinates through GCR format. Maximum 460,000 annual movements (government cap). 5-minute slot increments."
+    },
+    "weather_vulnerability": {
+      "fog_prone": true,
+      "snow_closure_frequency": "occasional",
+      "wind_limitations": true,
+      "requires_cat_ii_iii_capability": true,
+      "seasonal_risk_periods": "October-March (fog/snow), April-September (storms)",
+      "notes": "Fog is significant limiting factor; KNMI provides reduced visibility forecasts. Wind can restrict runway usage (crosswind limitations 15-20 knots typical). CAT II/III operations supported for low-visibility procedures."
+    },
+    "runway_specifications": {
+      "minimum_runway_length_meters": 2020,
+      "runway_surface_type": "Asphalt",
+      "number_of_runways": 6,
+      "crosswind_limitations": "15-20 knots typical",
+      "weight_restrictions": "None specified; accommodates all aircraft types",
+      "runway_details": [
+        {
+          "runway": "18R/36L",
+          "length_meters": 3800,
+          "width_meters": 60,
+          "surface": "Asphalt",
+          "designation": "Longest runway (Polderbaan)"
+        },
+        {
+          "runway": "18L/36R",
+          "length_meters": 3400,
+          "width_meters": 60,
+          "surface": "Asphalt",
+          "designation": "Aalsmeerbaan"
+        },
+        {
+          "runway": "09/27",
+          "length_meters": 3453,
+          "width_meters": 60,
+          "surface": "Asphalt",
+          "designation": "Buitenveldertbaan"
+        },
+        {
+          "runway": "06/24",
+          "length_meters": 3439,
+          "width_meters": 60,
+          "surface": "Asphalt",
+          "designation": "Kaagbaan"
+        },
+        {
+          "runway": "18C/36C",
+          "length_meters": 3300,
+          "width_meters": 60,
+          "surface": "Asphalt",
+          "designation": "Zwanenburgbaan"
+        },
+        {
+          "runway": "04/22",
+          "length_meters": 2020,
+          "width_meters": 45,
+          "surface": "Asphalt",
+          "designation": "Oostbaan (general aviation)"
+        }
+      ]
+    },
+    "crew_requirements": {
+      "special_crew_training_required": false,
+      "mountain_airport_rating": "Not applicable",
+      "cat_ii_iii_rating_required": true,
+      "captain_only_airport": false,
+      "minimum_pilot_hours": "Not specified; EASA Part-CAT requirements apply",
+      "notes": "CAT II/III operations require pilot certification for low-visibility approaches. Standard European licensing per EASA Regulation 1178/2011. Amsterdam is not a mountain airport; no special ratings required."
+    },
+    "handling_complexity": {
+      "handler_availability_24_7": true,
+      "fuel_availability": true,
+      "customs_hours": "24/7 with EU/Schengen processing",
+      "immigration_processing_time_avg": "15-30 minutes (EU/Schengen)",
+      "minimum_notice_hours": 24,
+      "weekend_surcharges": true,
+      "notes": "Regulated ground handling model effective January 2025. Multiple handlers available. Fuel (JET A-1, AVGAS) widely available. Weekend/night surcharges apply. CDM (Collaborative Decision Making) airport optimizes turnaround times."
+    },
+    "congestion_metrics": {
+      "average_taxi_time_minutes": 18,
+      "peak_hour_delays_typical": "15-30 minutes average",
+      "airspace_complexity": "High - Class B airspace, Amsterdam TMA",
+      "atc_delays_frequency": "Frequent during peak hours",
+      "seasonal_congestion_multiplier": 1.2,
+      "notes": "EUROCONTROL data: TaxiBot initiatives piloted to reduce taxi times. 2024 saw 473,815 movements (+7.2% YoY). Peak delays during 06:00-09:00 and 16:00-19:00. Complex airspace with frequent vectoring."
+    },
+    "permits_and_clearances": {
+      "requires_prior_permission": false,
+      "ppr_notice_period_hours": 24,
+      "overflight_permit_required": false,
+      "landing_permit_processing_time": "Immediate (slot-based)",
+      "diplomatic_clearance_required": false,
+      "notes": "No prior permission required for standard operations. Slot allocation is mandatory. General aviation requires ACNL slot coordination. Exemptions: state flights, emergency landings, humanitarian flights."
+    },
+    "noise_restrictions": {
+      "noise_category_required": "Chapter 4 (ICAO Annex 16)",
+      "chapter_requirements": "Cumulative margin ≥ -12 EPNdB (day), ≥ -13 EPNdB (night)",
+      "noise_surcharges": true,
+      "preferred_departure_routes": "RNAV SID routes designed to avoid residential areas",
+      "noise_complaints_risk": "High",
+      "notes": "Strict noise enforcement: April 2025 regulation prohibits aircraft with margin < -13 EPNdB between 23:00-07:00. Continuous descent approaches (CDA) mandatory at night. Enforcement through ILT with substantial fines. Amsterdam is among Europe's noisiest airports."
+    },
+    "infrastructure_reliability": {
+      "power_outage_frequency": "Rare (< 2 per year)",
+      "equipment_failure_rate": "Low (< 0.5%)",
+      "maintenance_closure_days_annual": 30,
+      "backup_systems_available": true,
+      "historical_closure_incidents": "Major maintenance 2025: Temporary noise limits adjusted for runway system work",
+      "notes": "Modern infrastructure with redundant systems. 2025 runway maintenance temporarily affects noise limits. Generally reliable; rare operational disruptions from infrastructure."
+    },
+    "security_requirements": {
+      "security_screening_time_avg": "20-45 minutes (peak times)",
+      "enhanced_security_periods": "During elevated threat levels or special events",
+      "vip_security_delays": "15-20 minutes (fast-track available)",
+      "passenger_background_check_required": true,
+      "notes": "Schengen airport with standard EU security protocols. ETIAS implementation May 2025 for non-EU visitors. PRM (Persons with Reduced Mobility) services available. Fast-track and VIP procedures available."
+    },
+    "seasonal_factors": {
+      "high_season_months": "May-September",
+      "ski_season_congestion": "Not applicable",
+      "summer_thunderstorm_frequency": "Occasional (July-August)",
+      "winter_deicing_delays_avg": "30-60 minutes (when applicable)",
+      "holiday_peak_dates": "Easter, summer holidays (mid-July to mid-August), Christmas/New Year",
+      "notes": "Spring/summer peak (May-Sept). Winter occasionally sees snow/ice requiring deicing. Deicing facilities available. Typical delay multiplier 1.2 during high season."
+    },
+    "alternate_airport_proximity": {
+      "nearest_suitable_alternate_code": "EHGG",
+      "nearest_suitable_alternate_name": "Groningen Airport Eelde",
+      "distance_to_alternate_km": 165,
+      "alternate_typically_available": true,
+      "ground_transport_time_to_alternate_minutes": 120,
+      "additional_alternates": [
+        {
+          "code": "EHAM",
+          "name": "Rotterdam The Hague Airport",
+          "distance_km": 85,
+          "ground_transport_minutes": 60
+        },
+        {
+          "code": "EHLD",
+          "name": "Eindhoven Airport",
+          "distance_km": 130,
+          "ground_transport_minutes": 90
+        },
+        {
+          "code": "EBCI",
+          "name": "Brussels Airport (Belgium)",
+          "distance_km": 185,
+          "ground_transport_minutes": 150
+        }
+      ],
+      "notes": "Multiple suitable alternates within short range. Rotterdam and Eindhoven are primary backups. All have customs/immigration services."
+    },
+    "payment_and_fees": {
+      "advance_payment_required": false,
+      "credit_account_needed": "Recommended for regular operators",
+      "handling_agent_prepayment": "Varies by handler",
+      "fuel_payment_terms": "Typically post-delivery credit for established operators",
+      "notes": "PRM levy charged per passenger for ground services. EU-regulated charging model. Airport charges every 3 years. Business terms negotiable for regular users."
+    }
+  },
+  "operational_summary": {
+    "risk_level": "HIGH",
+    "primary_risk_factors": [
+      "Extreme slot coordination complexity and congestion",
+      "Mandatory night slot system with severe penalties",
+      "Strict noise restrictions with substantial fines",
+      "Fog vulnerability affecting visibility operations",
+      "Limited runway utilization due to wind restrictions"
+    ],
+    "advantages": [
+      "24/7 operations capability",
+      "Extensive runway infrastructure (6 runways)",
+      "Reliable modern facilities",
+      "Excellent ground services and fuel availability",
+      "Multiple nearby alternate airports"
+    ],
+    "key_operational_considerations": "Amsterdam Schiphol is one of Europe's most complex and congested airports. Operators must secure slots well in advance (minimum 2 weeks, preferably months). Noise restrictions are rigorously enforced. Weather can impact operations, particularly fog in winter months. Ground handling is efficient but expensive. Night operations face strict penalties for non-compliance."
+  }
+}
