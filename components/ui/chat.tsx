@@ -17,6 +17,7 @@ import { CopyButton } from"@/components/ui/copy-button"
 import { MessageInput } from"@/components/ui/message-input"
 import { MessageList } from"@/components/ui/message-list"
 import { PromptSuggestions } from"@/components/ui/prompt-suggestions"
+import { getMessageText } from"@/lib/chat/messages"
 
 interface ChatPropsBase {
  handleSubmit: (
@@ -33,7 +34,7 @@ interface ChatPropsBase {
  messageId: string,
  rating:"thumbs-up" |"thumbs-down"
  ) => void
- setMessages?: (messages: any[]) => void
+ setMessages?: (messages: Message[] | ((messages: Message[]) => Message[])) => void
  transcribeAudio?: (blob: Blob) => Promise<string>
 }
 
@@ -72,95 +73,68 @@ export function Chat({
 
  // Enhanced stop function that marks pending tool calls as cancelled
  const handleStop = useCallback(() => {
- stop?.()
+ void stop?.()
 
  if (!setMessages) return
 
- const latestMessages = [...messagesRef.current]
- const lastAssistantMessage = latestMessages.findLast(
+ const lastAssistantMessage = messagesRef.current.findLast(
  (m) => m.role ==="assistant"
  )
 
  if (!lastAssistantMessage) return
 
  let needsUpdate = false
- let updatedMessage = { ...lastAssistantMessage }
-
- if (lastAssistantMessage.toolInvocations) {
- const updatedToolInvocations = lastAssistantMessage.toolInvocations.map(
- (toolInvocation) => {
- if (toolInvocation.state ==="call") {
- needsUpdate = true
- return {
- ...toolInvocation,
- state:"result",
- result: {
- content:"Tool execution was cancelled",
- __cancelled: true, // Special marker to indicate cancellation
- },
- } as const
- }
- return toolInvocation
- }
- )
-
- if (needsUpdate) {
- updatedMessage = {
- ...updatedMessage,
- toolInvocations: updatedToolInvocations,
- }
- }
- }
-
- if (lastAssistantMessage.parts && lastAssistantMessage.parts.length > 0) {
- const updatedParts = lastAssistantMessage.parts.map((part: any) => {
- if (
- part.type ==="tool-invocation" &&
- part.toolInvocation &&
- part.toolInvocation.state ==="call"
- ) {
+ const updatedParts = lastAssistantMessage.parts?.map((part: any) => {
+ if (typeof part.type === 'string' && part.type.startsWith('tool-')) {
+ if (part.state === 'input-streaming' || part.state === 'input-available') {
  needsUpdate = true
  return {
  ...part,
- toolInvocation: {
- ...part.toolInvocation,
- state:"result",
- result: {
- content:"Tool execution was cancelled",
+ state: 'output-available',
+ output: {
+ content: 'Tool execution was cancelled',
  __cancelled: true,
- },
  },
  }
  }
  return part
+ }
+
+ if (part.type === 'text' && part.state === 'streaming') {
+ needsUpdate = true
+ return {
+ ...part,
+ state: 'done',
+ }
+ }
+
+ return part
+ }) ?? []
+
+ if (needsUpdate) {
+ setMessages((currentMessages) => {
+ const draft = [...currentMessages]
+ const index = draft.findIndex((m) => m.id === lastAssistantMessage.id)
+ if (index === -1) {
+  return currentMessages
+ }
+ draft[index] = {
+  ...draft[index],
+  parts: updatedParts,
+ }
+ return draft
  })
-
- if (needsUpdate) {
- updatedMessage = {
- ...updatedMessage,
- parts: updatedParts,
- }
- }
- }
-
- if (needsUpdate) {
- const messageIndex = latestMessages.findIndex(
- (m) => m.id === lastAssistantMessage.id
- )
- if (messageIndex !== -1) {
- latestMessages[messageIndex] = updatedMessage
- setMessages(latestMessages)
- }
  }
  }, [stop, setMessages, messagesRef])
 
  const messageOptions = useCallback(
  (message: Message) => ({
+ message,
  actions: onRateResponse ? (
  <>
  <div className="border-r pr-1">
  <CopyButton
- content={message.content}
+ content={getMessageText(message)}
  copyMessage="Copied response to clipboard!"
  />
  </div>
@@ -183,7 +157,7 @@ export function Chat({
  </>
  ) : (
  <CopyButton
- content={message.content}
+ content={getMessageText(message)}
  copyMessage="Copied response to clipboard!"
  />
  ),
@@ -213,7 +187,6 @@ export function Chat({
 
  <ChatForm
  className="mt-auto"
- isPending={isGenerating || isTyping}
  handleSubmit={handleSubmit}
  >
  {({ files, setFiles }) => (
@@ -293,7 +266,6 @@ ChatContainer.displayName ="ChatContainer"
 
 interface ChatFormProps {
  className?: string
- isPending: boolean
  handleSubmit: (
  event?: { preventDefault?: () => void },
  options?: { experimental_attachments?: FileList }
@@ -305,7 +277,7 @@ interface ChatFormProps {
 }
 
 export const ChatForm = forwardRef<HTMLFormElement, ChatFormProps>(
- ({ children, handleSubmit, isPending, className }, ref) => {
+ ({ children, handleSubmit, className }, ref) => {
  const [files, setFiles] = useState<File[] | null>(null)
 
  const onSubmit = (event: React.FormEvent) => {

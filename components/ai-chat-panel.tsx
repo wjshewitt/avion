@@ -9,7 +9,6 @@ import { useAppStore } from '@/lib/store';
 import { useChatStore } from '@/lib/chat-store';
 import { useChatSettings } from '@/lib/chat-settings-store';
 import { usePremiumChat } from '@/hooks/usePremiumChat';
-import { useConversationMessages } from '@/lib/tanstack/hooks/useConversationMessages';
 import { useGeneralConversations } from '@/lib/tanstack/hooks/useGeneralConversations';
 import { Message as UIMessage } from '@/components/ui/chat-message';
 import { MessageList } from '@/components/ui/message-list';
@@ -18,10 +17,16 @@ import ChatModeSelector from '@/components/chat/ChatModeSelector';
 import ChatSettingsModal from '@/components/chat/ChatSettingsModal';
 import { useChatSessionStore } from '@/lib/chat-session-store';
 import { groupConversationsByRecency, sortConversationsByUpdatedAt } from '@/lib/conversations';
+import { getMessageText } from '@/lib/chat/messages';
+import { usePageContext } from '@/lib/context/usePageContext';
+import ContextBadge from '@/components/chat/ContextBadge';
 
 export default function AiChatPanel() {
   const pathname = usePathname();
   const { aiChatOpen, toggleAiChat, setSearchValue } = useAppStore();
+  
+  // Detect page context for context-aware chat
+  usePageContext();
   const { selectedContext } = useChatStore();
   const { useSimpleChat, currentMode, setMode, showTimestamps, showThinkingProcess } = useChatSettings();
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -33,21 +38,19 @@ export default function AiChatPanel() {
   const { data: conversations = [] } = useGeneralConversations();
   const conversationId = activeConversationId;
 
-  // Fetch messages for current conversation
-  const { data: messagesData } = useConversationMessages(conversationId);
-  const messages = useMemo(() => {
-    return messagesData?.messages ?? [];
-  }, [messagesData?.messages]);
   const shouldHidePanel = pathname === '/chat-enhanced';
 
   // Use Gemini-powered chat hook
   const {
+    messages,
     input,
     setInput,
     sendMessage,
     isStreaming,
     isThinking,
     error,
+    missingCredentials,
+    providerInfo,
   } = usePremiumChat({
     conversationId,
     onConversationCreated: (newConversationId) => {
@@ -63,51 +66,20 @@ export default function AiChatPanel() {
     },
   });
 
-  // Transform messages to UI format
-  const displayedMessages: UIMessage[] = messages.map((msg) => {
-    const toolInvocations: any[] = [];
-    
-    // Convert weatherData to toolInvocations format (for WeatherToolUI)
-    if (msg.weather_tool_data && msg.weather_tool_data.length > 0) {
-      msg.weather_tool_data.forEach((weatherItem: any) => {
-        // WeatherToolUI expects data in result.data format
-        const toolInvocation = {
-          state: 'result' as const,
-          toolName: 'get_airport_weather',
-          result: {
-            data: weatherItem // Wrap in data object for WeatherToolUI
-          }
-        };
-        toolInvocations.push(toolInvocation);
-      });
-    }
-    
-    // Convert airportData to toolInvocations format (for AirportInfoToolUI)
-    if (msg.airport_tool_data && msg.airport_tool_data.length > 0) {
-      msg.airport_tool_data.forEach((airportItem: any) => {
-        toolInvocations.push({
-          state: 'result' as const,
-          toolName: 'get_airport_details',
-          result: {
-            data: airportItem // Wrap in data object for consistency
-          }
-        });
-      });
-    }
-
-    return {
-      id: msg.id,
-      role: msg.role as 'user' | 'assistant',
-      content: msg.content,
-      createdAt: new Date(msg.created_at),
-      thinking_content: msg.thinking_content,
-      thinking_tokens: msg.thinking_tokens,
-      toolInvocations: toolInvocations.length > 0 ? toolInvocations : undefined
-    };
-  });
-
-  const isEmpty = displayedMessages.length === 0;
+  const isEmpty = messages.length === 0;
   const isLoading = isStreaming || isThinking;
+
+  const providerLabel = useMemo(() => {
+    if (!providerInfo) {
+      return 'Provider: detecting…';
+    }
+
+    const providerName = providerInfo.provider === 'vertex' ? 'Vertex AI' : 'Gemini API';
+    const modelName = providerInfo.model ?? 'gemini-2.5-flash';
+    const thinkingSuffix = providerInfo.supportsThinking ? ' · Thinking enabled' : '';
+
+    return `${providerName} · ${modelName}${thinkingSuffix}`;
+  }, [providerInfo]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -139,12 +111,11 @@ export default function AiChatPanel() {
   );
 
   const handleSend = useCallback((messageText?: string) => {
-    const textToSend = messageText || input.trim();
-    if (!textToSend || isLoading) return;
-    
-    // Pass the content directly to sendMessage (it will handle clearing input)
-    sendMessage(textToSend);
-  }, [input, isLoading, sendMessage]);
+    const textToSend = messageText ?? input.trim();
+    if (!textToSend || isLoading || missingCredentials) return;
+
+    void sendMessage(textToSend);
+  }, [input, isLoading, missingCredentials, sendMessage]);
 
   // Expose handleSend to window for header to call
   useEffect(() => {
@@ -157,9 +128,8 @@ export default function AiChatPanel() {
   }, [aiChatOpen, handleSend]);
 
   const messageOptions = (message: UIMessage) => ({
-    actions: (
-      <CopyButton content={message.content} copyMessage="Copied response to clipboard!" />
-    ),
+    message,
+    actions: <CopyButton content={getMessageText(message)} copyMessage="Copied response to clipboard!" />,
     showTimeStamp: showTimestamps,
   });
 
@@ -288,7 +258,10 @@ export default function AiChatPanel() {
           />
         )}
 
-        {error && (
+        {/* Context Indicator */}
+        <ContextBadge />
+
+        {error && !missingCredentials && (
           <div className="px-6 py-3 text-sm text-red-600 bg-red-50 border-b border-border">
             {error}
           </div>
@@ -296,35 +269,66 @@ export default function AiChatPanel() {
 
         {/* MESSAGES AREA */}
         <div className="flex-1 overflow-y-auto px-4 py-3 min-h-0">
-        {isEmpty ? (
-          <div className="flex flex-col items-center justify-center h-full">
-            <div className="text-center max-w-sm">
-              <h3 className="text-sm font-medium text-text-primary mb-1">Start a conversation</h3>
-              <p className="text-xs text-text-secondary">Ask about flight ops, weather, risks, or planning.</p>
-              <div className="mt-3 text-xs">
-                <Link href="/chat-enhanced" className="text-text-secondary hover:text-text-primary underline">Open full chat</Link>
+          
+          {missingCredentials ? (
+            <div className="flex h-full flex-col items-center justify-center text-center">
+              <div className="max-w-sm space-y-3">
+                <h3 className="text-sm font-semibold text-text-primary">Connect your AI provider</h3>
+                {missingCredentials === 'vertex' ? (
+                  <>
+                    <p className="text-xs text-text-secondary">
+                      Provide <code className="rounded bg-muted px-1 py-0.5">GOOGLE_VERTEX_PROJECT</code> and service-account credentials (<code className="rounded bg-muted px-1 py-0.5">GOOGLE_VERTEX_CLIENT_EMAIL</code>, <code className="rounded bg-muted px-1 py-0.5">GOOGLE_VERTEX_PRIVATE_KEY</code>) or configure Google Application Default Credentials so the assistant can stream from Vertex AI.
+                    </p>
+                    <p className="text-xs text-text-secondary">
+                      You can also fall back to the Gemini API by supplying <code className="rounded bg-muted px-1 py-0.5">GOOGLE_API_KEY</code> or <code className="rounded bg-muted px-1 py-0.5">GOOGLE_GENERATIVE_AI_API_KEY</code>.
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-xs text-text-secondary">
+                      Add a <code className="rounded bg-muted px-1 py-0.5">GOOGLE_API_KEY</code> (or <code className="rounded bg-muted px-1 py-0.5">GOOGLE_GENERATIVE_AI_API_KEY</code>) environment variable and redeploy to enable the Gemini API fallback.
+                    </p>
+                    <p className="text-xs text-text-secondary">
+                      After updating the environment variable, refresh this page to begin chatting.
+                    </p>
+                  </>
+                )}
               </div>
             </div>
-          </div>
-        ) : (
-          <>
-            <MessageList
-              messages={displayedMessages}
-              isTyping={isLoading && !showThinkingProcess}
-              messageOptions={messageOptions}
-            />
-            <div ref={messagesEndRef} />
-          </>
-        )}
-      </div>
+          ) : isEmpty ? (
+            <div className="flex flex-col items-center justify-center h-full">
+              <div className="text-center max-w-sm">
+                <h3 className="text-sm font-medium text-text-primary mb-1">Start a conversation</h3>
+                <p className="text-xs text-text-secondary">Ask about flight ops, weather, risks, or planning.</p>
+                <div className="mt-3 text-xs">
+                  <Link href="/chat-enhanced" className="text-text-secondary hover:text-text-primary underline">Open full chat</Link>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <>
+              <MessageList
+                messages={messages}
+                isTyping={isLoading && !showThinkingProcess}
+                messageOptions={messageOptions}
+              />
+              <div ref={messagesEndRef} />
+            </>
+          )}
+        </div>
 
       {/* BOTTOM: AI Assistant Header + Recents */}
       <div className="shrink-0 border-t border-border">
         {/* HEADER: Context Badge + Close */}
         <header className="px-4 py-2 border-b border-border flex items-center justify-between">
-          <div className="flex items-center gap-2 text-text-primary">
-            <Sparkles className="text-blue" size={16} />
-            <span className="text-sm font-medium">AI Assistant</span>
+          <div>
+            <div className="flex items-center gap-2 text-text-primary">
+              <Sparkles className="text-blue" size={16} />
+              <span className="text-sm font-medium">AI Assistant</span>
+            </div>
+            <div className="text-[10px] text-muted-foreground uppercase tracking-wide mt-0.5">
+              {providerLabel}
+            </div>
           </div>
           <div className="flex items-center gap-2">
             {selectedContext.type !== 'general' && (

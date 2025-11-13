@@ -79,7 +79,7 @@ export default function FileUpload({
  setFileName('');
  setProgress(0);
  }, 2000);
- } catch (error) {
+  } catch {
  clearInterval(interval);
  setUploadState('error');
  setErrorMessage('Upload failed. Please try again.');

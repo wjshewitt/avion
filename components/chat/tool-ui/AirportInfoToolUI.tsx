@@ -1,8 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { MapPin, Radio, Ruler, Plane, ChevronDown, ChevronUp } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { MapPin, Radio, Ruler, ChevronDown, ChevronUp } from "lucide-react";
 
 interface Airport {
   icao?: string;

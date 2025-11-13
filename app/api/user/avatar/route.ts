@@ -41,7 +41,7 @@ export async function POST(request: Request) {
     const fileName = `${user.id}-${Date.now()}.${fileExt}`
     const filePath = `avatars/${fileName}`
 
-    const { data: uploadData, error: uploadError } = await supabase.storage
+    const { error: uploadError } = await supabase.storage
       .from('profiles')
       .upload(filePath, file, {
         cacheControl: '3600',

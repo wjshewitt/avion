@@ -6,7 +6,10 @@ const nextConfig: NextConfig = {
     removeConsole: process.env.NODE_ENV === "production",
   },
   experimental: {
-    optimizePackageImports: ["framer-motion", "mapbox-gl"],
+    optimizePackageImports: ["framer-motion", "maplibre-gl"],
+  },
+  turbopack: {
+    root: __dirname,
   },
   webpack: (config) => {
     config.module.rules.push({

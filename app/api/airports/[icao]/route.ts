@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { isValidIcaoCode, sanitizeIcaoCode } from "@/types/airports";
+import { isValidIcaoCode } from "@/types/airports";
 import { getAirportService } from "@/lib/airports/airport-service";
 import { rateLimit } from "@/lib/server/rate-limit";
 

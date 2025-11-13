@@ -4,7 +4,7 @@ import { ChatMessage, type ChatMessageProps } from '@/components/ui/chat-message
 import CornerBracket from './corner-bracket';
 
 export function ChatMessageWithBrackets(props: ChatMessageProps) {
- const isUser = props.role === 'user';
+ const isUser = props.message.role === 'user';
  
  return (
  <div className={`flex ${isUser ? 'justify-end' : 'justify-start'} w-full`}>

@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Plane, CloudRain, Building2, Route } from 'lucide-react';
+import { Plane, CloudRain, Building2, FileText } from 'lucide-react';
 import { ChatMode } from '@/lib/chat-settings-store';
 
 interface ChatModeSelectorProps {
@@ -36,18 +36,16 @@ const modes = [
     description: 'Airport capabilities'
   },
   { 
-    id: 'trip-planning' as ChatMode, 
-    icon: Route, 
-    label: 'Trip Planning', 
-    shortLabel: 'Trip',
-    color: '#f59e0b',
-    description: 'Multi-leg coordination'
+    id: 'deep-briefing' as ChatMode, 
+    icon: FileText, 
+    label: 'Deep Briefing', 
+    shortLabel: 'Briefing',
+    color: '#1e3a8a',
+    description: 'Comprehensive client briefing documents'
   },
 ];
 
 export default function ChatModeSelector({ mode, onModeChange, compact = false }: ChatModeSelectorProps) {
-  const currentMode = modes.find((m) => m.id === mode)!;
-
   return (
     <div className="bg-background border-b border-border">
       <div className={`flex items-center gap-0.5 ${compact ? 'px-2 py-1' : 'px-3 py-2'}`}>

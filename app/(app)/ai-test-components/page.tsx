@@ -16,7 +16,7 @@ import { ToolExecutionProgress } from '@/components/chat/ToolExecutionProgress';
 import { TypewriterMessage, StreamingMessage, WordByWordMessage } from '@/components/chat/TypewriterMessage';
 import { MessageDiffViewer, DiffIndicator } from '@/components/chat/MessageDiffViewer';
 import { LiveCostTracker } from '@/components/chat/LiveCostTracker';
-import { getMessageText, getToolParts } from '@/lib/chat/messages';
+import { getToolParts } from '@/lib/chat/messages';
 import type { ToolUIPart } from 'ai';
 
 const mockThoughtSteps = [

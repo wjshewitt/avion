@@ -12,11 +12,11 @@ interface ShareButtonProps {
 export default function ShareButton({ url = window.location.href, title = 'Share' }: ShareButtonProps) {
  const [isOpen, setIsOpen] = useState(false);
 
- const shareOptions = [
- { icon: Mail, label: 'Email', color: '#ea4335' },
- { icon: Copy, label: 'Copy', color: '#10b981' },
- { icon: MessageSquare, label: 'Message', color: '#3b82f6' },
- ];
+  const shareOptions = [
+    { icon: Mail, label: 'Email', color: '#ea4335' },
+    { icon: Copy, label: 'Copy', color: '#10b981' },
+    { icon: MessageSquare, label: 'Message', color: '#3b82f6' },
+  ] as const;
 
  return (
  <div className="relative">
@@ -41,15 +41,25 @@ export default function ShareButton({ url = window.location.href, title = 'Share
  {shareOptions.map((option, index) => {
  const Icon = option.icon;
  return (
- <motion.button
- key={option.label}
- initial={{ opacity: 0, scale: 0 }}
- animate={{ opacity: 1, scale: 1 }}
- transition={{ delay: index * 0.1 }}
- className="p-3 hover:bg-surface dark:bg-slate-800 transition-colors group"
- style={{ color: option.color }}
- title={option.label}
- >
+              <motion.button
+                key={option.label}
+                initial={{ opacity: 0, scale: 0 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: index * 0.1 }}
+                className="p-3 hover:bg-surface dark:bg-slate-800 transition-colors group"
+                style={{ color: option.color }}
+                title={option.label}
+                onClick={() => {
+                  if (option.label === 'Copy') {
+                    void navigator.clipboard?.writeText(url);
+                  } else if (option.label === 'Email') {
+                    window.open(`mailto:?subject=${encodeURIComponent(title)}&body=${encodeURIComponent(url)}`);
+                  } else if (option.label === 'Message' && navigator.share) {
+                    void navigator.share({ title, url }).catch(() => undefined);
+                  }
+                  setIsOpen(false);
+                }}
+              >
  <Icon size={20} />
  </motion.button>
  );

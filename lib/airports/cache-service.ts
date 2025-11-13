@@ -90,6 +90,12 @@ export class AirportCacheService {
     };
   }
 
+  private convertCacheToProcessedData(
+    entry: AirportCache
+  ): ProcessedAirportData {
+    return deserializeCacheEntry(entry);
+  }
+
   private upsertMemoryEntry(entry: AirportCache): void {
     const existing = AirportCacheService.inMemoryCache.get(entry.icao_code);
     const createdAt = existing?.created_at || entry.created_at;
@@ -198,7 +204,7 @@ export class AirportCacheService {
       const cachedEntry = data as AirportCache;
 
       // Convert cached data back to ProcessedAirportData format
-      const processedData = this.convertCacheToProcessedData(cachedEntry);
+      const processedData = deserializeCacheEntry(cachedEntry);
 
       this.upsertMemoryEntry(cachedEntry);
 
@@ -232,7 +238,7 @@ export class AirportCacheService {
       const processedData = processAirportData(apiResponse);
 
       // Convert to cache format
-      const cacheData = this.convertProcessedDataToCache(
+      const cacheData = serializeProcessedAirport(
         processedData,
         apiResponse
       );
@@ -293,7 +299,7 @@ export class AirportCacheService {
 
       try {
         const processedData = processAirportData(apiResponse);
-        const cacheData = this.convertProcessedDataToCache(
+        const cacheData = serializeProcessedAirport(
           processedData,
           apiResponse
         );
@@ -363,7 +369,7 @@ export class AirportCacheService {
 
       // Convert cached data to ProcessedAirportData format
       const cached = cacheEntries.map((cacheEntry) =>
-        this.convertCacheToProcessedData(cacheEntry)
+        deserializeCacheEntry(cacheEntry)
       );
 
       cacheEntries.forEach((entry) => this.upsertMemoryEntry(entry));
@@ -387,7 +393,7 @@ export class AirportCacheService {
       for (const code of normalizedIcaos) {
         const entry = AirportCacheService.inMemoryCache.get(code);
         if (entry) {
-          cached.push(this.convertCacheToProcessedData(entry));
+          cached.push(deserializeCacheEntry(entry));
         } else {
           missing.push(code);
         }
@@ -429,7 +435,7 @@ export class AirportCacheService {
       for (const { icao, data } of airports) {
         const normalizedIcao = icao.toUpperCase().trim();
         const processedData = processAirportData(data);
-        const cacheData = this.convertProcessedDataToCache(processedData, data);
+        const cacheData = serializeProcessedAirport(processedData, data);
         const previousEntry = AirportCacheService.inMemoryCache.get(
           normalizedIcao
         );
@@ -487,7 +493,7 @@ export class AirportCacheService {
         for (const { icao, data } of airports) {
           const normalizedIcao = icao.toUpperCase().trim();
           const processedData = processAirportData(data);
-          const cacheData = this.convertProcessedDataToCache(processedData, data);
+          const cacheData = serializeProcessedAirport(processedData, data);
           const previousEntry = AirportCacheService.inMemoryCache.get(
             normalizedIcao
           );
@@ -692,70 +698,68 @@ export class AirportCacheService {
     }
   }
 
-  /**
-   * Convert ProcessedAirportData to cache storage format
-   */
-  private convertProcessedDataToCache(
-    processedData: ProcessedAirportData,
-    rawResponse: AirportDBResponse
-  ): Omit<
-    AirportCache,
-    | "id"
-    | "icao_code"
-    | "iata_code"
-    | "created_at"
-    | "updated_at"
-    | "data_completeness"
-    | "processing_version"
-    | "last_verified_at"
-  > {
-    return {
-      core_data: {
-        icao: processedData.icao,
-        iata: processedData.iata,
-        name: processedData.name,
-        coordinates: processedData.coordinates,
-        location: processedData.location,
-        classification: processedData.classification,
-        external_links: processedData.external_links,
-        weather: processedData.weather,
-      },
-      runway_data: processedData.runways,
-      communication_data: processedData.communications,
-      navigation_data: processedData.navigation,
-      capability_data: processedData.capabilities,
-      raw_api_response: rawResponse,
-    };
-  }
+}
 
-  /**
-   * Convert cache storage format back to ProcessedAirportData
-   */
-  private convertCacheToProcessedData(
-    cacheEntry: AirportCache
-  ): ProcessedAirportData {
-    const coreData = cacheEntry.core_data as any;
+export function serializeProcessedAirport(
+  processedData: ProcessedAirportData,
+  rawResponse?: AirportDBResponse | null
+): Omit<
+  AirportCache,
+  | "id"
+  | "icao_code"
+  | "iata_code"
+  | "created_at"
+  | "updated_at"
+  | "data_completeness"
+  | "processing_version"
+  | "last_verified_at"
+> {
+  return {
+    core_data: {
+      icao: processedData.icao,
+      iata: processedData.iata,
+      name: processedData.name,
+      coordinates: processedData.coordinates,
+      location: processedData.location,
+      classification: processedData.classification,
+      external_links: processedData.external_links,
+      weather: processedData.weather,
+      data_source: processedData.data_quality.source,
+    },
+    runway_data: processedData.runways,
+    communication_data: processedData.communications,
+    navigation_data: processedData.navigation,
+    capability_data: processedData.capabilities,
+    raw_api_response: rawResponse ?? null,
+  };
+}
 
-    return {
-      icao: cacheEntry.icao_code,
-      iata: cacheEntry.iata_code || undefined,
-      name: coreData.name,
-      coordinates: coreData.coordinates,
-      location: coreData.location,
-      classification: coreData.classification,
-      runways: cacheEntry.runway_data as any,
-      communications: cacheEntry.communication_data as any,
-      navigation: cacheEntry.navigation_data as any,
-      capabilities: cacheEntry.capability_data as any,
-      external_links: coreData.external_links,
-      weather: coreData.weather,
-      data_quality: {
-        completeness_score: cacheEntry.data_completeness,
-        last_updated: cacheEntry.updated_at,
-        source: "airportdb",
-      },
-    };
-  }
+export function deserializeCacheEntry(
+  cacheEntry: AirportCache
+): ProcessedAirportData {
+  const coreData = cacheEntry.core_data as any;
+
+  return {
+    icao: cacheEntry.icao_code,
+    iata: cacheEntry.iata_code || undefined,
+    name: coreData.name,
+    coordinates: coreData.coordinates,
+    location: coreData.location,
+    classification: coreData.classification,
+    runways: cacheEntry.runway_data as any,
+    communications: cacheEntry.communication_data as any,
+    navigation: cacheEntry.navigation_data as any,
+    capabilities: cacheEntry.capability_data as any,
+    external_links: coreData.external_links,
+    weather: coreData.weather,
+    data_quality: {
+      completeness_score: cacheEntry.data_completeness,
+      last_updated: cacheEntry.updated_at,
+      source:
+        (coreData?.data_source as ProcessedAirportData["data_quality"]["source"]) ||
+        "airportdb",
+    },
+  };
 }
 
 // Singleton instance for server-side usage

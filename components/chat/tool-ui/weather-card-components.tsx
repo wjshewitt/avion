@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Cloud, Wind, Eye, Gauge, Calendar } from "lucide-react";
+import { Wind, Eye, Gauge } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 /**

@@ -119,7 +119,9 @@ function convertCacheToSearchResult(
     data_quality: {
       completeness_score: cacheEntry.data_completeness || 0,
       last_updated: cacheEntry.updated_at,
-      source: "airportdb",
+      source:
+        (coreData?.data_source as ProcessedAirportData["data_quality"]["source"]) ||
+        "airportdb",
     },
   };
 

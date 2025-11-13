@@ -13,7 +13,7 @@ const modeOptions: { value: ChatMode; label: string }[] = [
   { value: 'flight-ops', label: '🛫 Flight Ops' },
   { value: 'weather-brief', label: '🌤️ Weather Brief' },
   { value: 'airport-planning', label: '🛬 Airport Planning' },
-  { value: 'trip-planning', label: '📋 Trip Planning' },
+  { value: 'deep-briefing', label: '📄 Deep Briefing' },
 ];
 
 export default function ChatSettingsModal({ isOpen, onClose }: ChatSettingsModalProps) {
@@ -29,6 +29,7 @@ export default function ChatSettingsModal({ isOpen, onClose }: ChatSettingsModal
     compactMode: settings.compactMode,
     showTimestamps: settings.showTimestamps,
     showThinkingProcess: settings.showThinkingProcess,
+    showUIElements: settings.showUIElements,
     autoExpandWeather: settings.autoExpandWeather,
     autoExpandAirports: settings.autoExpandAirports,
   });
@@ -42,6 +43,7 @@ export default function ChatSettingsModal({ isOpen, onClose }: ChatSettingsModal
     settings.setCompactMode(localSettings.compactMode);
     settings.setShowTimestamps(localSettings.showTimestamps);
     settings.setShowThinkingProcess(localSettings.showThinkingProcess);
+    settings.setShowUIElements(localSettings.showUIElements);
     settings.setAutoExpandWeather(localSettings.autoExpandWeather);
     settings.setAutoExpandAirports(localSettings.autoExpandAirports);
     onClose();
@@ -59,6 +61,7 @@ export default function ChatSettingsModal({ isOpen, onClose }: ChatSettingsModal
         compactMode: false,
         showTimestamps: true,
         showThinkingProcess: false,
+        showUIElements: false,
         autoExpandWeather: false,
         autoExpandAirports: false,
       });
@@ -216,6 +219,21 @@ export default function ChatSettingsModal({ isOpen, onClose }: ChatSettingsModal
                     <div className="text-sm font-medium text-foreground">Show thinking process</div>
                     <div className="text-xs text-muted-foreground mt-0.5">
                       Display AI reasoning blocks (experimental)
+                    </div>
+                  </div>
+                </label>
+
+                <label className="flex items-start gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={localSettings.showUIElements}
+                    onChange={(e) => setLocalSettings({ ...localSettings, showUIElements: e.target.checked })}
+                    className="mt-0.5"
+                  />
+                  <div className="flex-1">
+                    <div className="text-sm font-medium text-foreground">Show advanced UI elements</div>
+                    <div className="text-xs text-muted-foreground mt-0.5">
+                      Interactive tool calls, live metrics, animations, and enhanced visualizations
                     </div>
                   </div>
                 </label>

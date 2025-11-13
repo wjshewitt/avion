@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState } from 'react';
 import { Check } from 'lucide-react';
@@ -46,8 +47,8 @@ export default function TeamSelector({ teams, onSelect, defaultTeam }: TeamSelec
  whileTap={{ scale: 0.98 }}
  >
  {/* Team Icon/Avatar */}
- {team.icon ? (
- <img src={team.icon} alt={team.name} className="w-5 h-5" />
+        {team.icon ? (
+         <Image src={team.icon} alt={team.name} width={20} height={20} className="w-5 h-5 rounded-full object-cover" />
  ) : (
  <div 
  className="w-5 h-5 flex items-center justify-center text-xs font-bold text-white"

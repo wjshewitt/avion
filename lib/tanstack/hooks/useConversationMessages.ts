@@ -26,6 +26,7 @@ export interface ConversationMessage {
     communications?: any;
     suitability?: any;
   }> | null;
+  metadata?: Record<string, any> | null;
 }
 
 export interface ConversationMessagesResult {

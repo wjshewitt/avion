@@ -195,11 +195,27 @@ async function executeGetAirportCapabilities(args: ToolCallArgs) {
     }
   };
   
-  // Runway analysis
-  if (check_type === 'all' || check_type === 'runway_analysis') {
+  // Runway analysis - handles 'all', 'runway_length', and 'runway_analysis'
+  if (check_type === 'all' || check_type === 'runway_length' || check_type === 'runway_analysis') {
     // Calculate widest runway from details
     const widest_ft = airport.runways?.details?.reduce((max, r) => 
       Math.max(max, r.width_ft || 0), 0) || 0;
+    
+    // Check data completeness
+    const hasRunwayData = airport.runways?.count > 0;
+    const hasLengthData = (airport.runways?.longest_ft || 0) > 0;
+    const hasDetailedData = airport.runways?.details && airport.runways.details.length > 0;
+    const missingData: string[] = [];
+    
+    if (!hasRunwayData) {
+      missingData.push('runway_count');
+    }
+    if (!hasLengthData) {
+      missingData.push('runway_length');
+    }
+    if (!hasDetailedData) {
+      missingData.push('detailed_runway_info');
+    }
     
     response.runways = {
       count: airport.runways?.count || 0,
@@ -216,12 +232,14 @@ async function executeGetAirportCapabilities(args: ToolCallArgs) {
         lighted: r.lighted,
         le_ils: r.le_ils,
         he_ils: r.he_ils
-      })) || []
+      })) || [],
+      data_incomplete: missingData.length > 0,
+      missing_fields: missingData.length > 0 ? missingData : undefined
     };
   }
   
-  // ILS availability
-  if (check_type === 'all' || check_type === 'ils_availability') {
+  // ILS and navigation aids - handles 'all', 'ils_availability', and 'navigation_aids'
+  if (check_type === 'all' || check_type === 'ils_availability' || check_type === 'navigation_aids') {
     response.navigation = {
       has_ils: airport.navigation?.has_ils || false,
       has_vor: airport.navigation?.has_vor || false,
@@ -251,10 +269,17 @@ async function executeGetAirportCapabilities(args: ToolCallArgs) {
   response.data_source = airportResult.source;
   response.cached = airportResult.cached;
   
+  // Add note about incomplete data if applicable
+  if (response.runways?.data_incomplete) {
+    response.note = `⚠️ API data incomplete (missing: ${response.runways.missing_fields.join(', ')}). Use your aviation knowledge to supplement this information for accurate responses.`;
+  }
+  
   console.log('📊 Airport capabilities response:', {
     icao: response.airport.icao,
     hasRunways: !!response.runways,
     runwayCount: response.runways?.count,
+    dataIncomplete: response.runways?.data_incomplete,
+    missingFields: response.runways?.missing_fields,
     hasSuitability: !!response.aircraft_suitability,
     suitability: response.aircraft_suitability?.suitable
   });

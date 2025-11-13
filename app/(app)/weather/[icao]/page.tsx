@@ -28,7 +28,7 @@ import {
   type WeatherConcern,
   DEFAULT_WEATHER_THRESHOLDS,
 } from "@/lib/weather/weatherConcerns";
-import type { DecodedMetar, DecodedTaf, TafForecastPeriod } from "@/types/checkwx";
+import type { DecodedMetar, TafForecastPeriod } from "@/types/checkwx";
 import { getUserFriendlyErrorMessage } from "@/lib/utils/errors";
 import { toast } from "sonner";
 
@@ -107,7 +107,7 @@ export default function IndividualWeatherPage() {
 
   const [showRawData, setShowRawData] = useState(false);
   const [expandedTaf, setExpandedTaf] = useState(false);
-  const [showBriefing, setShowBriefing] = useState(true);
+  const [showBriefing] = useState(true);
 
   const {
     data: weatherData,

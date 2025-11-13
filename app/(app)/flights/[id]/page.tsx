@@ -11,7 +11,6 @@ import {
   AlertTriangle,
   CalendarClock,
   Info,
-  MapPin,
   Plane,
   RefreshCw,
   Users,

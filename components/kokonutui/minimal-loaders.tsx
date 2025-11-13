@@ -96,7 +96,6 @@ export function VerticalBarsLoader({ size = 'md', color = 'text-blue' }: LoaderP
   const actualColor = colorMap[color] || '#2563eb';
   const barWidth = border;
   const barCount = 4;
-  const spacing = (dimension - barCount * barWidth) / (barCount - 1);
 
   return (
     <div

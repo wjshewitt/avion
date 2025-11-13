@@ -1,8 +1,8 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { MapPin, Plane, Clock, Search as SearchIcon } from 'lucide-react';
+import { Plane, Clock, Search as SearchIcon } from 'lucide-react';
 import type { SearchResults, RecentSearch, AirportSearchMatch } from '@/lib/search/unified-search';
 import { addRecentSearch } from '@/lib/search/unified-search';
 import { useAirfieldWeather } from '@/lib/tanstack/hooks/useAirfieldWeather';
@@ -69,7 +69,7 @@ export default function HeaderSearchDropdown({
   }, [selectedIndex, totalItems]);
 
   // Handle item selection
-  const handleSelect = (item: typeof selectableItems[0]) => {
+  const handleSelect = useCallback((item: typeof selectableItems[0]) => {
     if (item.type === 'airport') {
       // Navigate to weather page
       router.push(`/weather/${item.data.icao}`);
@@ -102,14 +102,14 @@ export default function HeaderSearchDropdown({
     }
 
     onClose();
-  };
+  }, [router, onClose]);
 
   // Handle Enter key to select current item
-  const handleSelectCurrent = () => {
+  const handleSelectCurrent = useCallback(() => {
     if (selectedIndex >= 0 && selectedIndex < totalItems) {
       handleSelect(selectableItems[selectedIndex]);
     }
-  };
+  }, [selectedIndex, totalItems, selectableItems, handleSelect]);
 
   // Expose method to parent for Enter key handling
   useEffect(() => {
@@ -117,7 +117,7 @@ export default function HeaderSearchDropdown({
     return () => {
       delete (window as any).__headerSearchSelectCurrent;
     };
-  }, [selectedIndex, totalItems]);
+  }, [handleSelectCurrent]);
 
   // Don't render if no results and no recent searches
   const showRecent = inputValue.length < 2 && recentSearches.length > 0;
@@ -347,7 +347,6 @@ function AirportResultRow({
       `}
       role="option"
       aria-selected={isSelected}
-      aria-expanded={isExpanded}
     >
       {/* Collapsed State */}
       <AirportResultCompact airport={airport} weather={weatherData} />

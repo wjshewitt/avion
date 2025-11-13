@@ -254,7 +254,7 @@ export default function AirportSearchInput({
                 <div className="px-3 py-2 text-xs font-semibold text-text-secondary uppercase tracking-wide bg-surface">
                   Recent
                 </div>
-                {recent.slice(0, 5).map((airport, index) => (
+                {recent.slice(0, 5).map((airport) => (
                   <button
                     key={airport.icao}
                     onClick={() => handleSelect(airport)}

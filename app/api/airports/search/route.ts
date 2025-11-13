@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { AirportSearchQuerySchema } from "@/types/airports";
 import { searchAirportCache } from "@/lib/airports/cache-search";
 import { getAirportService } from "@/lib/airports/airport-service";
-import { processAirportData } from "@/lib/airports/airport-data-processor";
 import { rateLimit } from "@/lib/server/rate-limit";
 import { searchFallbackAirports } from "@/lib/airports/local-airportdb-fallback";
 

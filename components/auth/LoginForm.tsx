@@ -6,7 +6,7 @@ import { login } from "@/app/actions/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { AlertCircle, Plane } from "lucide-react";
+import { AlertCircle } from "lucide-react";
 import Link from "next/link";
 import { CornerBracketsLoader } from "@/components/kokonutui/minimal-loaders";
 
@@ -54,107 +54,105 @@ export function LoginForm({ className }: LoginFormProps) {
     <div className={`flex flex-col gap-6 ${className}`}>
       {/* Info Message (from redirect) */}
       {message && !error && (
-        <div className="glass-level-1 p-4 border-l-4 border-primary bg-primary/10">
+        <div className="p-4 border-l-4 border-blue-600 bg-blue-600/10">
           <div className="flex items-start gap-3">
-            <AlertCircle className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
-            <p className="text-sm text-text-primary">{message}</p>
+            <AlertCircle className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
+            <p className="text-sm text-zinc-900">{message}</p>
           </div>
         </div>
       )}
 
       {/* Error Message */}
       {error && (
-        <div className="glass-level-1 p-4 border-l-4 border-critical bg-critical/10">
+        <div className="p-4 border-l-4 border-red-600 bg-red-600/10">
           <div className="flex items-start gap-3">
-            <AlertCircle className="w-5 h-5 text-critical mt-0.5 flex-shrink-0" />
-            <p className="text-sm text-critical">{error}</p>
+            <AlertCircle className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" />
+            <p className="text-sm text-red-600">{error}</p>
           </div>
         </div>
       )}
 
-      {/* Login Form Card */}
-      <div className="glass-level-2 p-8 space-y-6">
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="grid gap-6">
-            <div className="grid gap-2">
-              <Label htmlFor="email" className="text-text-primary">
-                Email
-              </Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="ops@flightops.ai"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                disabled={loading}
-                autoComplete="email"
-                className="bg-background-secondary border-border-subtle focus:border-primary text-text-primary placeholder:text-text-muted"
-              />
-            </div>
-
-            <div className="grid gap-2">
-              <div className="flex items-center">
-                <Label htmlFor="password" className="text-text-primary">
-                  Password
-                </Label>
-                <Link
-                  href="/forgot-password"
-                  className="ml-auto text-sm text-text-muted underline-offset-4 hover:text-text-primary hover:underline transition-colors"
-                >
-                  Forgot your password?
-                </Link>
-              </div>
-              <Input
-                id="password"
-                type="password"
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                disabled={loading}
-                autoComplete="current-password"
-                className="bg-background-secondary border-border-subtle focus:border-primary text-text-primary placeholder:text-text-muted"
-              />
-            </div>
-
-            <Button
-              type="submit"
-              className="w-full bg-primary hover:bg-primary/90 text-white font-medium"
+      {/* Login Form */}
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="grid gap-6">
+          <div className="grid gap-2">
+            <Label htmlFor="email" className="text-zinc-900 text-xs uppercase tracking-widest font-medium">
+              Email
+            </Label>
+            <Input
+              id="email"
+              type="email"
+              placeholder="ops@avion.ai"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
               disabled={loading}
-              size="lg"
-            >
-              {loading ? (
-                <span className="flex items-center gap-3">
-                  <CornerBracketsLoader size="sm" color="text-white" />
-                  Authenticating...
-                </span>
-              ) : (
-                "Sign In"
-              )}
-            </Button>
+              autoComplete="email"
+              className="bg-white/50 border-zinc-300 focus:border-blue-600 text-zinc-900 placeholder:text-zinc-400"
+            />
           </div>
-        </form>
 
-        <div className="text-center text-sm text-text-muted">
-          Don&apos;t have an account?{" "}
-          <Link
-            href="/signup"
-            className="font-medium text-text-primary hover:underline transition-colors"
+          <div className="grid gap-2">
+            <div className="flex items-center">
+              <Label htmlFor="password" className="text-zinc-900 text-xs uppercase tracking-widest font-medium">
+                Password
+              </Label>
+              <Link
+                href="/forgot-password"
+                className="ml-auto text-xs text-zinc-500 hover:text-blue-600 transition-colors font-mono"
+              >
+                Reset?
+              </Link>
+            </div>
+            <Input
+              id="password"
+              type="password"
+              placeholder="••••••••"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              disabled={loading}
+              autoComplete="current-password"
+              className="bg-white/50 border-zinc-300 focus:border-blue-600 text-zinc-900 placeholder:text-zinc-400"
+            />
+          </div>
+
+          <Button
+            type="submit"
+            className="w-full bg-zinc-800 hover:bg-zinc-700 text-white font-medium uppercase tracking-widest text-xs transition-colors border border-zinc-700"
+            disabled={loading}
+            size="lg"
           >
-            Sign up
-          </Link>
+            {loading ? (
+              <span className="flex items-center gap-3">
+                <CornerBracketsLoader size="sm" color="text-white" />
+                Authenticating...
+              </span>
+            ) : (
+              "Sign In"
+            )}
+          </Button>
         </div>
+      </form>
+
+      <div className="text-center text-xs text-zinc-500 font-mono">
+        No account?{" "}
+        <Link
+          href="/signup"
+          className="font-medium text-zinc-900 hover:text-blue-600 transition-colors"
+        >
+          Sign Up
+        </Link>
       </div>
 
       {/* Terms and Privacy */}
-      <div className="text-balance text-center text-xs text-text-muted [&_a]:underline [&_a]:underline-offset-4 [&_a]:hover:text-text-primary transition-colors">
-        By clicking continue, you agree to our{" "}
-        <Link href="/terms" className="hover:text-text-primary">
-          Terms of Service
+      <div className="text-balance text-center text-[10px] text-zinc-400 font-mono [&_a]:underline [&_a]:underline-offset-4 [&_a]:hover:text-zinc-600 transition-colors">
+        By continuing, you agree to our{" "}
+        <Link href="/terms" className="hover:text-zinc-600">
+          Terms
         </Link>{" "}
         and{" "}
-        <Link href="/privacy" className="hover:text-text-primary">
+        <Link href="/privacy" className="hover:text-zinc-600">
           Privacy Policy
         </Link>
         .

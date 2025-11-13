@@ -156,7 +156,21 @@ export async function getAirfieldWeatherSnapshot(icao: string, mode: Mode = "ful
           const tafs = await client.getTaf([normalizedIcao]);
           const taf = tafs[0];
           if (!taf) {
-            throw new Error(`No TAF returned for ${normalizedIcao}`);
+            console.warn(`No TAF available for ${normalizedIcao} - this is normal for some airports`);
+            // Return a cache result with null data and short TTL
+            return {
+              data: null as any, // TAF not available
+              metadata: {
+                observed: null,
+                validFrom: null,
+                validTo: null,
+                retrievedAt: new Date().toISOString(),
+                source: "checkwx",
+                mode,
+              } as const,
+              ttlMinutes: 30, // Short TTL for rechecking
+              staleMinutes: 15,
+            };
           }
 
           const metadata = {

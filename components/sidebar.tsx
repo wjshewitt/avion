@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Gauge, Plane, Cloud, MapPin, MessageSquare, Settings, ChevronLeft, ChevronRight } from 'lucide-react';
@@ -28,11 +28,13 @@ export default function Sidebar() {
   }, []);
 
   // Save state
-  const toggleExpanded = () => {
-    const newState = !isExpanded;
-    setIsExpanded(newState);
-    localStorage.setItem('sidebar-expanded', String(newState));
-  };
+  const toggleExpanded = useCallback(() => {
+    setIsExpanded((prev) => {
+      const newState = !prev;
+      localStorage.setItem('sidebar-expanded', String(newState));
+      return newState;
+    });
+  }, []);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -44,7 +46,7 @@ export default function Sidebar() {
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isExpanded]);
+  }, [toggleExpanded]);
 
   const shouldExpand = isExpanded || hovering;
 

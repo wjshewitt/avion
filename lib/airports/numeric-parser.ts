@@ -158,6 +158,22 @@ export function parseElevation(
 /**
  * Parse frequency values (MHz or kHz) with validation
  */
+/**
+ * Classify frequency by range to identify radio type
+ */
+function classifyFrequency(frequencyKHz: number): 'ILS/VOR' | 'NDB' | 'VHF' | 'UHF' | 'UNKNOWN' {
+  if (frequencyKHz >= 108000 && frequencyKHz <= 118000) {
+    return 'ILS/VOR';  // ILS/VOR range: 108-118 MHz
+  } else if (frequencyKHz >= 190 && frequencyKHz <= 1750) {
+    return 'NDB';      // NDB range: 190-1750 kHz
+  } else if (frequencyKHz >= 118000 && frequencyKHz <= 137000) {
+    return 'VHF';      // VHF comms: 118-137 MHz
+  } else if (frequencyKHz >= 225000 && frequencyKHz <= 400000) {
+    return 'UHF';      // UHF military: 225-400 MHz
+  }
+  return 'UNKNOWN';
+}
+
 export function parseFrequency(
   value: string | number | undefined | null,
   unit: "MHz" | "kHz" = "MHz"
@@ -167,18 +183,15 @@ export function parseFrequency(
   if (parsed !== undefined) {
     // Validate frequency ranges
     if (unit === "MHz") {
-      // Aviation radio frequencies typically 108-137 MHz
+      // Aviation radio frequencies typically 108-400 MHz (includes ILS/VOR, VHF, UHF)
       if (parsed < 100 || parsed > 400) {
-        console.warn(
-          `Unusual MHz frequency: ${parsed}. Expected aviation range: 108-137 MHz.`
-        );
+        return undefined;
       }
     } else if (unit === "kHz") {
-      // NDB frequencies typically 190-1750 kHz
-      if (parsed < 100 || parsed > 2000) {
-        console.warn(
-          `Unusual kHz frequency: ${parsed}. Expected NDB range: 190-1750 kHz.`
-        );
+      // Validate kHz frequencies by type
+      const freqType = classifyFrequency(parsed);
+      if (freqType === 'UNKNOWN') {
+        return undefined;
       }
     }
   }

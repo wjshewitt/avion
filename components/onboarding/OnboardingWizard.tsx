@@ -124,8 +124,6 @@ export function OnboardingWizard() {
     }
   };
 
-  const progress = (currentStep / STEPS.length) * 100;
-
   return (
     <>
       <SetupAnimation 

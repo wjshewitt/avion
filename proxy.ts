@@ -1,7 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   let response = NextResponse.next({
     request: {
       headers: request.headers,
@@ -60,7 +60,7 @@ export async function middleware(request: NextRequest) {
 
   const pathname = request.nextUrl.pathname;
 
-  // Skip middleware auth checks for API routes
+  // Skip proxy auth checks for API routes
   if (pathname.startsWith("/api")) {
     return response;
   }
@@ -109,10 +109,7 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(redirectUrl);
     }
 
-    if (pathname === "/landing") {
-      const redirectUrl = new URL(onboardingCompleted ? "/flights" : onboardingRoute, request.url);
-      return NextResponse.redirect(redirectUrl);
-    }
+    // Allow signed-in users to access /landing page (no redirect)
   }
 
   return response;

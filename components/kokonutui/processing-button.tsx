@@ -36,7 +36,7 @@ export default function ProcessingButton({
  await onProcess();
  setState('success');
  setTimeout(() => setState('idle'), 2000);
- } catch (error) {
+  } catch {
  setState('idle');
  }
  };

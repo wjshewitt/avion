@@ -1,11 +1,60 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import { Save, User, Bell, Monitor, Database, Shield, Globe } from 'lucide-react';
 import { useStore } from '@/store/index';
-import type { UserProfile } from '@/types/profile';
 
 type SettingsSection = 'profile' | 'notifications' | 'display' | 'data' | 'security' | 'system';
+
+type SettingsToggleProps = {
+  checked: boolean;
+  onChange: (next: boolean) => void;
+};
+
+const SettingsToggle = ({ checked, onChange }: SettingsToggleProps) => {
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={checked}
+      onClick={() => onChange(!checked)}
+      className={`relative inline-flex h-6 w-11 items-center rounded-full border transition-colors ${
+        checked ? 'bg-blue text-white border-blue' : 'bg-gray-200 text-muted-foreground border-border'
+      }`}
+    >
+      <motion.div
+        layout
+        transition={{ type: 'spring', stiffness: 700, damping: 30 }}
+        className="h-4 w-4 rounded-full bg-card shadow-md"
+        style={{ marginLeft: checked ? '22px' : '2px' }}
+      />
+    </button>
+  );
+};
+
+const SECTION_TITLE = 'text-xl font-light tracking-tight text-foreground mb-4';
+const SECTION_META =
+  'text-[10px] font-mono uppercase tracking-[0.18em] text-muted-foreground mb-2';
+const SECTION_META_BLUE =
+  'text-[10px] font-mono uppercase tracking-[0.18em] text-blue mb-2';
+const SECTION_META_AMBER =
+  'text-[10px] font-mono uppercase tracking-[0.18em] text-amber mb-2';
+
+const FIELD_LABEL =
+  'block text-[11px] font-mono uppercase tracking-[0.14em] text-muted-foreground mb-1';
+const INPUT_BASE =
+  'w-full px-3 py-2 text-sm bg-white/80 dark:bg-zinc-950/40 border border-border rounded-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-blue focus:ring-1 focus:ring-blue disabled:opacity-50';
+const TEXTAREA_BASE = `${INPUT_BASE} resize-none`;
+const SELECT_BASE = INPUT_BASE;
+
+const SETTING_TITLE = 'text-sm font-medium text-foreground';
+const SETTING_DESC = 'text-xs text-muted-foreground mt-1';
+
+const ACTION_BUTTON =
+  'w-full px-4 py-3 text-[11px] font-mono uppercase tracking-[0.16em] border border-border bg-transparent text-foreground hover:bg-zinc-100/60 dark:hover:bg-zinc-900 transition-colors';
+const DANGER_BUTTON =
+  'w-full px-4 py-3 text-[11px] font-mono uppercase tracking-[0.16em] border border-red bg-red/5 text-red hover:bg-red/10 transition-colors';
 
 export default function SettingsPage() {
   const [activeSection, setActiveSection] = useState<SettingsSection>('profile');
@@ -125,56 +174,85 @@ export default function SettingsPage() {
     }
   };
 
+  const isError = saveMessage?.toLowerCase().includes('error');
+  const isSuccess = saveMessage && !isError;
+
   return (
-    <div className="flex-1 overflow-y-auto">
-      <div className="max-w-7xl mx-auto p-8">
-        {/* Header */}
-        <div className="mb-6 pb-4 border-b border-border ">
-          <h1 className="text-lg font-semibold text-foreground">Settings</h1>
-        </div>
+    <div className="min-h-full bg-[#e8e8e8] dark:bg-zinc-950">
+      <div className="relative h-full px-6 md:px-8 py-8">
+        <div className="absolute inset-0 tech-grid opacity-40 pointer-events-none" aria-hidden />
 
-        <div className="flex gap-8">
-          {/* Sidebar Navigation */}
-          <aside className="w-56 flex-shrink-0">
-            <nav className="space-y-1">
-              {sections.map((section) => {
-                const Icon = section.icon;
-                return (
-                  <button
-                    key={section.id}
-                    onClick={() => setActiveSection(section.id)}
-                    className={`
-                      w-full flex items-center gap-3 px-4 py-3 text-sm font-medium
-                      border-l-2 transition-colors
-                      ${
-                        activeSection === section.id
-                          ? 'border-blue bg-blue/5 text-blue'
-                          : 'border-transparent text-muted-foreground hover:text-foreground hover:bg-surface'
-                      }
-                    `}
-                  >
-                    <Icon size={18} />
-                    {section.label}
-                  </button>
-                );
-              })}
-            </nav>
-          </aside>
+        <div className="relative h-full corner-brackets corner-brackets-lg corner-brackets-default">
+          <div className="corner-brackets-inner h-full p-6 md:p-8 bg-surface/80 dark:bg-zinc-900/80 backdrop-blur-md space-y-8">
+            {/* Header */}
+            <div className="flex items-center justify-between border-b border-border pb-4">
+              <div>
+                <p className="text-[10px] font-mono tracking-[0.3em] uppercase text-muted-foreground mb-1">
+                  User Control Panel
+                </p>
+                <h1 className="text-2xl font-light tracking-tight text-foreground">Settings</h1>
+              </div>
+              <div className="hidden md:flex items-center gap-2 text-xs font-mono text-muted-foreground">
+                <span className={`w-2 h-2 rounded-full ${hasChanges ? 'bg-amber-500' : 'bg-emerald-500'}`} />
+                <span>{hasChanges ? 'Unsaved changes' : 'Profile synced'}</span>
+              </div>
+            </div>
 
-          {/* Main Content */}
-          <main className="flex-1">
-            <div className="bg-card  border border-border  p-8">
+            <div className="flex flex-col lg:flex-row gap-6 lg:gap-10">
+              {/* Sidebar Navigation */}
+              <aside className="w-full lg:w-64 flex-shrink-0">
+                <div className="glass-panel rounded-sm p-4 h-full">
+                  <div className="mb-3 flex items-center justify-between">
+                    <span className="text-[10px] font-mono uppercase tracking-[0.25em] text-muted-foreground">
+                      Sections
+                    </span>
+                    <span className="text-[10px] font-mono text-blue">
+                      {sections.length.toString().padStart(2, '0')} ITEMS
+                    </span>
+                  </div>
+                  <nav className="space-y-1">
+                    {sections.map((section) => {
+                      const Icon = section.icon;
+                      const isActive = activeSection === section.id;
+                      return (
+                        <button
+                          key={section.id}
+                          onClick={() => setActiveSection(section.id)}
+                          className={`w-full flex items-center justify-between px-3 py-2 rounded-sm border-l-2 transition-colors text-xs font-medium ${
+                            isActive
+                              ? 'border-blue bg-zinc-900 text-zinc-50 dark:bg-zinc-50 dark:text-zinc-900'
+                              : 'border-transparent text-muted-foreground hover:text-foreground hover:bg-zinc-100/60 dark:hover:bg-zinc-900'
+                          }`}
+                        >
+                          <span className="flex items-center gap-2">
+                            <span className="inline-flex h-6 w-6 items-center justify-center rounded-sm border border-border bg-background">
+                              <Icon size={14} />
+                            </span>
+                            <span>{section.label}</span>
+                          </span>
+                          <span className="hidden md:inline text-[10px] font-mono opacity-60">
+                            {section.id.toUpperCase()}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </nav>
+                </div>
+              </aside>
+
+              {/* Main Content */}
+              <main className="flex-1 flex flex-col">
+                <div className="glass-panel rounded-sm p-6 md:p-8 flex-1">
               {/* Profile Settings */}
               {activeSection === 'profile' && (
                 <div>
-                  <h2 className="text-xl font-semibold text-foreground mb-6">Profile Information</h2>
-                  
+                  <p className={SECTION_META}>Profile</p>
+                  <h2 className={SECTION_TITLE}>Profile Information</h2>
+
                   <div className="space-y-6">
                     <div className="grid grid-cols-2 gap-6">
                       <div>
-                        <label className="block text-sm font-semibold text-foreground mb-2">
-                          Display Name
-                        </label>
+                        <label className={FIELD_LABEL}>Display Name</label>
                         <input
                           type="text"
                           value={isLoadingProfile ? 'Loading...' : profileSettings.display_name}
@@ -183,14 +261,12 @@ export default function SettingsPage() {
                             setHasChanges(true);
                           }}
                           disabled={isLoadingProfile}
-                          className="w-full px-4 py-2 border border-border  text-sm focus:outline-none focus:border-blue disabled:opacity-50"
+                          className={INPUT_BASE}
                         />
                       </div>
 
                       <div>
-                        <label className="block text-sm font-semibold text-foreground mb-2">
-                          Username
-                        </label>
+                        <label className={FIELD_LABEL}>Username</label>
                         <input
                           type="text"
                           value={isLoadingProfile ? 'Loading...' : profileSettings.username}
@@ -199,20 +275,18 @@ export default function SettingsPage() {
                             setHasChanges(true);
                           }}
                           disabled={isLoadingProfile}
-                          className="w-full px-4 py-2 border border-border  text-sm focus:outline-none focus:border-blue font-mono disabled:opacity-50"
+                          className={`${INPUT_BASE} font-mono`}
                         />
                       </div>
                     </div>
 
                     <div>
-                      <label className="block text-sm font-semibold text-foreground mb-2">
-                        Email Address
-                      </label>
+                      <label className={FIELD_LABEL}>Email Address</label>
                       <input
                         type="email"
                         value={profileSettings.email}
                         disabled
-                        className="w-full px-4 py-2 border border-border  text-sm focus:outline-none focus:border-blue disabled:opacity-50 bg-gray-50 "
+                        className={`${INPUT_BASE} bg-background-secondary disabled:bg-background-secondary`}
                       />
                       <p className="text-xs text-muted-foreground mt-1">
                         Email cannot be changed here. Contact support if needed.
@@ -220,9 +294,7 @@ export default function SettingsPage() {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-semibold text-foreground mb-2">
-                        Bio
-                      </label>
+                      <label className={FIELD_LABEL}>Bio</label>
                       <textarea
                         value={isLoadingProfile ? 'Loading...' : profileSettings.bio}
                         onChange={(e) => {
@@ -231,15 +303,13 @@ export default function SettingsPage() {
                         }}
                         disabled={isLoadingProfile}
                         rows={3}
-                        className="w-full px-4 py-2 border border-border  text-sm focus:outline-none focus:border-blue disabled:opacity-50 resize-none"
+                        className={TEXTAREA_BASE}
                       />
                     </div>
 
                     <div className="grid grid-cols-2 gap-6">
                       <div>
-                        <label className="block text-sm font-semibold text-foreground mb-2">
-                          Phone Number
-                        </label>
+                        <label className={FIELD_LABEL}>Phone Number</label>
                         <input
                           type="tel"
                           value={isLoadingProfile ? 'Loading...' : profileSettings.phone}
@@ -248,14 +318,12 @@ export default function SettingsPage() {
                             setHasChanges(true);
                           }}
                           disabled={isLoadingProfile}
-                          className="w-full px-4 py-2 border border-border  text-sm focus:outline-none focus:border-blue font-mono disabled:opacity-50"
+                          className={`${INPUT_BASE} font-mono`}
                         />
                       </div>
 
                       <div>
-                        <label className="block text-sm font-semibold text-foreground mb-2">
-                          Organization
-                        </label>
+                        <label className={FIELD_LABEL}>Organization</label>
                         <input
                           type="text"
                           value={isLoadingProfile ? 'Loading...' : profileSettings.affiliated_organization}
@@ -264,16 +332,14 @@ export default function SettingsPage() {
                             setHasChanges(true);
                           }}
                           disabled={isLoadingProfile}
-                          className="w-full px-4 py-2 border border-border  text-sm focus:outline-none focus:border-blue disabled:opacity-50"
+                          className={INPUT_BASE}
                         />
                       </div>
                     </div>
 
                     <div className="grid grid-cols-2 gap-6">
                       <div>
-                        <label className="block text-sm font-semibold text-foreground mb-2">
-                          Default Timezone
-                        </label>
+                        <label className={FIELD_LABEL}>Default Timezone</label>
                         <select
                           value={isLoadingProfile ? 'UTC' : profileSettings.timezone}
                           onChange={(e) => {
@@ -281,7 +347,7 @@ export default function SettingsPage() {
                             setHasChanges(true);
                           }}
                           disabled={isLoadingProfile}
-                          className="w-full px-4 py-2 border border-border  text-sm focus:outline-none focus:border-blue disabled:opacity-50"
+                          className={SELECT_BASE}
                         >
                           <option value="UTC">UTC</option>
                           <option value="America/New_York">Eastern (ET)</option>
@@ -300,112 +366,87 @@ export default function SettingsPage() {
               {/* Notification Settings */}
               {activeSection === 'notifications' && (
                 <div>
-                  <h2 className="text-xl font-semibold text-foreground mb-6">Notification Preferences</h2>
-                  
+                  <p className={SECTION_META_BLUE}>Notifications</p>
+                  <h2 className={SECTION_TITLE}>Notification Preferences</h2>
                   <div className="space-y-4">
                     <div className="flex items-center justify-between py-3 border-b border-border ">
                       <div>
-                        <div className="text-sm font-semibold text-foreground">Weather Alerts</div>
-                        <div className="text-xs text-muted-foreground mt-1">
+                        <div className={SETTING_TITLE}>Weather Alerts</div>
+                        <div className={SETTING_DESC}>
                           Receive notifications for weather changes affecting your flights
                         </div>
                       </div>
-                      <label className="relative inline-flex items-center cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={notificationSettings.weatherAlerts}
-                          onChange={(e) => {
-                            setNotificationSettings({ ...notificationSettings, weatherAlerts: e.target.checked });
-                            setHasChanges(true);
-                          }}
-                          className="sr-only peer"
-                        />
-                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue border border-border  peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-card  after:border-gray-300 after:border after:h-5 after:w-5 after:transition-all peer-checked:bg-blue"></div>
-                      </label>
+                      <SettingsToggle
+                        checked={notificationSettings.weatherAlerts}
+                        onChange={(next) => {
+                          setNotificationSettings({ ...notificationSettings, weatherAlerts: next });
+                          setHasChanges(true);
+                        }}
+                      />
                     </div>
 
                     <div className="flex items-center justify-between py-3 border-b border-border ">
                       <div>
-                        <div className="text-sm font-semibold text-foreground">Flight Updates</div>
-                        <div className="text-xs text-muted-foreground mt-1">
+                        <div className={SETTING_TITLE}>Flight Updates</div>
+                        <div className={SETTING_DESC}>
                           Get notified about flight status changes and updates
                         </div>
                       </div>
-                      <label className="relative inline-flex items-center cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={notificationSettings.flightUpdates}
-                          onChange={(e) => {
-                            setNotificationSettings({ ...notificationSettings, flightUpdates: e.target.checked });
-                            setHasChanges(true);
-                          }}
-                          className="sr-only peer"
-                        />
-                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue border border-border  peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-card  after:border-gray-300 after:border after:h-5 after:w-5 after:transition-all peer-checked:bg-blue"></div>
-                      </label>
+                      <SettingsToggle
+                        checked={notificationSettings.flightUpdates}
+                        onChange={(next) => {
+                          setNotificationSettings({ ...notificationSettings, flightUpdates: next });
+                          setHasChanges(true);
+                        }}
+                      />
                     </div>
 
                     <div className="flex items-center justify-between py-3 border-b border-border ">
                       <div>
-                        <div className="text-sm font-semibold text-foreground">System Alerts</div>
-                        <div className="text-xs text-muted-foreground mt-1">
+                        <div className={SETTING_TITLE}>System Alerts</div>
+                        <div className={SETTING_DESC}>
                           Critical system notifications and warnings
                         </div>
                       </div>
-                      <label className="relative inline-flex items-center cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={notificationSettings.systemAlerts}
-                          onChange={(e) => {
-                            setNotificationSettings({ ...notificationSettings, systemAlerts: e.target.checked });
-                            setHasChanges(true);
-                          }}
-                          className="sr-only peer"
-                        />
-                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue border border-border  peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-card  after:border-gray-300 after:border after:h-5 after:w-5 after:transition-all peer-checked:bg-blue"></div>
-                      </label>
+                      <SettingsToggle
+                        checked={notificationSettings.systemAlerts}
+                        onChange={(next) => {
+                          setNotificationSettings({ ...notificationSettings, systemAlerts: next });
+                          setHasChanges(true);
+                        }}
+                      />
                     </div>
 
                     <div className="flex items-center justify-between py-3 border-b border-border ">
                       <div>
-                        <div className="text-sm font-semibold text-foreground">Email Notifications</div>
-                        <div className="text-xs text-muted-foreground mt-1">
+                        <div className={SETTING_TITLE}>Email Notifications</div>
+                        <div className={SETTING_DESC}>
                           Send notification summaries to your email
                         </div>
                       </div>
-                      <label className="relative inline-flex items-center cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={notificationSettings.emailNotifications}
-                          onChange={(e) => {
-                            setNotificationSettings({ ...notificationSettings, emailNotifications: e.target.checked });
-                            setHasChanges(true);
-                          }}
-                          className="sr-only peer"
-                        />
-                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue border border-border  peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-card  after:border-gray-300 after:border after:h-5 after:w-5 after:transition-all peer-checked:bg-blue"></div>
-                      </label>
+                      <SettingsToggle
+                        checked={notificationSettings.emailNotifications}
+                        onChange={(next) => {
+                          setNotificationSettings({ ...notificationSettings, emailNotifications: next });
+                          setHasChanges(true);
+                        }}
+                      />
                     </div>
 
                     <div className="flex items-center justify-between py-3">
                       <div>
-                        <div className="text-sm font-semibold text-foreground">Sound Enabled</div>
-                        <div className="text-xs text-muted-foreground mt-1">
+                        <div className={SETTING_TITLE}>Sound Enabled</div>
+                        <div className={SETTING_DESC}>
                           Play sound for notifications
                         </div>
                       </div>
-                      <label className="relative inline-flex items-center cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={notificationSettings.soundEnabled}
-                          onChange={(e) => {
-                            setNotificationSettings({ ...notificationSettings, soundEnabled: e.target.checked });
-                            setHasChanges(true);
-                          }}
-                          className="sr-only peer"
-                        />
-                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue border border-border  peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-card  after:border-gray-300 after:border after:h-5 after:w-5 after:transition-all peer-checked:bg-blue"></div>
-                      </label>
+                      <SettingsToggle
+                        checked={notificationSettings.soundEnabled}
+                        onChange={(next) => {
+                          setNotificationSettings({ ...notificationSettings, soundEnabled: next });
+                          setHasChanges(true);
+                        }}
+                      />
                     </div>
                   </div>
                 </div>
@@ -414,14 +455,13 @@ export default function SettingsPage() {
               {/* Display Settings */}
               {activeSection === 'display' && (
                 <div>
-                  <h2 className="text-xl font-semibold text-foreground mb-6">Display & Appearance</h2>
-                  
+                  <p className={SECTION_META_BLUE}>Interface</p>
+                  <h2 className={SECTION_TITLE}>Display &amp; Appearance</h2>
+
                   <div className="space-y-6">
                     {/* Weather View Mode */}
                     <div>
-                      <label className="block text-sm font-semibold text-foreground mb-2">
-                        Weather View Mode
-                      </label>
+                      <label className={FIELD_LABEL}>Weather View Mode</label>
                       <div className="flex gap-3">
                         {([
                           { id: 'standard', label: 'Standard (Accessible)' },
@@ -430,7 +470,7 @@ export default function SettingsPage() {
                           <button
                             key={opt.id}
                             onClick={() => setWeatherViewMode(opt.id)}
-                            className={`px-4 py-2 text-sm font-medium border transition-colors ${
+                            className={`px-4 py-2 text-[11px] font-mono uppercase tracking-[0.14em] border transition-colors ${
                               weatherViewMode === opt.id
                                 ? 'border-blue bg-blue text-white'
                                 : 'border-border  text-muted-foreground hover:text-foreground hover:border-text-primary'
@@ -440,24 +480,20 @@ export default function SettingsPage() {
                           </button>
                         ))}
                       </div>
-                      <p className="text-xs text-muted-foreground mt-2">
+                      <p className={SETTING_DESC}>
                         Standard balances detail and legibility. Switch to Advanced for dense, landscape cockpit view.
                       </p>
                     </div>
 
                     <div>
-                      <label className="block text-sm font-semibold text-foreground mb-3">
-                        Theme
-                      </label>
-                      <p className="text-xs text-muted-foreground mt-2">
+                      <label className={FIELD_LABEL}>Theme</label>
+                      <p className={SETTING_DESC}>
                         Choose your preferred color scheme or use system preference
                       </p>
                     </div>
 
                     <div>
-                      <label className="block text-sm font-semibold text-foreground mb-2">
-                        Unit System
-                      </label>
+                      <label className={FIELD_LABEL}>Unit System</label>
                       <div className="flex gap-3">
                         {['imperial', 'metric'].map((unit) => (
                           <button
@@ -467,7 +503,7 @@ export default function SettingsPage() {
                               setHasChanges(true);
                             }}
                             className={`
-                              px-6 py-2 text-sm font-medium border transition-colors
+                              px-6 py-2 text-[11px] font-mono uppercase tracking-[0.14em] border transition-colors
                               ${
                                 displaySettings.unitSystem === unit
                                   ? 'border-blue bg-blue text-white'
@@ -484,65 +520,50 @@ export default function SettingsPage() {
                     <div className="space-y-4 pt-4 border-t border-border ">
                       <div className="flex items-center justify-between">
                         <div>
-                          <div className="text-sm font-semibold text-foreground">Compact Mode</div>
-                          <div className="text-xs text-muted-foreground mt-1">
+                          <div className={SETTING_TITLE}>Compact Mode</div>
+                          <div className={SETTING_DESC}>
                             Reduce spacing and padding throughout the interface
                           </div>
                         </div>
-                        <label className="relative inline-flex items-center cursor-pointer">
-                          <input
-                            type="checkbox"
-                            checked={displaySettings.compactMode}
-                            onChange={(e) => {
-                              setDisplaySettings({ ...displaySettings, compactMode: e.target.checked });
-                              setHasChanges(true);
-                            }}
-                            className="sr-only peer"
-                          />
-                          <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue border border-border  peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-card  after:border-gray-300 after:border after:h-5 after:w-5 after:transition-all peer-checked:bg-blue"></div>
-                        </label>
+                        <SettingsToggle
+                          checked={displaySettings.compactMode}
+                          onChange={(next) => {
+                            setDisplaySettings({ ...displaySettings, compactMode: next });
+                            setHasChanges(true);
+                          }}
+                        />
                       </div>
 
                       <div className="flex items-center justify-between">
                         <div>
-                          <div className="text-sm font-semibold text-foreground">Show Badges</div>
-                          <div className="text-xs text-muted-foreground mt-1">
+                          <div className={SETTING_TITLE}>Show Badges</div>
+                          <div className={SETTING_DESC}>
                             Display notification badges on navigation items
                           </div>
                         </div>
-                        <label className="relative inline-flex items-center cursor-pointer">
-                          <input
-                            type="checkbox"
-                            checked={displaySettings.showBadges}
-                            onChange={(e) => {
-                              setDisplaySettings({ ...displaySettings, showBadges: e.target.checked });
-                              setHasChanges(true);
-                            }}
-                            className="sr-only peer"
-                          />
-                          <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue border border-border  peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-card  after:border-gray-300 after:border after:h-5 after:w-5 after:transition-all peer-checked:bg-blue"></div>
-                        </label>
+                        <SettingsToggle
+                          checked={displaySettings.showBadges}
+                          onChange={(next) => {
+                            setDisplaySettings({ ...displaySettings, showBadges: next });
+                            setHasChanges(true);
+                          }}
+                        />
                       </div>
 
                       <div className="flex items-center justify-between">
                         <div>
-                          <div className="text-sm font-semibold text-foreground">Sidebar Expanded by Default</div>
-                          <div className="text-xs text-muted-foreground mt-1">
+                          <div className={SETTING_TITLE}>Sidebar Expanded by Default</div>
+                          <div className={SETTING_DESC}>
                             Keep the sidebar expanded on page load
                           </div>
                         </div>
-                        <label className="relative inline-flex items-center cursor-pointer">
-                          <input
-                            type="checkbox"
-                            checked={displaySettings.sidebarExpanded}
-                            onChange={(e) => {
-                              setDisplaySettings({ ...displaySettings, sidebarExpanded: e.target.checked });
-                              setHasChanges(true);
-                            }}
-                            className="sr-only peer"
-                          />
-                          <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue border border-border  peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-card  after:border-gray-300 after:border after:h-5 after:w-5 after:transition-all peer-checked:bg-blue"></div>
-                        </label>
+                        <SettingsToggle
+                          checked={displaySettings.sidebarExpanded}
+                          onChange={(next) => {
+                            setDisplaySettings({ ...displaySettings, sidebarExpanded: next });
+                            setHasChanges(true);
+                          }}
+                        />
                       </div>
                     </div>
                   </div>
@@ -552,62 +573,50 @@ export default function SettingsPage() {
               {/* Data Settings */}
               {activeSection === 'data' && (
                 <div>
-                  <h2 className="text-xl font-semibold text-foreground mb-6">Data Management</h2>
-                  
+                  <p className={SECTION_META_AMBER}>Storage &amp; Retention</p>
+                  <h2 className={SECTION_TITLE}>Data Management</h2>
                   <div className="space-y-6">
                     <div className="flex items-center justify-between py-3 border-b border-border ">
                       <div>
-                        <div className="text-sm font-semibold text-foreground">Auto-Save</div>
-                        <div className="text-xs text-muted-foreground mt-1">
+                        <div className={SETTING_TITLE}>Auto-Save</div>
+                        <div className={SETTING_DESC}>
                           Automatically save changes as you work
                         </div>
                       </div>
-                      <label className="relative inline-flex items-center cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={dataSettings.autoSave}
-                          onChange={(e) => {
-                            setDataSettings({ ...dataSettings, autoSave: e.target.checked });
-                            setHasChanges(true);
-                          }}
-                          className="sr-only peer"
-                        />
-                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue border border-border  peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-card  after:border-gray-300 after:border after:h-5 after:w-5 after:transition-all peer-checked:bg-blue"></div>
-                      </label>
+                      <SettingsToggle
+                        checked={dataSettings.autoSave}
+                        onChange={(next) => {
+                          setDataSettings({ ...dataSettings, autoSave: next });
+                          setHasChanges(true);
+                        }}
+                      />
                     </div>
 
                     <div className="flex items-center justify-between py-3 border-b border-border ">
                       <div>
-                        <div className="text-sm font-semibold text-foreground">Cache Enabled</div>
-                        <div className="text-xs text-muted-foreground mt-1">
+                        <div className={SETTING_TITLE}>Cache Enabled</div>
+                        <div className={SETTING_DESC}>
                           Store data locally for faster access
                         </div>
                       </div>
-                      <label className="relative inline-flex items-center cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={dataSettings.cacheEnabled}
-                          onChange={(e) => {
-                            setDataSettings({ ...dataSettings, cacheEnabled: e.target.checked });
-                            setHasChanges(true);
-                          }}
-                          className="sr-only peer"
-                        />
-                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue border border-border  peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-card  after:border-gray-300 after:border after:h-5 after:w-5 after:transition-all peer-checked:bg-blue"></div>
-                      </label>
+                      <SettingsToggle
+                        checked={dataSettings.cacheEnabled}
+                        onChange={(next) => {
+                          setDataSettings({ ...dataSettings, cacheEnabled: next });
+                          setHasChanges(true);
+                        }}
+                      />
                     </div>
 
                     <div>
-                      <label className="block text-sm font-semibold text-foreground mb-2">
-                        Data Retention Period
-                      </label>
+                      <label className={FIELD_LABEL}>Data Retention Period</label>
                       <select
                         value={dataSettings.dataRetention}
                         onChange={(e) => {
                           setDataSettings({ ...dataSettings, dataRetention: e.target.value });
                           setHasChanges(true);
                         }}
-                        className="w-full px-4 py-2 border border-border  text-sm focus:outline-none focus:border-blue"
+                        className={SELECT_BASE}
                       >
                         <option value="7">7 days</option>
                         <option value="30">30 days</option>
@@ -621,15 +630,9 @@ export default function SettingsPage() {
                     </div>
 
                     <div className="pt-6 border-t border-border  space-y-3">
-                      <button className="w-full px-4 py-3 border border-border  text-sm font-medium text-foreground hover:bg-surface  transition-colors">
-                        Export All Data
-                      </button>
-                      <button className="w-full px-4 py-3 border border-border  text-sm font-medium text-foreground hover:bg-surface  transition-colors">
-                        Clear Cache
-                      </button>
-                      <button className="w-full px-4 py-3 border border-red bg-red/5 text-sm font-medium text-red hover:bg-red/10 transition-colors">
-                        Delete All Data
-                      </button>
+                      <button className={ACTION_BUTTON}>Export All Data</button>
+                      <button className={ACTION_BUTTON}>Clear Cache</button>
+                      <button className={DANGER_BUTTON}>Delete All Data</button>
                     </div>
                   </div>
                 </div>
@@ -638,17 +641,18 @@ export default function SettingsPage() {
               {/* Security Settings */}
               {activeSection === 'security' && (
                 <div>
-                  <h2 className="text-xl font-semibold text-foreground mb-6">Security & Privacy</h2>
-                  
+                  <p className={SECTION_META}>Security</p>
+                  <h2 className={SECTION_TITLE}>Security &amp; Privacy</h2>
+
                   <div className="space-y-6">
                     <div>
-                      <button className="w-full px-4 py-3 border border-border  text-sm font-medium text-foreground hover:bg-surface  transition-colors text-left">
+                      <button className={`${ACTION_BUTTON} text-left`}>
                         Change Password
                       </button>
                     </div>
 
                     <div>
-                      <button className="w-full px-4 py-3 border border-border  text-sm font-medium text-foreground hover:bg-surface  transition-colors text-left">
+                      <button className={`${ACTION_BUTTON} text-left`}>
                         Two-Factor Authentication
                       </button>
                       <p className="text-xs text-muted-foreground mt-2 px-4">
@@ -657,26 +661,24 @@ export default function SettingsPage() {
                     </div>
 
                     <div className="pt-6 border-t border-border ">
-                      <h3 className="text-sm font-semibold text-foreground mb-4">Active Sessions</h3>
+                      <h3 className="text-sm font-medium text-foreground mb-4">Active Sessions</h3>
                       <div className="space-y-3">
                         <div className="p-4 border border-border ">
                           <div className="flex items-center justify-between">
                             <div>
-                              <div className="text-sm font-semibold text-foreground">Current Session</div>
-                              <div className="text-xs text-muted-foreground mt-1">
+                              <div className={SETTING_TITLE}>Current Session</div>
+                              <div className={SETTING_DESC}>
                                 Chrome on macOS · San Francisco, CA
                               </div>
                             </div>
-                            <div className="text-xs text-green font-semibold">ACTIVE</div>
+                            <div className="text-[10px] font-mono uppercase tracking-[0.16em] text-green">Active</div>
                           </div>
                         </div>
                       </div>
                     </div>
 
                     <div className="pt-6 border-t border-border ">
-                      <button className="w-full px-4 py-3 border border-red bg-red/5 text-sm font-medium text-red hover:bg-red/10 transition-colors">
-                        Sign Out All Devices
-                      </button>
+                      <button className={DANGER_BUTTON}>Sign Out All Devices</button>
                     </div>
                   </div>
                 </div>
@@ -685,38 +687,33 @@ export default function SettingsPage() {
               {/* System Settings */}
               {activeSection === 'system' && (
                 <div>
-                  <h2 className="text-xl font-semibold text-foreground mb-6">System Information</h2>
-                  
+                  <p className={SECTION_META}>System</p>
+                  <h2 className={SECTION_TITLE}>System Information</h2>
+
                   <div className="space-y-4">
                     <div className="grid grid-cols-2 gap-4">
-                      <div className="p-4 border border-border ">
-                        <div className="text-xs text-muted-foreground uppercase mb-1">Version</div>
+                      <div className="p-4 border border-border bg-background/60">
+                        <div className="text-[10px] font-mono uppercase tracking-[0.16em] text-muted-foreground mb-1">Version</div>
                         <div className="text-sm font-mono text-foreground">1.0.0</div>
                       </div>
-                      <div className="p-4 border border-border ">
-                        <div className="text-xs text-muted-foreground uppercase mb-1">Build</div>
+                      <div className="p-4 border border-border bg-background/60">
+                        <div className="text-[10px] font-mono uppercase tracking-[0.16em] text-muted-foreground mb-1">Build</div>
                         <div className="text-sm font-mono text-foreground">20250111</div>
                       </div>
-                      <div className="p-4 border border-border ">
-                        <div className="text-xs text-muted-foreground uppercase mb-1">Environment</div>
+                      <div className="p-4 border border-border bg-background/60">
+                        <div className="text-[10px] font-mono uppercase tracking-[0.16em] text-muted-foreground mb-1">Environment</div>
                         <div className="text-sm font-mono text-foreground">Production</div>
                       </div>
-                      <div className="p-4 border border-border ">
-                        <div className="text-xs text-muted-foreground uppercase mb-1">Status</div>
+                      <div className="p-4 border border-border bg-background/60">
+                        <div className="text-[10px] font-mono uppercase tracking-[0.16em] text-muted-foreground mb-1">Status</div>
                         <div className="text-sm font-mono text-green">Operational</div>
                       </div>
                     </div>
 
                     <div className="pt-6 border-t border-border  space-y-3">
-                      <button className="w-full px-4 py-3 border border-border  text-sm font-medium text-foreground hover:bg-surface  transition-colors">
-                        Check for Updates
-                      </button>
-                      <button className="w-full px-4 py-3 border border-border  text-sm font-medium text-foreground hover:bg-surface  transition-colors">
-                        View Documentation
-                      </button>
-                      <button className="w-full px-4 py-3 border border-border  text-sm font-medium text-foreground hover:bg-surface  transition-colors">
-                        Report an Issue
-                      </button>
+                      <button className={ACTION_BUTTON}>Check for Updates</button>
+                      <button className={ACTION_BUTTON}>View Documentation</button>
+                      <button className={ACTION_BUTTON}>Report an Issue</button>
                     </div>
 
                     <div className="pt-6 border-t border-border ">
@@ -728,50 +725,64 @@ export default function SettingsPage() {
                   </div>
                 </div>
               )}
-            </div>
-
-            {/* Save Bar */}
-            {(hasChanges || saveMessage) && (
-              <div className={`mt-4 p-4 border flex items-center justify-between ${
-                saveMessage?.includes('Error')
-                  ? 'bg-red border-red'
-                  : saveMessage
-                    ? 'bg-green border-green'
-                    : 'bg-blue border-blue'
-              }`}>
-                <div className="text-sm text-white">
-                  {saveMessage || 'You have unsaved changes'}
                 </div>
-                {!saveMessage && (
-                  <div className="flex gap-3">
-                    <button
-                      onClick={() => setHasChanges(false)}
-                      className="px-4 py-2 border border-white text-white text-sm font-medium hover:bg-white/10 transition-colors"
-                    >
-                      Discard
-                    </button>
-                    <button
-                      onClick={handleSave}
-                      disabled={isSaving}
-                      className="px-4 py-2 bg-card  text-blue text-sm font-medium hover:bg-white/90 transition-colors flex items-center gap-2 disabled:opacity-50"
-                    >
-                      {isSaving ? (
-                        <>
-                          <div className="w-4 h-4 border-2 border-blue border-t-transparent rounded-full animate-spin"></div>
-                          Saving...
-                        </>
-                      ) : (
-                        <>
-                          <Save size={16} />
-                          Save Changes
-                        </>
-                      )}
-                    </button>
+
+                {/* Save Bar */}
+                {(hasChanges || saveMessage) && (
+                  <div
+                    className={`mt-6 glass-panel rounded-sm px-4 py-3 flex items-center justify-between text-[11px] font-mono border-l-4 ${
+                      isError
+                        ? 'border-l-red-500'
+                        : isSuccess
+                          ? 'border-l-emerald-500'
+                          : 'border-l-amber-500'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <span
+                        className={`h-2 w-2 rounded-full ${
+                          isError
+                            ? 'bg-red-500'
+                            : isSuccess
+                              ? 'bg-emerald-500'
+                              : 'bg-amber-500'
+                        }`}
+                      />
+                      <span>{saveMessage || 'UNSAVED CHANGES'}</span>
+                    </div>
+
+                    {!saveMessage && (
+                      <div className="flex gap-3 text-[11px] tracking-widest uppercase">
+                        <button
+                          onClick={() => setHasChanges(false)}
+                          className="px-3 py-1 border border-border bg-transparent text-foreground hover:bg-zinc-100/60 dark:hover:bg-zinc-900 transition-colors"
+                        >
+                          Discard
+                        </button>
+                        <button
+                          onClick={handleSave}
+                          disabled={isSaving}
+                          className="px-3 py-1 bg-zinc-900 text-white border border-zinc-900 hover:bg-zinc-800 transition-colors flex items-center gap-2 disabled:opacity-60"
+                        >
+                          {isSaving ? (
+                            <>
+                              <div className="w-3 h-3 border-2 border-blue border-t-transparent rounded-full animate-spin" />
+                              <span>Saving</span>
+                            </>
+                          ) : (
+                            <>
+                              <Save size={14} />
+                              <span>Save</span>
+                            </>
+                          )}
+                        </button>
+                      </div>
+                    )}
                   </div>
                 )}
-              </div>
-            )}
-          </main>
+              </main>
+            </div>
+          </div>
         </div>
       </div>
     </div>

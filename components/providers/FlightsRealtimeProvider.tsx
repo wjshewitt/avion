@@ -69,8 +69,8 @@ export function FlightsRealtimeProvider() {
     const unsubPromise = subscribe();
     return () => {
       isMounted = false;
-      void unsubPromise?.then((unsub) => {
-        // handled in returned function of subscribe
+      void unsubPromise?.then((cleanup) => {
+        cleanup?.();
       });
     };
   }, [qc]);

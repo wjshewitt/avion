@@ -128,34 +128,17 @@ export class FrequencyOrganizer {
   private validateFrequencies(frequencies: FrequencyData[]): FrequencyData[] {
     return frequencies
       .map((freq) => {
-        // Parse frequency properly - handle strings like "119.1"
         const parsedFreq = parseFrequency(freq.frequency_mhz, "MHz");
+        if (parsedFreq === undefined) {
+          return null;
+        }
         return {
           ...freq,
-          frequency_mhz: parsedFreq?.toString() || freq.frequency_mhz,
+          frequency_mhz: parsedFreq.toString(),
           type: this.normalizeFrequencyType(freq.type),
         };
       })
-      .filter((freq) => {
-        // Filter out invalid frequencies - FIXED: Better validation
-        const mhz = parseFloat(freq.frequency_mhz);
-        if (isNaN(mhz)) {
-          console.warn(
-            `Invalid frequency format: ${freq.frequency_mhz} for ${freq.type}`
-          );
-          return false;
-        }
-
-        // Aviation frequencies are typically 108-137 MHz, but allow wider range for edge cases
-        if (mhz < 108.0 || mhz > 137.0) {
-          console.warn(
-            `Frequency ${mhz} MHz outside typical aviation range (108-137 MHz) for ${freq.type}`
-          );
-          // Still include it - might be valid for some services
-        }
-
-        return true;
-      });
+      .filter((freq): freq is FrequencyData => freq !== null);
   }
 
   /**

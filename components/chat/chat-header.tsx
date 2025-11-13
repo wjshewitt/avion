@@ -1,6 +1,6 @@
 'use client';
 
-import { Download, Settings } from 'lucide-react';
+import { Settings } from 'lucide-react';
 import ContextSelector from './context-selector';
 
 interface ChatHeaderProps {

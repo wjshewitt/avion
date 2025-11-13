@@ -39,8 +39,6 @@ const createFlightSchema = z.object({
 // Helpers to coerce empty strings/null to undefined for optional fields
 const emptyToUndefined = (val: unknown) =>
   val === "" || val === null || typeof val === "undefined" ? undefined : val;
-const emptyToNull = (val: unknown) => (val === "" ? null : (val as any));
-
 // Validation schema for flight updates (tolerant of empty strings from forms)
 const updateFlightSchema = z.object({
   id: z.string().uuid("Invalid flight ID"),

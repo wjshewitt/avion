@@ -62,8 +62,6 @@ export default function ChatInput({ conversationId, onMessageSent, isGenerating 
  throw new Error(errorData.error || 'Failed to send message');
  }
 
- const data = await response.json();
- 
  // Notify parent to refresh messages
  if (onMessageSent) {
  onMessageSent();

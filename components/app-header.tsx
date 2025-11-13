@@ -35,7 +35,7 @@ export default function AppHeader({ currentRoute }: AppHeaderProps) {
   const { alerts, aiChatOpen, toggleAiChat, searchValue, setSearchValue } = useAppStore();
   const { data: flights = [] } = useFlights();
   const [utcTime, setUtcTime] = useState('');
-  const [systemStatus, setSystemStatus] = useState<'operational' | 'degraded'>('operational');
+  const [systemStatus] = useState<'operational' | 'degraded'>('operational');
   const inputRef = React.useRef<HTMLInputElement>(null);
   
   // Search state

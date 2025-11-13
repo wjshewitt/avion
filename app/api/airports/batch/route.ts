@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
 
     // Validate the request body
-    const { icao_codes, include_details } = BatchRequestSchema.parse(body);
+    const { icao_codes } = BatchRequestSchema.parse(body);
 
     // Validate ICAO formats first
     const invalid = icao_codes.filter((c) => !isValidIcaoCode(c));

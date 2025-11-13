@@ -18,7 +18,7 @@ interface MessageListProps {
 }
 
 // Memoized individual message component to prevent re-rendering all messages
-const MemoizedMessage = memo<Message & AdditionalMessageOptions & { showTimeStamp: boolean }>(
+const MemoizedMessage = memo<ChatMessageProps>(
  function MemoizedMessage(props) {
  return <ChatMessage {...props} />
  }
@@ -41,8 +41,8 @@ export function MessageList({
  return (
  <MemoizedMessage
  key={message.id}
+ message={message}
  showTimeStamp={showTimeStamps}
- {...message}
  {...additionalOptions}
  />
  )

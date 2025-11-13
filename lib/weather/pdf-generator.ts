@@ -29,19 +29,19 @@ interface BriefingData {
  * Optimized for 1-2 page output with clean, readable layout
  */
 export class WeatherBriefingPdfGenerator {
-  private doc: jsPDF;
-  private pageWidth: number;
-  private pageHeight: number;
-  private margin: number = 12;
-  private currentY: number = 15;
-  private fontSize: {
+  protected doc: jsPDF;
+  protected pageWidth: number;
+  protected pageHeight: number;
+  protected margin: number = 12;
+  protected currentY: number = 15;
+  protected fontSize: {
     title: number;
     header: number;
     subheader: number;
     body: number;
     small: number;
   };
-  private colors: {
+  protected colors: {
     primary: [number, number, number];
     secondary: [number, number, number];
     border: [number, number, number];

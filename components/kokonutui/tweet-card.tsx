@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { Heart, Repeat2, MessageCircle, Share } from 'lucide-react';
 
@@ -37,7 +38,7 @@ export default function TweetCard({
  {/* Header */}
  <div className="flex items-center gap-3 mb-4">
  {avatar ? (
- <img src={avatar} alt={author} className="w-12 h-12" />
+ <Image src={avatar} alt={author} width={48} height={48} className="w-12 h-12 rounded-full object-cover" />
  ) : (
  <div className="w-12 h-12 bg-blue flex items-center justify-center text-white font-bold">
  {author.charAt(0)}

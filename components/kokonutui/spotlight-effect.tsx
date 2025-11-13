@@ -35,7 +35,7 @@ export default function SpotlightEffect({
  element.addEventListener('mousemove', handleMouseMove);
  return () => element.removeEventListener('mousemove', handleMouseMove);
  }
- }, []);
+ }, [mouseX, mouseY]);
 
  return (
  <div ref={ref} className={`relative overflow-hidden ${className}`}>

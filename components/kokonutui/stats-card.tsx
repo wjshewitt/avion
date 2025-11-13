@@ -26,7 +26,7 @@ export default function StatsCard({
 
  useEffect(() => {
  animate(count, value, { duration: 2 });
- }, [value]);
+ }, [count, value]);
 
  return (
  <div className="bg-white dark:bg-slate-900 border border-border dark:border-slate-700 p-6 hover:shadow-lg transition-shadow">

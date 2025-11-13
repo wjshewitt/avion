@@ -6,7 +6,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-export type ChatMode = 'flight-ops' | 'weather-brief' | 'airport-planning' | 'trip-planning';
+export type ChatMode = 'flight-ops' | 'weather-brief' | 'airport-planning' | 'deep-briefing';
 
 interface ChatSettings {
   // Behavior
@@ -21,6 +21,7 @@ interface ChatSettings {
   compactMode: boolean;
   showTimestamps: boolean;
   showThinkingProcess: boolean;
+  showUIElements: boolean; // New: controls interactive tool calls, metrics, animations
   
   // Tools
   autoExpandWeather: boolean;
@@ -33,6 +34,7 @@ interface ChatSettings {
   setCompactMode: (compact: boolean) => void;
   setShowTimestamps: (show: boolean) => void;
   setShowThinkingProcess: (show: boolean) => void;
+  setShowUIElements: (show: boolean) => void;
   setAutoExpandWeather: (expand: boolean) => void;
   setAutoExpandAirports: (expand: boolean) => void;
   setMode: (mode: ChatMode | null) => void;
@@ -51,6 +53,7 @@ const DEFAULT_SETTINGS = {
   compactMode: false,
   showTimestamps: true,
   showThinkingProcess: false,
+  showUIElements: false,
   autoExpandWeather: false,
   autoExpandAirports: false,
 };
@@ -70,6 +73,7 @@ export const useChatSettings = create<ChatSettings>()(
       setCompactMode: (compact) => set({ compactMode: compact }),
       setShowTimestamps: (show) => set({ showTimestamps: show }),
       setShowThinkingProcess: (show) => set({ showThinkingProcess: show }),
+      setShowUIElements: (show) => set({ showUIElements: show }),
       setAutoExpandWeather: (expand) => set({ autoExpandWeather: expand }),
       setAutoExpandAirports: (expand) => set({ autoExpandAirports: expand }),
       
@@ -91,6 +95,7 @@ export const useChatSettings = create<ChatSettings>()(
         compactMode: state.compactMode,
         showTimestamps: state.showTimestamps,
         showThinkingProcess: state.showThinkingProcess,
+        showUIElements: state.showUIElements,
         autoExpandWeather: state.autoExpandWeather,
         autoExpandAirports: state.autoExpandAirports,
       }),

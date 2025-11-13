@@ -235,7 +235,7 @@ export interface ProcessedAirportData {
   data_quality: {
     completeness_score: number; // 0-100
     last_updated: string;
-    source: "airportdb";
+    source: "airportdb" | "ourairports" | "merged";
   };
 }
 

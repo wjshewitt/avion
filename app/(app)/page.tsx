@@ -5,16 +5,15 @@ import { useRouter } from 'next/navigation';
 import { useAppStore } from '@/lib/store';
 import { useFlights } from '@/lib/tanstack/hooks/useFlights';
 import { mockAlerts } from '@/lib/mock-alerts';
-import type { Flight } from '@/lib/supabase/types';
 import WeatherWidget from '@/components/weather-widget';
 import AlertItem from '@/components/alert-item';
 import CollapsiblePanel from '@/components/collapsible-panel';
 import Map from '@/components/map';
-import { Plane, Cloud, Bell, Loader2, ArrowRight, AlertTriangle } from 'lucide-react';
+import { Plane, Cloud, Bell, Loader2, ArrowRight } from 'lucide-react';
 
 export default function DashboardPage() {
  const router = useRouter();
- const { alerts, mapCollapsed, toggleMap } = useAppStore();
+ const { alerts, mapCollapsed } = useAppStore();
  const { data: flights = [], isLoading } = useFlights();
 
  // Get active flights (first 3 for preview)

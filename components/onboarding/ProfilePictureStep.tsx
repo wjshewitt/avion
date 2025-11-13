@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Upload, X, User } from "lucide-react";
@@ -106,7 +107,7 @@ export function ProfilePictureStep({ value, onChange }: ProfilePictureStepProps)
         <div className="relative">
           <div className="w-40 h-40 bg-background-secondary border-2 border-border-subtle overflow-hidden flex items-center justify-center">
             {value ? (
-              <img src={value} alt="Profile" className="w-full h-full object-cover" />
+              <Image src={value} alt="Profile" width={160} height={160} className="w-full h-full object-cover" />
             ) : (
               <User className="w-20 h-20 text-text-muted" />
             )}

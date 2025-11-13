@@ -16,7 +16,7 @@ export function ThinkingIndicator() {
       setStep((prev) => (prev + 1) % steps.length);
     }, 2000);
     return () => clearInterval(interval);
-  }, []);
+  }, [steps.length]);
 
   return (
     <div className="flex items-center gap-3 p-4 bg-zinc-50 rounded-lg border border-zinc-100 w-fit shadow-sm">

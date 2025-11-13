@@ -1,49 +1,59 @@
 'use client';
 
-import { useEffect, useMemo, useCallback, useDeferredValue } from 'react';
+import { Suspense, useEffect, useMemo, useCallback, useState } from 'react';
+import type { ChangeEvent } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { usePremiumChat } from '@/hooks/usePremiumChat';
 import { useFlights } from '@/lib/tanstack/hooks/useFlights';
-import { useConversationMessages } from '@/lib/tanstack/hooks/useConversationMessages';
 import { useGeneralConversations } from '@/lib/tanstack/hooks/useGeneralConversations';
 import { Chat } from '@/components/ui/chat';
 import ChatSidebar from '@/components/chat/chat-sidebar';
 import { Download, Settings, Plus } from 'lucide-react';
 import ContextSelector from '@/components/chat/context-selector';
-import { Button } from '@/components/ui/button';
 import { useChatSessionStore } from '@/lib/chat-session-store';
+import ChatSettingsPanel from '@/components/chat/ChatSettingsPanel';
+import { useChatSettings } from '@/lib/chat-settings-store';
+import ChatModeSelector from '@/components/chat/ChatModeSelector';
+
+
+import { usePageContext } from '@/lib/context/usePageContext';
+
+export const dynamic = 'force-dynamic';
 
 export default function EnhancedChatPage() {
+ return (
+  <Suspense fallback={null}>
+   <EnhancedChatPageContent />
+  </Suspense>
+ );
+}
+
+function EnhancedChatPageContent() {
  const searchParams = useSearchParams();
+ 
+ // Enable page context detection
+ usePageContext();
  const { activeConversationId, setActiveConversationId } = useChatSessionStore();
  const queryClient = useQueryClient();
  const { data: conversations = [] } = useGeneralConversations();
  const { data: flights = [] } = useFlights();
+ 
+ const [showSettings, setShowSettings] = useState(false);
+ const { currentMode, useSimpleChat, setMode } = useChatSettings();
 
- // SERVER STATE: Load messages from database via TanStack Query
- const { data: conversationData } = useConversationMessages(activeConversationId);
- const messages = useMemo(
-   () => conversationData?.messages ?? [],
-   [conversationData]
- );
-
- useEffect(() => {
-   const conversationFromParams = searchParams.get('conversation');
-   if (conversationFromParams && conversationFromParams !== activeConversationId) {
-     setActiveConversationId(conversationFromParams);
-   }
- }, [searchParams, activeConversationId, setActiveConversationId]);
-
- // UI STATE: Chat input and sending logic with optimistic updates
+ // ✅ useChat now handles ALL message state - no manual transformation needed
  const {
+  messages,      // Already in correct format with toolInvocations, etc.
   input,
   setInput,
   sendMessage,
   stopStreaming,
   isStreaming,
-  isThinking,
+  setMessages,
+  missingCredentials,
+  providerInfo,
  } = usePremiumChat({
   conversationId: activeConversationId,
   onConversationCreated: useCallback((conversationId: string) => {
@@ -55,11 +65,28 @@ export default function EnhancedChatPage() {
   }, [setActiveConversationId, queryClient]),
   onError: useCallback((error: Error) => {
     console.error('Chat error:', error);
+    toast.error('Failed to send message', { description: error.message });
   }, [])
  });
 
- // Defer input value to prevent re-renders on every keystroke
- const deferredInput = useDeferredValue(input);
+ const providerLabel = useMemo(() => {
+   if (!providerInfo) {
+     return 'Provider: detecting…';
+   }
+
+   const providerName = providerInfo.provider === 'vertex' ? 'Vertex AI' : 'Gemini API';
+   const modelName = providerInfo.model ?? 'gemini-2.5-flash';
+   const thinkingSuffix = providerInfo.supportsThinking ? ' · Thinking enabled' : '';
+
+   return `${providerName} · ${modelName}${thinkingSuffix}`;
+ }, [providerInfo]);
+
+ useEffect(() => {
+   const conversationFromParams = searchParams.get('conversation');
+   if (conversationFromParams && conversationFromParams !== activeConversationId) {
+     setActiveConversationId(conversationFromParams);
+   }
+ }, [searchParams, activeConversationId, setActiveConversationId]);
 
  // Get suggestions based on available flights - memoized
  const contextSuggestions = useMemo(() => {
@@ -81,12 +108,10 @@ export default function EnhancedChatPage() {
    ];
  }, [flights]);
 
- const isLoading = isStreaming || isThinking;
-
  // ESC key to stop streaming
  useEffect(() => {
    const handleKeyDown = (e: KeyboardEvent) => {
-     if (e.key === 'Escape' && isLoading) {
+     if (e.key === 'Escape' && isStreaming) {
        e.preventDefault();
        stopStreaming();
        toast.info('Generation stopped', {
@@ -97,7 +122,7 @@ export default function EnhancedChatPage() {
 
    window.addEventListener('keydown', handleKeyDown);
    return () => window.removeEventListener('keydown', handleKeyDown);
- }, [isLoading, stopStreaming]);
+ }, [isStreaming, stopStreaming]);
 
  // Find the active conversation from the database-backed list
  const activeConversation = useMemo(
@@ -105,55 +130,18 @@ export default function EnhancedChatPage() {
    [conversations, activeConversationId]
  );
 
- // Transform messages to match Chat component interface - optimized
- const transformedMessages = useMemo(() => {
-   return messages.map((msg) => {
-     const toolInvocations: any[] = [];
-
-     if (msg.weather_tool_data && msg.weather_tool_data.length > 0) {
-       msg.weather_tool_data.forEach((weatherItem: any) => {
-         toolInvocations.push({
-           state: 'result' as const,
-           toolName: 'get_airport_weather',
-           result: { data: weatherItem },
-         });
-       });
-     }
-
-     if (msg.airport_tool_data && msg.airport_tool_data.length > 0) {
-       msg.airport_tool_data.forEach((airportItem: any) => {
-         toolInvocations.push({
-           state: 'result' as const,
-           toolName: 'get_airport_details',
-           result: { data: airportItem },
-         });
-       });
-     }
-
-     return {
-       id: msg.id,
-       role: msg.role,
-       content: msg.content,
-       createdAt: new Date(msg.created_at),
-       thinking_content: msg.thinking_content,
-       thinking_tokens: msg.thinking_tokens,
-       toolInvocations: toolInvocations.length > 0 ? toolInvocations : undefined,
-     };
-   });
- }, [messages]);
-
- const handleInputChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
+ const handleInputChange = useCallback((e: ChangeEvent<HTMLTextAreaElement>) => {
    setInput(e.target.value);
  }, [setInput]);
 
  const handleSubmit = useCallback((event?: { preventDefault?: () => void }) => {
    event?.preventDefault?.();
-   if (!input.trim() || isLoading) return;
-   sendMessage();
- }, [input, isLoading, sendMessage]);
+   if (!input.trim() || isStreaming || missingCredentials) return;
+   void sendMessage();
+ }, [input, isStreaming, missingCredentials, sendMessage]);
 
  const handleAppend = useCallback((message: { role: 'user'; content: string }) => {
-   sendMessage(message.content);
+   void sendMessage(message.content);
  }, [sendMessage]);
 
  const handleExport = useCallback(() => {
@@ -167,6 +155,8 @@ export default function EnhancedChatPage() {
    a.click();
  }, [messages]);
 
+ 
+
  return (
  <div className="flex h-full overflow-hidden">
  {/* Sidebar */}
@@ -178,15 +168,18 @@ export default function EnhancedChatPage() {
  {/* Main Chat Area */}
  <div className="flex-1 flex flex-col min-h-0">
  {/* Header */}
- <header className="border-b border-border bg-card px-6 py-2 flex-shrink-0">
+ <header className="border-b border-border bg-card flex-shrink-0">
+ <div className="px-6 py-2">
  <div className="flex items-center justify-between">
  <div className="flex-1 min-w-0">
  <div className="flex items-baseline gap-2">
  <h1 className="text-sm font-semibold text-foreground truncate">
- {activeConversation?.title || 'AI Aviation Assistant'}
+ {showSettings ? 'Chat Settings' : (activeConversation?.title || 'AI Aviation Assistant')}
  </h1>
  <div className="text-[10px] text-muted-foreground/70">
- {isLoading ? (
+ {showSettings ? (
+ 'Configure chat behavior and preferences'
+ ) : isStreaming ? (
  <span className="flex items-center gap-1.5 animate-pulse">
  Generating...
  <kbd className="px-1.5 py-0.5 bg-muted/50 rounded text-[9px] font-mono">ESC</kbd>
@@ -197,10 +190,19 @@ export default function EnhancedChatPage() {
  )}
  </div>
  </div>
+ {!showSettings && (
+ <div className="text-[10px] text-muted-foreground/70 mt-0.5 truncate">
+ {providerLabel}
+ </div>
+ )}
  </div>
 
  <div className="flex items-center gap-2 ml-4">
+ {!showSettings && (
+ <>
  <ContextSelector />
+
+ 
 
  <div 
  onClick={() => {
@@ -224,30 +226,74 @@ export default function EnhancedChatPage() {
  <Download size={13} />
  </div>
  )}
+ </>
+ )}
 
  <div
- className="text-muted-foreground/70 hover:text-foreground/90 cursor-pointer transition-colors p-1.5 rounded-sm hover:bg-muted/30"
- title="Settings"
+ onClick={() => setShowSettings(!showSettings)}
+ className={`cursor-pointer transition-colors p-1.5 rounded-sm hover:bg-muted/30 ${
+   showSettings 
+     ? 'text-blue bg-blue/10' 
+     : 'text-muted-foreground/70 hover:text-foreground/90'
+ }`}
+ title={showSettings ? 'Back to Chat' : 'Settings'}
  >
  <Settings size={13} />
  </div>
  </div>
  </div>
+ </div>
+
+ {/* Mode Selector - Show when not in settings and not using simple chat */}
+ {!showSettings && !useSimpleChat && (
+ <ChatModeSelector
+ mode={currentMode || 'flight-ops'}
+ onModeChange={setMode}
+ compact={false}
+ />
+ )}
  </header>
 
  {/* Chat Interface */}
  <div className="flex-1 min-h-0 flex flex-col">
- <Chat
- messages={transformedMessages as any}
- input={input}
- handleInputChange={handleInputChange}
- handleSubmit={handleSubmit}
- isGenerating={isLoading}
- stop={stopStreaming}
- append={handleAppend}
- suggestions={contextSuggestions}
- className="flex-1 h-full px-6 py-4"
- />
+ {showSettings ? (
+   <ChatSettingsPanel onBack={() => setShowSettings(false)} />
+ ) : (
+   <>
+     {missingCredentials && (
+       <div className="border border-dashed border-border bg-muted/50 text-xs text-muted-foreground px-4 py-2 mb-2 rounded-sm space-y-1">
+         {missingCredentials === 'vertex' ? (
+           <>
+             <p>
+               Configure <code className="rounded bg-background px-1 py-0.5">GOOGLE_VERTEX_PROJECT</code> plus service-account credentials (<code className="rounded bg-background px-1 py-0.5">GOOGLE_VERTEX_CLIENT_EMAIL</code>, <code className="rounded bg-background px-1 py-0.5">GOOGLE_VERTEX_PRIVATE_KEY</code>) or Google ADC to enable Vertex AI streaming.
+             </p>
+             <p>
+               To fall back to Gemini, supply <code className="rounded bg-background px-1 py-0.5">GOOGLE_API_KEY</code> or <code className="rounded bg-background px-1 py-0.5">GOOGLE_GENERATIVE_AI_API_KEY</code>.
+             </p>
+           </>
+         ) : (
+           <p>
+             Add <code className="rounded bg-background px-1 py-0.5">GOOGLE_API_KEY</code> (or <code className="rounded bg-background px-1 py-0.5">GOOGLE_GENERATIVE_AI_API_KEY</code>) and reload to enable the Gemini API fallback.
+           </p>
+         )}
+       </div>
+     )}
+     <Chat
+      messages={messages}
+      input={input}
+      handleInputChange={handleInputChange}
+      handleSubmit={handleSubmit}
+      isGenerating={isStreaming}
+      stop={stopStreaming}
+      append={handleAppend}
+      suggestions={contextSuggestions}
+      className="flex-1 h-full px-6 py-4"
+      setMessages={setMessages}
+     />
+   </>
+ )}
+
+ 
  </div>
  </div>
  </div>

@@ -14,7 +14,6 @@ import {
   MapPin,
   Navigation,
   Plane,
-  Gauge,
   Loader2,
 } from "lucide-react";
 import { ScannerLoader } from "@/components/kokonutui/minimal-loaders";
@@ -27,13 +26,6 @@ import SmoothTab from "@/components/kokonutui/smooth-tab";
 import StatusBadge from "@/components/kokonutui/status-badge";
 import CopyButton from "@/components/kokonutui/copy-button";
 import { useStore } from "@/store/index";
-
-const categoryClasses: Record<NonNullable<DecodedMetar["flight_category"]>, string> = {
-  VFR: "bg-green-100 text-green-700 dark:bg-green-500/10 dark:text-green-200",
-  MVFR: "bg-blue-100 text-blue-700 dark:bg-blue-500/10 dark:text-blue-200",
-  IFR: "bg-amber-100 text-amber-700 dark:bg-amber-500/10 dark:text-amber-200",
-  LIFR: "bg-red-100 text-red-700 dark:bg-red-500/10 dark:text-red-200",
-};
 
 const normalizeIcao = (value: string) => value.trim().replace(/[^a-z0-9]/gi, "").toUpperCase().slice(0, 4);
 
@@ -179,24 +171,6 @@ function calculateDensityAltitude(altimeterHg?: number | null, tempC?: number | 
   const isaTemp = 15 - 2 * (elevFt / 1000); // approx lapse rate
   const densityAlt = pressureAlt + 120 * (tempC - isaTemp);
   return Math.round(densityAlt);
-}
-
-function angleDiff(a: number, b: number): number {
-  let d = Math.abs(a - b) % 360;
-  return d > 180 ? 360 - d : d;
-}
-
-function runwayIdentToHeading(ident: string): number | null {
-  const m = ident.match(/^(\d{2})/);
-  if (!m) return null;
-  const tens = parseInt(m[1], 10);
-  return (tens * 10) % 360;
-}
-
-function calculateCrosswind(windDir?: number, windKts?: number, runwayHeading?: number): number | null {
-  if (windDir == null || windKts == null || runwayHeading == null) return null;
-  const diff = angleDiff(windDir, runwayHeading) * (Math.PI / 180);
-  return Math.round(Math.abs(Math.sin(diff)) * windKts);
 }
 
 function deriveWeatherPhenomena(raw?: string | null): Array<{ code: string; text: string }> {

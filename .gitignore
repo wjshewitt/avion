@@ -34,6 +34,11 @@
 .env.local
 .env.*.local
 
+# data imports
+/data/*.csv
+/data/ourairports-cache/
+/data/airports-corporate.json
+
 # debug
 npm-debug.log*
 yarn-debug.log*
@@ -76,6 +81,17 @@ ehthumbs.db
 
 # turbopack cache
 .turbo
-```
 
-Now let me reset git and push properly:
+# Genkit
+.genkit/
+.secrets/
+
+# Supabase temp
+supabase/.temp/
+
+# HTML test files
+*.html
+
+# Temporary directories
+scripts/temp/
+lib/temp/

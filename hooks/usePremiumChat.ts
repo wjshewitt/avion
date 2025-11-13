@@ -1,116 +1,339 @@
-/**
- * Premium Chat - UI State Management Hook
- * Uses TanStack Query mutations for server state
- */
-
 "use client";
 
-import { useState, useCallback, useRef } from "react";
-import { useSendMessage } from "@/lib/tanstack/hooks/useSendMessage";
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type { ChangeEvent } from 'react';
+import { useChat } from '@ai-sdk/react';
+import { DefaultChatTransport } from 'ai';
+import { useQueryClient } from '@tanstack/react-query';
+
+import {
+  cloneMessageWithTimestamp,
+  mapConversationMessageToFlightChatMessage,
+  withMetadata,
+  type FlightChatMessage,
+  type FlightChatMetadata,
+} from '@/lib/chat/messages';
+import { useConversationMessages } from '@/lib/tanstack/hooks/useConversationMessages';
+import { useChatSettings } from '@/lib/chat-settings-store';
+import { usePageContextStore } from '@/lib/context/page-context-store';
 
 export interface UsePremiumChatOptions {
   conversationId: string | null;
-  onError?: (error: Error) => void;
   onConversationCreated?: (conversationId: string) => void;
+  onError?: (error: Error) => void;
 }
 
 export function usePremiumChat(options: UsePremiumChatOptions) {
-  const { conversationId, onError, onConversationCreated } = options;
+  const { conversationId, onConversationCreated, onError } = options;
+
+  const queryClient = useQueryClient();
+  const conversationIdRef = useRef<string | null>(conversationId ?? null);
+  useEffect(() => {
+    conversationIdRef.current = conversationId ?? null;
+  }, [conversationId]);
+
+  // ✅ Get chat mode from settings
+  const { currentMode, useSimpleChat } = useChatSettings();
+  const effectiveMode = useSimpleChat ? null : currentMode;
   
-  // UI state only (not message state - that's in TanStack Query)
-  const [input, setInput] = useState("");
+  // ✅ Get page context for context-aware chat
+  const { context: pageContext, contextEnabled } = usePageContextStore();
+
+  const transport = useMemo(() => {
+    return new DefaultChatTransport<FlightChatMessage>({
+      api: '/api/chat/general',
+      body: () => ({ 
+        conversationId: conversationIdRef.current,
+        mode: effectiveMode,
+        pageContext: contextEnabled ? pageContext : null
+      }),
+    });
+  }, [effectiveMode, pageContext, contextEnabled]);
+
+  const [input, setInput] = useState('');
+  const [missingCredentials, setMissingCredentials] = useState<MissingCredentialsType>(null);
+  const [providerInfo, setProviderInfo] = useState<ProviderInfo | null>(null);
   
-  // Server mutation with optimistic updates
-  const sendMessageMutation = useSendMessage();
-  const abortControllerRef = useRef<AbortController | null>(null);
+  // 🔧 FIX: Track hydration state to prevent race conditions
+  const [lastHydratedConvId, setLastHydratedConvId] = useState<string | null>(null);
+  const [isHydrating, setIsHydrating] = useState(false);
 
-  const sendMessage = useCallback(async (content?: string) => {
-    const messageContent = content || input.trim();
-    
-    if (!messageContent || sendMessageMutation.isPending) return;
-    
-    // Clear input immediately for better UX
-    setInput("");
-    
-    // Cancel previous request if still pending
-    abortControllerRef.current?.abort();
-    abortControllerRef.current = new AbortController();
-    
-    try {
-      let targetConversationId = conversationId;
+  const {
+    messages,
+    setMessages,
+    sendMessage: sendChatMessage,
+    stop,
+    status,
+    error,
+    clearError,
+  } = useChat<FlightChatMessage>({
+    id: conversationId ?? undefined,
+    transport,
+    onError: (err) => {
+      const message = err?.message ?? '';
 
-      if (!targetConversationId) {
-        const title = messageContent.slice(0, 50) + (messageContent.length > 50 ? "..." : "");
-        const response = await fetch("/api/chat/conversations", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ chat_type: "general", title }),
-        });
-
-        if (!response.ok) {
-          const errorPayload = await response.json().catch(() => ({}));
-          throw new Error(errorPayload.error || "Failed to create conversation");
-        }
-
-        const created = await response.json();
-        targetConversationId = created?.conversation?.id ?? created?.id ?? null;
-
-        if (!targetConversationId) {
-          throw new Error("Conversation ID missing in creation response");
-        }
-
-        onConversationCreated?.(targetConversationId);
-      }
-
-      if (!targetConversationId) {
-        throw new Error("Conversation ID unavailable");
-      }
-
-      const result = await sendMessageMutation.mutateAsync({
-        conversationId: targetConversationId,
-        content: messageContent,
-      });
-      
-      // If new conversation was created, notify parent
-      if (result.conversationId && result.conversationId !== targetConversationId) {
-        onConversationCreated?.(result.conversationId);
-      }
-      
-    } catch (err) {
-      // Ignore abort errors
-      if (err instanceof Error && err.name === 'AbortError') {
+      const missingType = detectMissingCredentials(message);
+      if (missingType) {
+        setMissingCredentials(missingType);
         return;
       }
+
+      console.error('❌ Chat error:', err);
+      onError?.(err);
+    },
+    onFinish: (event) => {
+      setMissingCredentials(null);
+      const metaConversationId = event.message.metadata?.conversationId;
+      if (metaConversationId && metaConversationId !== conversationIdRef.current) {
+        conversationIdRef.current = metaConversationId;
+        onConversationCreated?.(metaConversationId);
+      }
+
+      const metadataInfo = extractProviderInfo(event.message.metadata as FlightChatMetadata | undefined);
+      if (metadataInfo) {
+        setProviderInfo(metadataInfo);
+      }
+
+      setMessages((current) =>
+        current.map((msg) =>
+          msg.id === event.message.id
+            ? cloneMessageWithTimestamp(
+                withMetadata(msg, { conversationId: conversationIdRef.current ?? metaConversationId ?? '' }),
+                new Date()
+              )
+            : msg
+        )
+      );
       
-      const error = err instanceof Error ? err : new Error("Unknown error");
-      
-      // Restore input so user can retry
-      setInput(messageContent);
-      
-      // Notify error handler
-      onError?.(error);
+      // 🔧 FIX: Invalidate queries after database save completes
+      const finalConvId = conversationIdRef.current ?? metaConversationId;
+      if (finalConvId) {
+        // Use setTimeout to ensure database write completes first
+        setTimeout(() => {
+          console.log('🔄 Invalidating queries for conversation:', finalConvId);
+          
+          queryClient.invalidateQueries({
+            queryKey: ['conversation-messages', finalConvId]
+          });
+          
+          queryClient.invalidateQueries({
+            queryKey: ['general-conversations']
+          });
+        }, 500);  // 500ms delay for database write
+      }
+    },
+  });
+
+  const { data: conversationData } = useConversationMessages(conversationId);
+  const dbMessages = useMemo(() => conversationData?.messages ?? [], [conversationData?.messages]);
+
+  // 🔧 FIX: Smarter hydration logic to prevent race conditions
+  useEffect(() => {
+    // Clear messages when no conversation
+    if (!conversationId) {
+      if (messages.length > 0 || lastHydratedConvId !== null) {
+        setMessages([]);
+        setLastHydratedConvId(null);
+      }
+      return;
     }
-  }, [input, conversationId, sendMessageMutation, onError, onConversationCreated]);
 
-  const stopStreaming = useCallback(() => {
-    abortControllerRef.current?.abort();
-    sendMessageMutation.reset();
-  }, [sendMessageMutation]);
+    // 🔧 FIX: Never hydrate while streaming
+    if (status === 'streaming' || status === 'submitted') {
+      return;
+    }
 
-  const clearError = useCallback(() => {
-    sendMessageMutation.reset();
-  }, [sendMessageMutation]);
+    // 🔧 FIX: Only hydrate once per conversation or when conversation changes
+    if (conversationId === lastHydratedConvId && !isHydrating) {
+      return;  // Already hydrated this conversation, trust useChat state
+    }
+
+    // 🔧 FIX: Only hydrate if we have database messages
+    if (dbMessages.length === 0) {
+      if (conversationId !== lastHydratedConvId) {
+        setLastHydratedConvId(conversationId);
+      }
+      return;
+    }
+
+    // Perform hydration
+    const hydratedMessages = dbMessages.map(mapConversationMessageToFlightChatMessage);
+    
+    console.log('🔄 Hydrating messages:', {
+      conversationId,
+      dbCount: dbMessages.length,
+      uiCount: messages.length,
+      lastHydrated: lastHydratedConvId,
+    });
+
+    setMessages(hydratedMessages);
+    setLastHydratedConvId(conversationId);
+    setIsHydrating(false);
+    
+  }, [dbMessages, conversationId, status, lastHydratedConvId, isHydrating]);
+  // 🔧 FIX: Removed 'messages' and 'setMessages' from deps to prevent loops
+
+  const isStreaming = status === 'streaming' || status === 'submitted';
+
+  // 🔧 FIX: Handle conversation switching
+  useEffect(() => {
+    // When conversation ID changes, mark for re-hydration
+    if (conversationId !== conversationIdRef.current) {
+      console.log('🔄 Conversation switched:', {
+        from: conversationIdRef.current,
+        to: conversationId,
+      });
+      
+      // Mark that we need to hydrate this new conversation
+      setIsHydrating(true);
+      setLastHydratedConvId(null);
+    }
+  }, [conversationId]);
+
+  useEffect(() => {
+    const latestAssistant = [...messages]
+      .reverse()
+      .find((msg) => msg.role === 'assistant' && msg.metadata);
+
+    if (latestAssistant?.metadata) {
+      const metadataInfo = extractProviderInfo(latestAssistant.metadata);
+      if (metadataInfo && !providerInfoEquals(providerInfo, metadataInfo)) {
+        setProviderInfo(metadataInfo);
+      }
+      return;
+    }
+
+    if (providerInfo !== null) {
+      setProviderInfo(null);
+    }
+  }, [messages, providerInfo]);
+
+  const handleInputChange = useCallback((value: string) => {
+    setInput(value);
+  }, []);
+
+  const submitMessage = useCallback(
+    async (content?: string) => {
+      const text = (content ?? input ?? '').trim();
+      if (!text || isStreaming || missingCredentials) {
+        return;
+      }
+
+      setInput('');
+
+      await sendChatMessage({
+        parts: [{ type: 'text', text }],
+        metadata: conversationIdRef.current
+          ? { conversationId: conversationIdRef.current }
+          : undefined,
+      });
+    },
+    [input, isStreaming, missingCredentials, sendChatMessage]
+  );
+
+  const handleSubmit = useCallback(
+    async (event?: { preventDefault?: () => void }) => {
+      event?.preventDefault?.();
+      await submitMessage();
+    },
+    [submitMessage]
+  );
+
+  const append = useCallback(
+    async ({ content }: { role: 'user'; content: string }) => {
+      await submitMessage(content);
+    },
+    [submitMessage]
+  );
 
   return {
+    messages,
     input,
-    setInput,
-    sendMessage,
-    stopStreaming,
-    clearError,
-    
-    // Derived state from mutation
-    isStreaming: sendMessageMutation.isPending,
-    isThinking: sendMessageMutation.isPending,
-    error: sendMessageMutation.error?.message || null,
+    setInput: handleInputChange,
+    handleInputChange: (event: ChangeEvent<HTMLTextAreaElement>) => {
+      handleInputChange(event.target.value);
+    },
+    handleSubmit,
+    sendMessage: submitMessage,
+    append,
+    stopStreaming: () => {
+      void stop();
+    },
+    isStreaming,
+    isThinking: isStreaming,
+    error: error?.message ?? null,
+    clearError: () => {
+      clearError();
+    },
+    setMessages,
+    missingApiKey: missingCredentials !== null,
+    missingCredentials,
+    providerInfo,
   };
+}
+
+type MissingCredentialsType = 'gemini' | 'vertex' | null;
+
+type ProviderInfo = {
+  provider: 'gemini' | 'vertex';
+  model?: string;
+  supportsThinking?: boolean;
+};
+
+function detectMissingCredentials(message: string): MissingCredentialsType {
+  if (!message) return null;
+
+  const normalized = message.toLowerCase();
+  if (normalized.includes('missing_vertex_credentials')) {
+    return 'vertex';
+  }
+  if (normalized.includes('missing_gemini_api_key') || normalized.includes('missing_api_key')) {
+    return 'gemini';
+  }
+
+  try {
+    const parsed = JSON.parse(message);
+    if (parsed?.error === 'missing_vertex_credentials') {
+      return 'vertex';
+    }
+    if (parsed?.error === 'missing_gemini_api_key' || parsed?.error === 'missing_api_key') {
+      return 'gemini';
+    }
+  } catch {
+    // ignore JSON parse errors
+  }
+
+  return null;
+}
+
+function extractProviderInfo(metadata?: FlightChatMetadata | null): ProviderInfo | null {
+  if (!metadata || !metadata.provider) {
+    return null;
+  }
+
+  if (metadata.provider !== 'gemini' && metadata.provider !== 'vertex') {
+    return null;
+  }
+
+  return {
+    provider: metadata.provider,
+    model: metadata.model,
+    supportsThinking: metadata.supportsThinking,
+  };
+}
+
+function providerInfoEquals(a: ProviderInfo | null, b: ProviderInfo | null): boolean {
+  if (a === b) {
+    return true;
+  }
+
+  if (!a || !b) {
+    return false;
+  }
+
+  return (
+    a.provider === b.provider &&
+    a.model === b.model &&
+    a.supportsThinking === b.supportsThinking
+  );
 }

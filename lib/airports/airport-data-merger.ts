@@ -3,6 +3,50 @@
 
 import { ProcessedAirportData } from "@/types/airportdb";
 
+function emptyRunways(): ProcessedAirportData["runways"] {
+  return {
+    count: 0,
+    longest_ft: 0,
+    shortest_ft: 0,
+    surface_types: [],
+    all_lighted: false,
+    ils_equipped: false,
+    details: [],
+  };
+}
+
+function emptyCommunications(): ProcessedAirportData["communications"] {
+  return {
+    has_tower: false,
+    has_ground: false,
+    has_approach: false,
+    has_atis: false,
+    frequencies_by_type: {},
+    primary_frequencies: {},
+  };
+}
+
+function emptyNavigation(): ProcessedAirportData["navigation"] {
+  return {
+    navaids_count: 0,
+    has_ils: false,
+    has_ndb: false,
+    has_vor: false,
+    approach_types: [],
+    navaids_by_type: {},
+  };
+}
+
+function emptyCapabilities(): ProcessedAirportData["capabilities"] {
+  return {
+    max_aircraft_category: "A",
+    night_operations: false,
+    all_weather_operations: false,
+    international_capable: false,
+    commercial_service: false,
+  };
+}
+
 /**
  * Merge airport data from multiple sources
  */
@@ -29,56 +73,66 @@ export function mergeAirportData(
       ...primary.classification,
     },
     // Merge runway data - combine details
-    runways: {
-      ...secondary.runways,
-      ...primary.runways,
-      details: [
-        ...(secondary.runways.details || []),
-        ...(primary.runways.details || []),
-      ],
-    },
+    runways: (() => {
+      const secondaryRunways = secondary.runways ?? emptyRunways();
+      const primaryRunways = primary.runways ?? emptyRunways();
+      return {
+        ...secondaryRunways,
+        ...primaryRunways,
+        details: [
+          ...(secondaryRunways.details || []),
+          ...(primaryRunways.details || []),
+        ],
+      };
+    })(),
     // Merge communications
-    communications: {
-      ...secondary.communications,
-      ...primary.communications,
-      frequencies_by_type: {
-        ...secondary.communications.frequencies_by_type,
-        ...primary.communications.frequencies_by_type,
-      },
-      primary_frequencies: {
-        ...secondary.communications.primary_frequencies,
-        ...primary.communications.primary_frequencies,
-      },
-    },
+    communications: (() => {
+      const secondaryComms = secondary.communications ?? emptyCommunications();
+      const primaryComms = primary.communications ?? emptyCommunications();
+      return {
+        ...secondaryComms,
+        ...primaryComms,
+        frequencies_by_type: {
+          ...secondaryComms.frequencies_by_type,
+          ...primaryComms.frequencies_by_type,
+        },
+        primary_frequencies: {
+          ...secondaryComms.primary_frequencies,
+          ...primaryComms.primary_frequencies,
+        },
+      };
+    })(),
     // Merge navigation data
-    navigation: {
-      ...secondary.navigation,
-      ...primary.navigation,
-      navaids_by_type: {
-        ...secondary.navigation.navaids_by_type,
-        ...primary.navigation.navaids_by_type,
-      },
-    },
+    navigation: (() => {
+      const secondaryNav = secondary.navigation ?? emptyNavigation();
+      const primaryNav = primary.navigation ?? emptyNavigation();
+      return {
+        ...secondaryNav,
+        ...primaryNav,
+        navaids_by_type: {
+          ...secondaryNav.navaids_by_type,
+          ...primaryNav.navaids_by_type,
+        },
+      };
+    })(),
     // Merge capabilities - use most permissive
-    capabilities: {
-      max_aircraft_category:
-        primary.capabilities.max_aircraft_category >
-        secondary.capabilities.max_aircraft_category
-          ? primary.capabilities.max_aircraft_category
-          : secondary.capabilities.max_aircraft_category,
-      night_operations:
-        primary.capabilities.night_operations ||
-        secondary.capabilities.night_operations,
-      all_weather_operations:
-        primary.capabilities.all_weather_operations ||
-        secondary.capabilities.all_weather_operations,
-      international_capable:
-        primary.capabilities.international_capable ||
-        secondary.capabilities.international_capable,
-      commercial_service:
-        primary.capabilities.commercial_service ||
-        secondary.capabilities.commercial_service,
-    },
+    capabilities: (() => {
+      const secondaryCap = secondary.capabilities ?? emptyCapabilities();
+      const primaryCap = primary.capabilities ?? emptyCapabilities();
+      return {
+        max_aircraft_category:
+          primaryCap.max_aircraft_category > secondaryCap.max_aircraft_category
+            ? primaryCap.max_aircraft_category
+            : secondaryCap.max_aircraft_category,
+        night_operations: primaryCap.night_operations || secondaryCap.night_operations,
+        all_weather_operations:
+          primaryCap.all_weather_operations || secondaryCap.all_weather_operations,
+        international_capable:
+          primaryCap.international_capable || secondaryCap.international_capable,
+        commercial_service:
+          primaryCap.commercial_service || secondaryCap.commercial_service,
+      };
+    })(),
     // Use primary data quality info
     data_quality: primary.data_quality,
   };

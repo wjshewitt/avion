@@ -64,7 +64,11 @@ export async function PUT(request: Request) {
     console.log('Received update data:', body)
 
     // Remove fields that shouldn't be updated directly
-    const { id, user_id, created_at, updated_at, ...updateData } = body
+    const updateData = { ...body }
+    delete updateData.id
+    delete updateData.user_id
+    delete updateData.created_at
+    delete updateData.updated_at
     console.log('Cleaned update data:', updateData)
 
     // First check if profile exists
