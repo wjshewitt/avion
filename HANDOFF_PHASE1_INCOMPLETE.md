@@ -203,7 +203,7 @@ npm run dev
 
 ### Current Setup (Gemini API):
 ```env
-GOOGLE_API_KEY=AIzaSyD1PPo317EDAOa1QUmjpj7-nlimgVjRTFE
+GOOGLE_API_KEY=REDACTED
 ```
 
 ### For Vertex AI (Optional):
@@ -213,7 +213,7 @@ GOOGLE_CLOUD_LOCATION=us-central1
 GOOGLE_APPLICATION_CREDENTIALS=./vertex-ai-key.json
 
 # Keep Gemini API key as fallback
-GOOGLE_API_KEY=AIzaSyD1PPo317EDAOa1QUmjpj7-nlimgVjRTFE
+GOOGLE_API_KEY=REDACTED
 ```
 
 ---
