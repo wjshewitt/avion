@@ -128,12 +128,26 @@ async function fetchWeatherRisk(params: WeatherRiskParams): Promise<WeatherRiskD
   }
 
   const body: WeatherRiskResponse = await res.json();
-  
+
   if (!body.success) {
     throw new Error(body.error || "Risk API returned an error");
   }
 
-  return body.data;
+  const data = body.data;
+
+  // Normalize shape: ensure top-level score/tier/confidence are populated from result if present
+  if (data && data.result) {
+    const { score, confidence, tier, factorBreakdown } = data.result;
+    return {
+      ...data,
+      score: data.score ?? score,
+      confidence: data.confidence ?? confidence,
+      tier: data.tier ?? tier,
+      factorBreakdown: data.factorBreakdown ?? factorBreakdown,
+    };
+  }
+
+  return data;
 }
 
 // ============================================================================

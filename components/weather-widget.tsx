@@ -37,6 +37,23 @@ export default function WeatherWidget({ location, weather, onClick, icao }: Weat
    }
  };
 
+ // Safety check for weather data
+ if (!weather || !weather.condition) {
+   return (
+     <CornerBracket size="md" variant="hover">
+       <div className="bg-white border border-border p-4">
+         <div className="text-center text-muted-foreground">
+           <div className="font-mono text-md font-semibold">{location}</div>
+           <div className="text-sm mt-2">Weather data unavailable</div>
+         </div>
+       </div>
+     </CornerBracket>
+   );
+ }
+
+ const conditionStyle = conditionColors[weather.condition] || conditionColors.IFR;
+ const conditionLabel = conditionLabels[weather.condition] || 'Unknown';
+
  return (
  <CornerBracket size="md" variant="hover">
  <div
@@ -50,10 +67,10 @@ export default function WeatherWidget({ location, weather, onClick, icao }: Weat
  <div className="font-mono text-md font-semibold text-text-primary">{location}</div>
  <span
  className={`inline-block text-xs px-2 py-1 border font-semibold mt-1 ${
- conditionColors[weather.condition]
+ conditionStyle
  }`}
  >
- {conditionLabels[weather.condition]}
+ {conditionLabel}
  </span>
  </div>
  <div className="text-right">

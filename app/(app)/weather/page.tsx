@@ -87,12 +87,29 @@ const getStatusBadgeType = (status: string): "LOW" | "MODERATE" | "HIGH" | "CRIT
   return "SCHEDULED";
 };
 
-const getRiskColor = (tier?: string) => {
-  if (!tier) return "bg-gray";
-  if (tier === "LOW") return "bg-green";
-  if (tier === "MODERATE") return "bg-blue";
-  if (tier === "HIGH") return "bg-amber";
-  if (tier === "CRITICAL") return "bg-red";
+const normalizeRiskTier = (tier?: string | null): "LOW" | "MODERATE" | "HIGH" | "CRITICAL" | undefined => {
+  if (!tier) return undefined;
+
+  // Map engine tiers to display tiers
+  if (tier === "on_track") return "LOW";
+  if (tier === "monitor") return "MODERATE";
+  if (tier === "high_disruption") return "HIGH";
+
+  // Pass-through for already-normalized tiers
+  if (tier === "LOW" || tier === "MODERATE" || tier === "HIGH" || tier === "CRITICAL") {
+    return tier;
+  }
+
+  return undefined;
+};
+
+const getRiskColor = (tier?: string | null) => {
+  const normalized = normalizeRiskTier(tier);
+  if (!normalized) return "bg-gray";
+  if (normalized === "LOW") return "bg-green";
+  if (normalized === "MODERATE") return "bg-blue";
+  if (normalized === "HIGH") return "bg-amber";
+  if (normalized === "CRITICAL") return "bg-red";
   return "bg-gray";
 };
 
@@ -400,9 +417,10 @@ function AirportWeatherTab() {
   const router = useRouter();
   const [airportInput, setAirportInput] = useState("KJFK");
   const airportCode = normalizeIcao(airportInput);
+  const [activeAirportCode, setActiveAirportCode] = useState(() => normalizeIcao("KJFK"));
 
   const { metar, taf, station, loading, error, refetch } = useCompleteWeather({
-    icao: airportCode.length === 4 ? airportCode : "",
+    icao: activeAirportCode.length === 4 ? activeAirportCode : "",
     metarOptions: { staleTime: 5 * 60 * 1000, retry: 1 },
     tafOptions: { staleTime: 5 * 60 * 1000, retry: 1 },
     stationOptions: { staleTime: 24 * 60 * 60 * 1000 },
@@ -425,8 +443,8 @@ function AirportWeatherTab() {
 
   // Risk assessment
   const { data: riskData, isLoading: riskLoading } = useWeatherRisk(
-    { airport: airportCode, mode: "full" },
-    { enabled: airportCode.length === 4 }
+    { airport: activeAirportCode, mode: "full" },
+    { enabled: activeAirportCode.length === 4 }
   );
 
   const metarAge = getDataAge(metar?.observed);
@@ -443,6 +461,14 @@ function AirportWeatherTab() {
           type="text"
           value={airportInput}
           onChange={(event) => setAirportInput(event.target.value.toUpperCase())}
+          onKeyDown={(event) => {
+            if (event.key === "Enter") {
+              const code = normalizeIcao(airportInput);
+              if (code.length === 4) {
+                setActiveAirportCode(code);
+              }
+            }
+          }}
           placeholder="ICAO"
           maxLength={4}
           className="w-32 border border-border px-3 py-2 text-center font-mono text-lg uppercase focus:border-blue focus:outline-none bg-white"
@@ -455,7 +481,7 @@ function AirportWeatherTab() {
           )}
           <button
             type="button"
-            onClick={() => airportCode.length === 4 && router.push(`/weather/${airportCode}`)}
+            onClick={() => activeAirportCode.length === 4 && router.push(`/weather/${activeAirportCode}`)}
             className="border border-border px-3 py-2 text-xs"
           >
             Full Details
@@ -633,9 +659,10 @@ function AirportWeatherStandard() {
   const router = useRouter();
   const [airportInput, setAirportInput] = useState("KJFK");
   const airportCode = normalizeIcao(airportInput);
+  const [activeAirportCode, setActiveAirportCode] = useState(() => normalizeIcao("KJFK"));
 
   const { metar, taf, loading, error, refetch } = useCompleteWeather({
-    icao: airportCode.length === 4 ? airportCode : "",
+    icao: activeAirportCode.length === 4 ? activeAirportCode : "",
     metarOptions: { staleTime: 5 * 60 * 1000, retry: 1 },
     tafOptions: { staleTime: 5 * 60 * 1000, retry: 1 },
   });
@@ -649,6 +676,14 @@ function AirportWeatherStandard() {
           type="text"
           value={airportInput}
           onChange={(event) => setAirportInput(event.target.value.toUpperCase())}
+          onKeyDown={(event) => {
+            if (event.key === "Enter") {
+              const code = normalizeIcao(airportInput);
+              if (code.length === 4) {
+                setActiveAirportCode(code);
+              }
+            }
+          }}
           placeholder="ICAO CODE"
           maxLength={4}
           className="w-full border border-border px-6 py-4 text-center font-mono text-2xl uppercase focus:border-blue focus:outline-none bg-white"
@@ -681,6 +716,7 @@ function AirportWeatherStandard() {
           <span className="text-sm font-mono text-text-secondary">Scanning weather data...</span>
         </div>
       ) : !airportCode || airportCode.length !== 4 ? (
+        // Prompt when no valid ICAO has been entered or committed yet
         <div className="border border-dashed border-border p-12 text-center">
           <Cloud className="h-12 w-12 mx-auto mb-4 text-text-secondary" />
           <p className="text-sm text-text-secondary">Enter a valid ICAO code to view weather</p>
@@ -696,7 +732,7 @@ function AirportWeatherStandard() {
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-3">
                 <Cloud className="h-6 w-6 text-text-secondary" />
-                <h2 className="font-mono text-3xl font-bold text-text-primary">{airportCode}</h2>
+                <h2 className="font-mono text-3xl font-bold text-text-primary">{activeAirportCode}</h2>
               </div>
               <div className="flex items-center gap-2">
                 {metarPresent && (() => {
@@ -706,7 +742,7 @@ function AirportWeatherStandard() {
                 })()}
                 <button
                   type="button"
-                  onClick={() => router.push(`/weather/${airportCode}`)}
+                  onClick={() => router.push(`/weather/${activeAirportCode}`)}
                   className="inline-flex items-center gap-1 border border-border px-3 py-2 text-xs hover:bg-surface"
                 >
                   <ExternalLink className="h-3 w-3" />
@@ -855,6 +891,9 @@ function DepartingFlightsWide({ flights }: { flights: any[] }) {
 }
 
 function RiskAssessmentWide({ riskData, riskLoading }: { riskData: any; riskLoading?: boolean }) {
+  const score = riskData?.score ?? riskData?.result?.score ?? 0;
+  const tier = riskData?.tier ?? riskData?.result?.tier ?? null;
+
   return (
     <div className="border-t border-border p-3">
       <div className="flex items-center gap-2 mb-2">
@@ -864,15 +903,15 @@ function RiskAssessmentWide({ riskData, riskLoading }: { riskData: any; riskLoad
       <div className="mb-3">
         <div className="flex items-center justify-between mb-1">
           <span className="text-xs uppercase font-semibold text-text-secondary">Overall Risk</span>
-          <span className="font-mono text-sm font-bold text-text-primary">{riskData.score ?? 0}/100</span>
+          <span className="font-mono text-sm font-bold text-text-primary">{score}/100</span>
         </div>
         <div className="h-2 bg-surface border border-border overflow-hidden">
-          <div className={`${getRiskColor(riskData.tier)} h-full`} style={{ width: `${riskData.score ?? 0}%` }} />
+          <div className={`${getRiskColor(tier)} h-full`} style={{ width: `${score}%` }} />
         </div>
       </div>
-      {riskData.tier && (
+      {tier && (
         <div className="mb-3">
-          <StatusBadge status={riskData.tier as any}>{riskData.tier}</StatusBadge>
+          <StatusBadge status={normalizeRiskTier(tier) as any}>{normalizeRiskTier(tier)}</StatusBadge>
         </div>
       )}
       {riskData.result?.factorBreakdown && riskData.result.factorBreakdown.length > 0 && (

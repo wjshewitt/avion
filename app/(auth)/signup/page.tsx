@@ -4,90 +4,33 @@ import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { signup } from "@/app/actions/auth";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { motion } from "framer-motion";
-
-// Bracket SVG component
-const Bracket = ({ className }: { className?: string }) => (
-  <svg
-    className={className}
-    width="20"
-    height="20"
-    viewBox="0 0 20 20"
-    fill="none"
-  >
-    <path d="M1 19V1H19" stroke="currentColor" strokeWidth="1.5" />
-  </svg>
-);
-
-// Corner Brackets component
-const CornerBrackets = ({ children, active = false }: { children: React.ReactNode; active?: boolean }) => (
-  <div className="relative p-6 md:p-10 h-full w-full">
-    <motion.div
-      className="absolute top-0 left-0 text-zinc-900"
-      animate={{
-        x: active ? 0 : 10,
-        y: active ? 0 : 10,
-        opacity: active ? 1 : 0.5,
-      }}
-    >
-      <Bracket />
-    </motion.div>
-
-    <motion.div
-      className="absolute top-0 right-0 rotate-90 text-zinc-900"
-      animate={{
-        x: active ? 0 : -10,
-        y: active ? 0 : 10,
-        opacity: active ? 1 : 0.5,
-      }}
-    >
-      <Bracket />
-    </motion.div>
-
-    <motion.div
-      className="absolute bottom-0 right-0 rotate-180 text-zinc-900"
-      animate={{
-        x: active ? 0 : -10,
-        y: active ? 0 : -10,
-        opacity: active ? 1 : 0.5,
-      }}
-    >
-      <Bracket />
-    </motion.div>
-
-    <motion.div
-      className="absolute bottom-0 left-0 -rotate-90 text-zinc-900"
-      animate={{
-        x: active ? 0 : 10,
-        y: active ? 0 : -10,
-        opacity: active ? 1 : 0.5,
-      }}
-    >
-      <Bracket />
-    </motion.div>
-
-    {children}
-  </div>
-);
+import { Mail, Lock } from "lucide-react";
+import { SecureAccessLayout } from "@/components/auth/SecureAccessLayout";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { signupSchema, type SignupFormValues } from "@/lib/validation/auth";
 
 export default function SignupPage() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const router = useRouter();
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (password !== confirmPassword) {
-      setError("Passwords do not match");
-      return;
-    }
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<SignupFormValues>({
+    resolver: zodResolver(signupSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+      confirmPassword: "",
+    },
+  });
+
+  const onSubmit = handleSubmit(async ({ email, password }) => {
     setLoading(true);
     setError(null);
 
@@ -102,7 +45,8 @@ export default function SignupPage() {
         if (result.requiresEmailConfirmation) {
           setShowConfirmation(true);
         } else {
-          router.push("/flights");
+          // Redirect to onboarding for new users
+          router.push("/onboarding");
           router.refresh();
         }
       } else {
@@ -114,176 +58,165 @@ export default function SignupPage() {
     } finally {
       setLoading(false);
     }
-  };
+  });
 
   return (
-    <>
-      <style jsx global>{`
-        @import url("https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600&family=JetBrains+Mono:wght@300;400;500&display=swap");
+    <SecureAccessLayout>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+        className="space-y-8"
+      >
+        {/* Logo / heading */}
+        <div className="flex items-center gap-3">
+          <div className="flex h-8 w-8 items-center justify-center bg-[#050712] text-sm font-semibold tracking-tight text-white shadow-md dark:bg-zinc-50 dark:text-zinc-900">
+            Av
+          </div>
+          <div className="flex flex-col">
+            <span className="text-xs font-medium uppercase tracking-[0.18em] text-zinc-500 dark:text-zinc-400">
+              Avion
+            </span>
+            <span className="text-sm text-zinc-700 dark:text-zinc-100">Create account</span>
+          </div>
+        </div>
 
-        body {
-          font-family: "Inter", sans-serif;
-        }
-
-        /* Technical Grid */
-        .tech-grid {
-          background-size: 40px 40px;
-          background-image:
-            linear-gradient(to right, rgba(0, 0, 0, 0.03) 1px, transparent 1px),
-            linear-gradient(to bottom, rgba(0, 0, 0, 0.03) 1px, transparent 1px);
-        }
-
-        /* Inset "Screen" look */
-        .glass-panel {
-          background: rgba(245, 245, 245, 0.8);
-          backdrop-filter: blur(12px);
-          box-shadow:
-            inset 0 0 20px rgba(255, 255, 255, 0.8),
-            0 10px 20px rgba(0, 0, 0, 0.05);
-          border: 1px solid rgba(255, 255, 255, 0.4);
-        }
-      `}</style>
-
-      <div className="min-h-screen flex items-center justify-center bg-[#e8e8e8] p-4 relative overflow-hidden">
-        <div className="absolute inset-0 tech-grid opacity-50"></div>
-
-        <div className="w-full max-w-md relative z-10">
-          <CornerBrackets active={true}>
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-              className="flex flex-col gap-6"
-            >
-              {/* Logo/Brand */}
-              <Link href="/" className="flex items-center gap-4 self-center group">
-                <div className="w-3 h-3 bg-blue-600 animate-pulse"></div>
-                <span className="font-bold tracking-tighter text-2xl text-zinc-900 group-hover:text-blue-600 transition-colors">
-                  AVION
+        <div className="space-y-2">
+          <h1 className="text-2xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
+            Create your Avion account
+          </h1>
+          <p className="text-sm text-zinc-500 dark:text-zinc-400">
+            Sign up to manage flights, weather briefings, and tools.
+          </p>
+        </div>
+        <div className="glass-panel rounded-sm px-5 py-4 space-y-4">
+          {/* Email confirmation message */}
+          {showConfirmation && (
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <span className="h-2 w-2 rounded-full bg-blue-500 shadow-[0_0_6px_rgba(59,130,246,0.9)]" />
+                <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-500 dark:text-zinc-400">
+                  Email confirmation
                 </span>
-              </Link>
-
-              {/* Tagline */}
-              <div className="text-center">
-                <div className="h-[1px] w-32 bg-blue-600 mb-4 mx-auto"></div>
-                <p className="text-sm text-zinc-500 font-light uppercase tracking-widest">
-                  Create Account
+              </div>
+              <div className="border-l-4 border-blue-600 bg-blue-600/10 p-3 text-sm text-zinc-700 dark:border-blue-400 dark:bg-blue-500/10 dark:text-zinc-100">
+                <p className="font-medium mb-1">Check your inbox</p>
+                <p>
+                  We sent a confirmation link to <span className="font-semibold">{email}</span>. Click the link to activate your
+                  account, then sign in.
                 </p>
               </div>
+              <Link href="/login" className="block pt-1">
+                <button className="mt-1 flex w-full items-center justify-center rounded-sm bg-[#050712] px-4 py-2.5 text-xs font-medium tracking-[0.18em] text-white shadow-[0_4px_10px_rgba(0,0,0,0.3)] hover:bg-black dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200">
+                  Go to sign in
+                </button>
+              </Link>
+            </div>
+          )}
 
-              <div className="glass-panel p-8 space-y-6">
-                {/* Email Confirmation Message */}
-                {showConfirmation && (
-                  <div className="p-4 border-l-4 border-blue-600 bg-blue-600/10">
-                    <p className="text-sm text-zinc-900 font-semibold mb-2">Check your email</p>
-                    <p className="text-sm text-zinc-600">
-                      We sent a confirmation link to <span className="font-medium text-zinc-900">{email}</span>. 
-                      Click the link in the email to activate your account, then return here to sign in.
-                    </p>
-                  </div>
-                )}
+          {/* Error message */}
+          {error && (
+            <div className="border-l-4 border-red-600 bg-red-50 p-3 text-sm text-red-700 dark:border-red-500/80 dark:bg-red-500/10 dark:text-red-300">
+              <p>{error}</p>
+              {error.includes("already exists") && (
+                <Link
+                  href="/login"
+                  className="mt-2 inline-block text-xs font-medium text-blue-600 hover:underline dark:text-blue-400"
+                >
+                  Go to sign in →
+                </Link>
+              )}
+            </div>
+          )}
 
-                {/* Error Message */}
-                {error && (
-                  <div className="p-4 border-l-4 border-red-600 bg-red-600/10">
-                    <p className="text-sm text-red-600">{error}</p>
-                    {error.includes("already exists") && (
-                      <Link 
-                        href="/login" 
-                        className="text-sm text-blue-600 hover:underline mt-2 inline-block font-medium"
-                      >
-                        Go to Sign In →
-                      </Link>
-                    )}
-                  </div>
-                )}
-
-                {/* Signup Form */}
-                {!showConfirmation && <form onSubmit={handleSubmit} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="email" className="text-zinc-900 text-xs uppercase tracking-widest font-medium">
-                      Email
-                    </Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      placeholder="ops@avion.ai"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required
-                      disabled={loading}
-                      autoComplete="email"
-                      className="bg-white/50 border-zinc-300 focus:border-blue-600 text-zinc-900 placeholder:text-zinc-400"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="password" className="text-zinc-900 text-xs uppercase tracking-widest font-medium">
-                      Password
-                    </Label>
-                    <Input
-                      id="password"
-                      type="password"
-                      placeholder="••••••••"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                      disabled={loading}
-                      autoComplete="new-password"
-                      className="bg-white/50 border-zinc-300 focus:border-blue-600 text-zinc-900 placeholder:text-zinc-400"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="confirm-password" className="text-zinc-900 text-xs uppercase tracking-widest font-medium">
-                      Confirm Password
-                    </Label>
-                    <Input
-                      id="confirm-password"
-                      type="password"
-                      placeholder="••••••••"
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                      required
-                      disabled={loading}
-                      autoComplete="new-password"
-                      className="bg-white/50 border-zinc-300 focus:border-blue-600 text-zinc-900 placeholder:text-zinc-400"
-                    />
-                  </div>
-
-                  <Button
-                    type="submit"
-                    className="w-full bg-zinc-800 hover:bg-zinc-700 text-white font-medium uppercase tracking-widest text-xs transition-colors border border-zinc-700"
+          {!showConfirmation && (
+            <form onSubmit={onSubmit} className="space-y-5">
+              <div className="space-y-1">
+                <label className="ml-1 text-[10px] font-mono uppercase tracking-[0.2em] text-zinc-500 dark:text-zinc-400">
+                  Email
+                </label>
+                <div className="flex items-center gap-3 rounded-md bg-[#e8e8e8] px-4 py-3 shadow-[inset_1px_1px_3px_rgba(0,0,0,0.08),inset_-1px_-1px_3px_rgba(255,255,255,0.7)] dark:bg-zinc-800 dark:shadow-[inset_0_0_0_rgba(0,0,0,0.4)]">
+                  <Mail className="h-4 w-4 text-zinc-400 dark:text-zinc-500" />
+                  <input
+                    id="email"
+                    type="email"
+                    placeholder="ops@avion.ai"
+                    {...register("email")}
+                    required
                     disabled={loading}
-                    size="lg"
-                  >
-                    {loading ? "Creating account..." : "Sign Up"}
-                  </Button>
-                </form>}
-
-                {/* Sign in link for confirmed users */}
-                {showConfirmation && (
-                  <Link href="/login">
-                    <Button className="w-full bg-zinc-800 hover:bg-zinc-700 text-white font-medium uppercase tracking-widest text-xs transition-colors border border-zinc-700" size="lg">
-                      Go to Sign In
-                    </Button>
-                  </Link>
+                    autoComplete="email"
+                    className="w-full border-none bg-transparent text-sm font-mono text-zinc-800 outline-none placeholder:text-zinc-400 dark:text-zinc-50 dark:placeholder:text-zinc-500"
+                  />
+                </div>
+                {errors.email && (
+                  <p className="text-xs text-red-500 font-medium">{errors.email.message}</p>
                 )}
-
-                {/* Footer */}
-                {!showConfirmation && <div className="text-center text-xs text-zinc-500 font-mono">
-                  <p>
-                    Already have an account?{" "}
-                    <Link href="/login" className="font-medium text-zinc-900 hover:text-blue-600 transition-colors">
-                      Sign In
-                    </Link>
-                  </p>
-                </div>}
               </div>
-            </motion.div>
-          </CornerBrackets>
+
+              <div className="space-y-1">
+                <label className="ml-1 text-[10px] font-mono uppercase tracking-[0.2em] text-zinc-500 dark:text-zinc-400">
+                  Password
+                </label>
+                <div className="flex items-center gap-3 rounded-md bg-[#e8e8e8] px-4 py-3 shadow-[inset_1px_1px_3px_rgba(0,0,0,0.08),inset_-1px_-1px_3px_rgba(255,255,255,0.7)] dark:bg-zinc-800 dark:shadow-[inset_0_0_0_rgba(0,0,0,0.4)]">
+                  <Lock className="h-4 w-4 text-zinc-400 dark:text-zinc-500" />
+                  <input
+                    id="password"
+                    type="password"
+                    placeholder="••••••••"
+                    {...register("password")}
+                    required
+                    disabled={loading}
+                    autoComplete="new-password"
+                    className="w-full border-none bg-transparent text-sm font-mono text-zinc-800 outline-none placeholder:text-zinc-400 dark:text-zinc-50 dark:placeholder:text-zinc-500"
+                  />
+                </div>
+                {errors.password && (
+                  <p className="text-xs text-red-500 font-medium">{errors.password.message}</p>
+                )}
+              </div>
+
+              <div className="space-y-1">
+                <label className="ml-1 text-[10px] font-mono uppercase tracking-[0.2em] text-zinc-500 dark:text-zinc-400">
+                  Confirm password
+                </label>
+                <div className="flex items-center gap-3 rounded-md bg-[#e8e8e8] px-4 py-3 shadow-[inset_1px_1px_3px_rgba(0,0,0,0.08),inset_-1px_-1px_3px_rgba(255,255,255,0.7)] dark:bg-zinc-800 dark:shadow-[inset_0_0_0_rgba(0,0,0,0.4)]">
+                  <Lock className="h-4 w-4 text-zinc-400 dark:text-zinc-500" />
+                  <input
+                    id="confirm-password"
+                    type="password"
+                    placeholder="••••••••"
+                    {...register("confirmPassword")}
+                    required
+                    disabled={loading}
+                    autoComplete="new-password"
+                    className="w-full border-none bg-transparent text-sm font-mono text-zinc-800 outline-none placeholder:text-zinc-400 dark:text-zinc-50 dark:placeholder:text-zinc-500"
+                  />
+                </div>
+                {errors.confirmPassword && (
+                  <p className="text-xs text-red-500 font-medium">{errors.confirmPassword.message}</p>
+                )}
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="flex w-full items-center justify-center gap-2 rounded-sm bg-[#F04E30] px-4 py-3 text-sm font-medium tracking-wide text-white shadow-[0_4px_6px_rgba(0,0,0,0.15)] transition-colors hover:bg-[#d33f24] disabled:cursor-not-allowed disabled:opacity-80"
+              >
+                {loading ? "Creating account…" : "Sign up"}
+              </button>
+            </form>
+          )}
+
+          {!showConfirmation && (
+            <div className="flex items-center justify-center gap-2 pt-1 text-xs text-zinc-500 dark:text-zinc-400">
+              <span>Already have an account?</span>
+              <Link href="/login" className="font-medium text-zinc-900 hover:text-blue-600 dark:text-zinc-100 dark:hover:text-blue-400">
+                Sign in
+              </Link>
+            </div>
+          )}
         </div>
-      </div>
-    </>
+      </motion.div>
+    </SecureAccessLayout>
   );
 }

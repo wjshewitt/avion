@@ -73,7 +73,7 @@ export async function GET(req: NextRequest) {
         // Get last message preview
         const { data: lastMsg } = await supabase
           .from('chat_messages')
-          .select('content')
+          .select('text_content')
           .eq('conversation_id', conv.id)
           .order('created_at', { ascending: false })
           .limit(1)
@@ -87,7 +87,7 @@ export async function GET(req: NextRequest) {
           updated_at: conv.updated_at,
           flight_id: conv.flight_id,
           message_count: count || 0,
-          last_message_preview: (lastMsg as any)?.content?.substring(0, 60) || '',
+          last_message_preview: (lastMsg as any)?.text_content?.substring(0, 60) || '',
         };
       })
     );

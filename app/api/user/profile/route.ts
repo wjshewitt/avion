@@ -18,7 +18,17 @@ export async function GET() {
       .single())
 
     if (error && error.code !== 'PGRST116') {
-      return NextResponse.json({ error: error.message }, { status: 500 })
+      console.error('Profile fetch error:', {
+        code: error.code,
+        message: error.message,
+        details: error.details,
+        hint: error.hint
+      })
+      return NextResponse.json({ 
+        error: error.message,
+        code: error.code,
+        details: error.details 
+      }, { status: 500 })
     }
 
     // If no profile exists, create one
@@ -27,13 +37,20 @@ export async function GET() {
         .from('user_profiles')
         .insert({
           user_id: user.id,
-          display_name: user.user_metadata?.display_name || user.email?.split('@')[0]
+          display_name: user.user_metadata?.display_name || user.email?.split('@')[0],
+          role: null, // Explicitly set to null for new profiles
+          timezone: 'UTC',
+          theme_preference: 'light'
         })
         .select()
         .single())
 
       if (insertError) {
-        return NextResponse.json({ error: insertError.message }, { status: 500 })
+        console.error('Profile creation error:', insertError)
+        return NextResponse.json({ 
+          error: insertError.message,
+          details: insertError.details 
+        }, { status: 500 })
       }
 
       return NextResponse.json({ profile: newProfile })

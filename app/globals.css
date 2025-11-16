@@ -19,8 +19,15 @@
 └─────────────────────────────────────────────────────────────────┘
 */
 
-/* TIER 1: PRIMITIVE TOKENS - BASE COLOR SYSTEM */
+/* TIER 1: PRIMITIVE TOKENS - AVION DESIGN LANGUAGE */
 :root {
+ /* Avion Materials */
+ --material-ceramic: #F4F4F4;
+ --material-tungsten: #1A1A1A;
+ --material-tungsten-light: #2A2A2A;
+ --accent-safety: #F04E30;
+ --accent-info: #2563EB;
+
  /* Brand Colors */
  --color-brand-50: #f0f9ff;
  --color-brand-100: #e0f2fe;
@@ -28,17 +35,17 @@
  --color-brand-600: #2563eb;
  --color-brand-900: #1e3a8a;
 
- /* Scale Grays */
- --color-gray-50: #f8fafc;
- --color-gray-100: #f1f5f9;
- --color-gray-200: #e2e8f0;
- --color-gray-300: #cbd5e1;
- --color-gray-400: #94a3b8;
- --color-gray-500: #64748b;
- --color-gray-600: #475569;
- --color-gray-700: #334155;
- --color-gray-800: #1e293b;
- --color-gray-900: #0f172a;
+ /* Scale Grays - Adjusted for Avion palette */
+ --color-gray-50: #F8F8F8;
+ --color-gray-100: #F4F4F4;
+ --color-gray-200: #E0E0E0;
+ --color-gray-300: #C4C4C4;
+ --color-gray-400: #A0A0A0;
+ --color-gray-500: #737373;
+ --color-gray-600: #525252;
+ --color-gray-700: #404040;
+ --color-gray-800: #262626;
+ --color-gray-900: #1A1A1A;
 
  /* Semantic Colors */
  --color-success: #10b981;
@@ -46,22 +53,25 @@
  --color-error: #ef4444;
 
  /* TIER 2: SEMANTIC TOKENS - USAGE CONTEXT */
- /* Theme Agnostic - Reference primitives */
- --color-background-primary: var(--color-gray-50);
- --color-background-secondary: var(--color-gray-100);
- --color-surface: var(--color-white);
- --color-surface-subtle: var(--color-gray-50);
- --color-text-primary: var(--color-gray-900);
+ /* Default references - will be overridden by theme */
+ --color-background-primary: var(--material-ceramic);
+ --color-background-secondary: #FFFFFF;
+ --color-surface: #FFFFFF;
+ --color-surface-subtle: var(--material-ceramic);
+ --color-text-primary: var(--material-tungsten);
  --color-text-secondary: var(--color-gray-600);
  --color-text-muted: var(--color-gray-400);
- --color-text-inverse: #ffffff; /* Only for colored backgrounds where white is absolutely necessary */
+ --color-text-inverse: #ffffff;
  --color-border: var(--color-gray-200);
  --color-border-subtle: var(--color-gray-200);
- --color-blue: var(--color-brand-600);
+ --color-blue: var(--accent-info);
+ --color-orange: var(--accent-safety);
  --color-green: var(--color-success);
  --color-amber: var(--color-warning);
  --color-red: var(--color-error);
  --color-gray: var(--color-gray-500);
+ --accent-primary: #2563EB; /* Default to Blue, overridden by theme */
+ --accent-secondary: #F04E30; /* Default to Orange, overridden by theme */
 
  /* Standard CSS Variables for Tailwind tokens */
  --radius: 0.625rem;
@@ -71,7 +81,7 @@
  --card-foreground: var(--color-text-primary);
  --popover: var(--color-surface);
  --popover-foreground: var(--color-text-primary);
- --primary: #2563eb;
+ --primary: #2563EB; /* Default to Blue, overridden by theme */
  --primary-foreground: #ffffff;
  --secondary: var(--color-background-secondary);
  --secondary-foreground: var(--color-text-primary);
@@ -82,20 +92,20 @@
  --destructive: #dc2626;
  --border: var(--color-border);
  --input: var(--color-border);
- --ring: #2563eb;
- --chart-1: #3b82f6;
+ --ring: #2563EB; /* Default to Blue, overridden by theme */
+ --chart-1: #2563eb; /* Info Blue for charts */
  --chart-2: #10b981;
  --chart-3: #f59e0b;
  --chart-4: #8b5cf6;
  --chart-5: #ec4899;
  --sidebar: var(--color-surface);
  --sidebar-foreground: var(--color-text-primary);
- --sidebar-primary: #2563eb;
+ --sidebar-primary: #2563EB; /* Default to Blue, overridden by theme */
  --sidebar-primary-foreground: #ffffff;
  --sidebar-accent: var(--color-background-secondary);
  --sidebar-accent-foreground: var(--color-text-primary);
  --sidebar-border: var(--color-border);
- --sidebar-ring: #2563eb;
+ --sidebar-ring: #2563EB; /* Default to Blue, overridden by theme */
 }
 
 /* 
@@ -108,41 +118,86 @@
 └─────────────────────────────────────────────────────────────────┘
 */
 
-/* LIGHT THEME - PURE LIGHT COLORS ONLY */
+/* LIGHT THEME - CERAMIC (Avion Design Language) */
 [data-theme="light"] {
- --color-background-primary: #ffffff;
- --color-background-secondary: #f1f5f9;
- --color-surface: #ffffff;
- --color-surface-subtle: #f8fafc;
- --color-text-primary: #0f172a;
- --color-text-secondary: #475569;
- --color-text-muted: #94a3b8;
- --color-text-inverse: #ffffff; /* White text stays white for colored backgrounds */
- --color-border: #e2e8f0;
- --color-border-subtle: #e2e8f0;
- --color-foreground: #0f172a; /* Ensure text in inputs is dark */
- --color-muted-foreground: #64748b; /* Ensure placeholder text is visible */
+ --color-background-primary: #F4F4F4; /* Ceramic */
+ --color-background-secondary: #FFFFFF; /* White surfaces */
+ --color-surface: #FFFFFF;
+ --color-surface-subtle: #F8F8F8;
+ --color-text-primary: #1A1A1A; /* Tungsten text */
+ --color-text-secondary: #525252;
+ --color-text-muted: #A0A0A0;
+ --color-text-inverse: #ffffff;
+ --color-border: #E0E0E0;
+ --color-border-subtle: #E0E0E0;
+ --color-foreground: #1A1A1A;
+ --color-muted-foreground: #737373;
+ --background: #F4F4F4;
+ --foreground: #1A1A1A;
+ --card: #FFFFFF;
+ --card-foreground: #1A1A1A;
+ --popover: #FFFFFF;
+ --popover-foreground: #1A1A1A;
+ --secondary: #F4F4F4;
+ --secondary-foreground: #1A1A1A;
+ --muted: #F8F8F8;
+ --muted-foreground: #737373;
+ --accent: #F4F4F4;
+ --accent-foreground: #1A1A1A;
+ --border: #E0E0E0;
+ --input: #E0E0E0;
+ 
+ /* Ceramic: Blue primary, Orange secondary */
+ --primary: #2563EB; /* Info Blue */
+ --primary-foreground: #ffffff;
+ --ring: #2563EB;
+ --accent-primary: #2563EB;
+ --accent-secondary: #F04E30;
+ --sidebar-primary: #2563EB;
+ --sidebar-ring: #2563EB;
 }
 
-/* DARK THEME - PURE DARK COLORS ONLY */
+/* DARK THEME - TUNGSTEN (Avion Design Language) */
 [data-theme="dark"] {
- --color-background-primary: #0f172a;
- --color-background-secondary: #1e293b;
- --color-surface: #1e293b;
- --color-surface-subtle: #334155;
- --color-text-primary: #e2e8f0;
- --color-text-secondary: #94a3b8;
- --color-text-muted: #64748b;
- --color-text-inverse: #ffffff; /* White text stays white for colored backgrounds */
- --color-border: #334155;
- --color-border-subtle: #475569;
- --color-foreground: #e2e8f0; /* Ensure text in inputs is light in dark mode */
- --color-muted-foreground: #94a3b8; /* Ensure placeholder text is visible */
+ --color-background-primary: #1A1A1A; /* Tungsten */
+ --color-background-secondary: #2A2A2A; /* Lighter tungsten */
+ --color-surface: #2A2A2A;
+ --color-surface-subtle: #404040;
+ --color-text-primary: #E5E5E5;
+ --color-text-secondary: #A0A0A0;
+ --color-text-muted: #737373;
+ --color-text-inverse: #ffffff;
+ --color-border: #333333;
+ --color-border-subtle: #404040;
+ --color-foreground: #E5E5E5;
+ --color-muted-foreground: #A0A0A0;
+ --background: #1A1A1A;
+ --foreground: #E5E5E5;
+ --card: #2A2A2A;
+ --card-foreground: #E5E5E5;
+ --popover: #2A2A2A;
+ --popover-foreground: #E5E5E5;
+ --secondary: #2A2A2A;
+ --secondary-foreground: #E5E5E5;
+ --muted: #262626;
+ --muted-foreground: #A0A0A0;
+ --accent: #404040;
+ --accent-foreground: #E5E5E5;
+ --border: #333333;
+ --input: #333333;
+ 
+ /* Tungsten: Orange primary, Blue secondary */
+ --primary: #F04E30; /* Safety Orange */
+ --primary-foreground: #ffffff;
+ --ring: #F04E30;
+ --accent-primary: #F04E30;
+ --accent-secondary: #2563EB;
+ --sidebar-primary: #F04E30;
+ --sidebar-ring: #F04E30;
 }
 
 @theme inline {
- /* Colors - Keep Tailwind default palette for utilities like blue-500, purple-500, etc. */
- /* Override Tailwind defaults with our custom design system colors */
+ /* Colors - Avion Design Language Material System */
  /* Theme-aware variables - reference the [data-theme] CSS variables */
  --color-background: var(--color-background-primary);
  --color-foreground: var(--color-text-primary);
@@ -157,11 +212,12 @@
  --color-border: var(--color-border);
  --color-border-subtle: var(--color-border-subtle);
  --color-muted-foreground: var(--color-text-muted);
- --color-blue: #2563eb;
+ --color-blue: #2563eb; /* Info Blue */
+ --color-orange: #F04E30; /* Safety Orange */
  --color-green: #10b981;
  --color-amber: #f59e0b;
  --color-red: #ef4444;
- --color-gray: #64748b;
+ --color-gray: #737373;
 
  /* Typography */
  --font-sans: ui-sans-serif, system-ui, sans-serif;
@@ -205,10 +261,6 @@
  --color-card: var(--card);
  --color-foreground: var(--foreground);
  --color-background: var(--background);
- --color-text-muted: #94a3b8;
- --color-background-main: #f8fafc;
- --color-background-secondary: #f1f5f9;
- --color-border-subtle: #e2e8f0;
  
  /* Radius */
  --radius-sm: calc(var(--radius) - 4px);
@@ -346,16 +398,16 @@ body {
 
 /* Bottom-left corner */
 .corner-brackets-inner::before {
- bottom: -1px;
- left: -1px;
+ bottom: 0;
+ left: 0;
  border-bottom: 2px solid;
  border-left: 2px solid;
 }
 
 /* Bottom-right corner */
 .corner-brackets-inner::after {
- bottom: -1px;
- right: -1px;
+ bottom: 0;
+ right: 0;
  border-bottom: 2px solid;
  border-right: 2px solid;
 }
@@ -421,6 +473,24 @@ body {
  border-color: #10b981;
 }
 
+/* Soft variant - for subtle emphasis (expanded sidebar rows) */
+.corner-brackets-soft::before,
+.corner-brackets-soft::after,
+.corner-brackets-soft .corner-brackets-inner::before,
+.corner-brackets-soft .corner-brackets-inner::after {
+ border-color: rgba(161, 161, 170, 0.3); /* zinc-400 @ 30% opacity */
+ border-width: 1.5px;
+}
+
+/* Subtle variant - barely visible framing (inactive items) */
+.corner-brackets-subtle::before,
+.corner-brackets-subtle::after,
+.corner-brackets-subtle .corner-brackets-inner::before,
+.corner-brackets-subtle .corner-brackets-inner::after {
+ border-color: rgba(228, 228, 231, 0.5); /* zinc-200 @ 50% opacity */
+ border-width: 1px;
+}
+
 /* Corner visibility utilities for stacked elements */
 .corner-brackets-hide-top::before,
 .corner-brackets-hide-top::after {
@@ -457,6 +527,22 @@ body {
  body {
  @apply bg-background text-foreground;
  }
+ 
+ /* Input focus states use theme-aware primary color */
+ input:focus,
+ textarea:focus,
+ select:focus {
+  border-color: var(--primary);
+  outline-color: var(--primary);
+ }
+}
+
+/* React DayPicker – align with Avion tungsten panel */
+.rdp-root {
+ --rdp-accent-color: #F04E30;
+ --rdp-accent-background-color: #111827;
+ --rdp-background-color: #020617;
+ --rdp-cell-size: 1.75rem;
 }
 
 /* Onboarding Wizard: Dieter Rams Aesthetic */
@@ -507,3 +593,316 @@ body {
  from { opacity: 0; }
  to { opacity: 1; }
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   AVION ONBOARDING FLOW - DESIGN LANGUAGE V1.2
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Ceramic Card - Main onboarding container */
+.ceramic-card {
+ background: white;
+ border-radius: 6px;
+ box-shadow:
+  0 20px 40px -10px rgba(0, 0, 0, 0.1),
+  0 0 0 1px rgba(0, 0, 0, 0.05);
+ transition: background 0.3s, box-shadow 0.3s;
+}
+
+[data-theme="dark"] .ceramic-card {
+ background: #2a2a2a;
+ box-shadow:
+  0 20px 40px -10px rgba(0, 0, 0, 0.5),
+  0 0 0 1px rgba(255, 255, 255, 0.05);
+}
+
+/* Groove Input - Inset input style */
+.groove-input {
+ background: #f4f4f4 !important;
+ box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.06);
+ border: 1px solid rgba(0, 0, 0, 0.08);
+ transition: all 0.2s ease;
+}
+
+.groove-input:focus-within {
+ background: #ffffff !important;
+ border-color: #e5e5e5;
+ box-shadow:
+  inset 0 1px 2px rgba(0, 0, 0, 0.03),
+  0 0 0 2px rgba(240, 78, 48, 0.1);
+}
+
+[data-theme="dark"] .groove-input,
+[data-theme="tungsten"] .groove-input {
+ background: #2a2a2a !important;
+ box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3);
+ border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+[data-theme="dark"] .groove-input:focus-within,
+[data-theme="tungsten"] .groove-input:focus-within {
+ background: #323232 !important;
+ border-color: #3a3a3a;
+ box-shadow:
+  inset 0 1px 2px rgba(0, 0, 0, 0.2),
+  0 0 0 2px rgba(240, 78, 48, 0.2);
+}
+
+/* Primary Button - Tungsten style */
+.btn-primary {
+ background: #1a1a1a;
+ color: white;
+ box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+ transition: all 0.1s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-primary:hover:not(:disabled) {
+ background: #2a2a2a;
+}
+
+.btn-primary:active {
+ transform: translateY(1px);
+ box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.btn-primary:disabled {
+ opacity: 0.5;
+ cursor: not-allowed;
+ transform: none;
+}
+
+[data-theme="dark"] .btn-primary {
+ background: #F04E30;
+ box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="dark"] .btn-primary:hover:not(:disabled) {
+ background: #d33f24;
+}
+
+/* Tactile Option - Role selection cards */
+.tactile-option {
+ transition: all 0.2s ease;
+ border: 1px solid #d4d4d4;
+}
+
+.tactile-option:hover {
+ border-color: #a3a3a3;
+}
+
+.tactile-option.selected {
+ border-color: #1a1a1a;
+ background-color: #1a1a1a;
+ color: white;
+ box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.2);
+}
+
+.tactile-option.selected .icon-box {
+ background-color: rgba(255, 255, 255, 0.1);
+ color: white;
+}
+
+.tactile-option.selected .desc {
+ color: rgba(255, 255, 255, 0.6);
+}
+
+[data-theme="dark"] .tactile-option {
+ border: 1px solid #3a3a3a;
+ background: #1e1e1e;
+}
+
+[data-theme="dark"] .tactile-option:hover {
+ border-color: #4a4a4a;
+}
+
+[data-theme="dark"] .tactile-option.selected {
+ border-color: #F04E30;
+ background-color: #F04E30;
+ color: white;
+ box-shadow: 0 10px 20px -5px rgba(240, 78, 48, 0.3);
+}
+
+/* Thin, masked scroll rail used for compact lists (e.g. onboarding timezones) */
+.rail-scroll {
+ overflow-y: auto;
+ scrollbar-width: none; /* Firefox */
+ -webkit-mask-image: linear-gradient(to bottom, transparent 0, black 16px, black calc(100% - 16px), transparent 100%);
+ mask-image: linear-gradient(to bottom, transparent 0, black 16px, black calc(100% - 16px), transparent 100%);
+}
+
+.rail-scroll::-webkit-scrollbar {
+ width: 0;
+ height: 0;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   MAPLIBRE GL - AVION THEME OVERRIDES
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Map container with Avion groove/inset styling */
+.avion-route-map {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 400px;
+  background: var(--material-tungsten-light);
+  border: 1px solid #333;
+  border-radius: 2px;
+  box-shadow: inset 1px 1px 3px rgba(0,0,0,0.1), 
+              inset -1px -1px 3px rgba(255,255,255,0.05);
+  overflow: hidden;
+}
+
+[data-theme="light"] .avion-route-map {
+  background: #F4F4F4;
+  border: 1px solid #E0E0E0;
+  box-shadow: -2px -2px 5px rgba(255,255,255,0.8), 
+              2px 2px 5px rgba(0,0,0,0.05);
+}
+
+/* MapLibre map uses monospace font */
+.maplibregl-map {
+  font-family: var(--font-mono);
+}
+
+/* MapLibre controls styling */
+.maplibregl-ctrl-group {
+  background: var(--color-surface) !important;
+  border: 1px solid var(--color-border) !important;
+  border-radius: 2px !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2) !important;
+}
+
+.maplibregl-ctrl-group button {
+  background: var(--color-surface) !important;
+  color: var(--color-text-primary) !important;
+  width: 29px !important;
+  height: 29px !important;
+}
+
+.maplibregl-ctrl-group button:hover {
+  background: var(--primary) !important;
+  color: white !important;
+}
+
+.maplibregl-ctrl-group button + button {
+  border-top: 1px solid var(--color-border) !important;
+}
+
+/* MapLibre compass */
+.maplibregl-ctrl-compass {
+  background-image: none !important;
+}
+
+.maplibregl-ctrl-compass .maplibregl-ctrl-icon {
+  background-image: none !important;
+}
+
+/* Popup styling */
+.maplibregl-popup-content {
+  background: var(--color-surface) !important;
+  color: var(--color-text-primary) !important;
+  border: 1px solid var(--color-border) !important;
+  border-radius: 2px !important;
+  padding: 12px !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3) !important;
+  font-family: var(--font-mono) !important;
+}
+
+.maplibregl-popup-tip {
+  border-top-color: var(--color-surface) !important;
+  border-bottom-color: var(--color-surface) !important;
+}
+
+.maplibregl-popup-anchor-top .maplibregl-popup-tip {
+  border-bottom-color: var(--color-surface) !important;
+}
+
+.maplibregl-popup-anchor-bottom .maplibregl-popup-tip {
+  border-top-color: var(--color-surface) !important;
+}
+
+.maplibregl-popup-close-button {
+  color: var(--color-text-secondary) !important;
+  font-size: 20px !important;
+  padding: 0 8px !important;
+}
+
+.maplibregl-popup-close-button:hover {
+  background: var(--color-accent) !important;
+  color: var(--color-text-primary) !important;
+}
+
+/* Attribution control */
+.maplibregl-ctrl-attrib {
+  background: var(--color-surface) !important;
+  color: var(--color-text-secondary) !important;
+  font-size: 10px !important;
+  border-radius: 2px !important;
+}
+
+.maplibregl-ctrl-attrib a {
+  color: var(--primary) !important;
+}
+
+/* Airport markers with hover animation */
+.avion-airport-marker {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.avion-airport-marker:hover {
+  transform: scale(1.3);
+}
+
+
+/* 
+┌─────────────────────────────────────────────────────────────────┐
+│ AVION DESIGN LANGUAGE V1.5 - MATERIAL PHYSICS                   │
+└─────────────────────────────────────────────────────────────────┘
+*/
+
+/* Technical grid background */
+.tech-grid {
+  background-image: 
+    linear-gradient(rgba(0,0,0,0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,0,0,0.05) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+/* Groove input style - for inset controls */
+.groove-input {
+  position: relative;
+  border-radius: 4px; /* Changed from 2px to 4px */
+  overflow: hidden;
+}
+
+.groove-input::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  box-shadow: inset 1px 1px 3px rgba(0,0,0,0.1), 
+              inset -1px -1px 3px rgba(255,255,255,0.2);
+  pointer-events: none;
+  border-radius: 2px; /* Match parent */
+}
+
+[data-theme="dark"] .groove-input::before {
+  box-shadow: inset 1px 1px 2px rgba(0,0,0,0.5), 
+              inset -1px -1px 2px rgba(255,255,255,0.05);
+}
+
+/* Ceramic card (light mode) - elevated surface */
+.ceramic-card {
+  background: #F4F4F4;
+  box-shadow: -2px -2px 5px rgba(255,255,255,0.8), 
+              2px 2px 5px rgba(0,0,0,0.05);
+  border: 1px solid rgba(255,255,255,0.6);
+}
+
+/* Tungsten card (dark mode) - elevated surface */
+.dark .tungsten-card {
+  background: #2A2A2A;
+  box-shadow: inset 0 0 20px rgba(0,0,0,0.5), 
+              0 10px 20px rgba(0,0,0,0.2);
+  border: 1px solid #333;
+}
+

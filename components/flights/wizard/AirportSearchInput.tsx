@@ -136,28 +136,26 @@ export default function AirportSearchInput({
 
   return (
     <div className="relative">
-      {/* Label */}
-      <label className="block text-xs font-semibold text-text-secondary uppercase tracking-wide mb-2">
+      <label className="block text-[11px] font-mono uppercase tracking-[0.14em] text-muted-foreground mb-1">
         {label}
         {required && <span className="text-red ml-1">*</span>}
       </label>
 
-      {/* Input or Selected Display */}
       {value ? (
-        <div className="flex items-center justify-between p-3 border border-border bg-white">
+        <div className="flex items-center justify-between p-3 border border-border bg-surface rounded-sm">
           <div className="flex-1">
-            <div className="font-mono font-semibold text-text-primary">
+            <div className="font-mono font-semibold text-foreground">
               {value.icao}
               {value.iata && ` (${value.iata})`}
             </div>
-            <div className="text-sm text-text-secondary mt-0.5">
+            <div className="text-sm text-muted-foreground mt-0.5">
               {value.name}
               {value.city && `, ${value.city}`}
             </div>
           </div>
           <button
             onClick={handleClear}
-            className="ml-3 text-sm text-blue hover:underline"
+            className="ml-3 text-[11px] font-mono uppercase tracking-[0.14em] text-blue hover:underline"
           >
             Change
           </button>
@@ -166,7 +164,7 @@ export default function AirportSearchInput({
         <div className="relative">
           <Search
             size={16}
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary"
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
           />
           <input
             ref={inputRef}
@@ -176,19 +174,17 @@ export default function AirportSearchInput({
             onFocus={() => setIsOpen(true)}
             onKeyDown={handleKeyDown}
             placeholder={placeholder}
-            className={`w-full h-10 pl-10 pr-4 border text-sm focus:outline-none focus:ring-2 focus:ring-blue ${
+            className={`w-full h-10 pl-10 pr-4 text-sm bg-background border rounded-sm focus:outline-none focus:ring-1 focus:ring-[var(--primary)] ${
               error ? 'border-red' : 'border-border'
             }`}
           />
         </div>
       )}
 
-      {/* Error message */}
       {error && (
         <p className="mt-1 text-xs text-red">{error}</p>
       )}
 
-      {/* Dropdown */}
       <AnimatePresence>
         {showDropdown && (
           <motion.div
@@ -197,11 +193,11 @@ export default function AirportSearchInput({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.2 }}
-            className="absolute z-50 w-full mt-1 bg-white border border-border shadow-lg max-h-80 overflow-y-auto"
+            className="absolute z-50 w-full mt-1 bg-surface border border-border shadow-lg max-h-80 overflow-y-auto rounded-sm"
           >
             {/* Loading */}
             {isLoading && (
-              <div className="p-4 text-sm text-text-secondary text-center">
+              <div className="p-4 text-sm text-muted-foreground text-center">
                 Searching...
               </div>
             )}
@@ -215,20 +211,20 @@ export default function AirportSearchInput({
                     onClick={() => handleSelect(result)}
                     onMouseEnter={() => setSelectedIndex(index)}
                     className={`w-full text-left p-3 transition-colors ${
-                      index === selectedIndex ? 'bg-surface' : 'hover:bg-surface'
+                      index === selectedIndex ? 'bg-muted' : 'hover:bg-muted'
                     }`}
                   >
                     <div className="flex items-start gap-2">
                       <MapPin size={16} className="text-blue mt-0.5 flex-shrink-0" />
                       <div className="flex-1 min-w-0">
-                        <div className="font-mono font-semibold text-text-primary">
+                        <div className="font-mono font-semibold text-foreground">
                           {result.airport.icao}
                           {result.airport.iata && ` · ${result.airport.iata}`}
                         </div>
-                        <div className="text-sm text-text-secondary truncate">
+                        <div className="text-sm text-muted-foreground truncate">
                           {result.airport.name}
                         </div>
-                        <div className="text-xs text-text-secondary">
+                        <div className="text-xs text-muted-foreground">
                           {result.airport.city}, {result.airport.country}
                         </div>
                       </div>
@@ -243,7 +239,7 @@ export default function AirportSearchInput({
 
             {/* No results */}
             {query.length >= 2 && !isLoading && displayResults?.length === 0 && (
-              <div className="p-4 text-sm text-text-secondary text-center">
+              <div className="p-4 text-sm text-muted-foreground text-center">
                 No airports found for &quot;{query}&quot;
               </div>
             )}
@@ -251,23 +247,23 @@ export default function AirportSearchInput({
             {/* Recent airports */}
             {showSuggestions && recent.length > 0 && (
               <div>
-                <div className="px-3 py-2 text-xs font-semibold text-text-secondary uppercase tracking-wide bg-surface">
+                <div className="px-3 py-2 text-[10px] font-mono font-semibold text-muted-foreground uppercase tracking-[0.18em] bg-muted">
                   Recent
                 </div>
                 {recent.slice(0, 5).map((airport) => (
                   <button
                     key={airport.icao}
                     onClick={() => handleSelect(airport)}
-                    className="w-full text-left p-3 hover:bg-surface transition-colors"
+                    className="w-full text-left p-3 hover:bg-muted transition-colors"
                   >
                     <div className="flex items-start gap-2">
                       <Clock size={16} className="text-gray mt-0.5 flex-shrink-0" />
                       <div className="flex-1">
-                        <div className="font-mono font-semibold text-text-primary">
+                        <div className="font-mono font-semibold text-foreground">
                           {airport.icao}
                           {airport.iata && ` · ${airport.iata}`}
                         </div>
-                        <div className="text-sm text-text-secondary truncate">
+                        <div className="text-sm text-muted-foreground truncate">
                           {airport.name}
                         </div>
                       </div>

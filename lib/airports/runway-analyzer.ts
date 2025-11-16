@@ -279,7 +279,7 @@ export class RunwayAnalyzer {
     if (runway.le_ils) {
       const courseError = Math.abs(runway.le_ils.course - le_heading_degT);
       const normalizedError = Math.min(courseError, 360 - courseError);
-      if (normalizedError <= 5) {
+      if (normalizedError <= 20) {
         // Within 5 degrees tolerance
         ils_approaches.push(runway.le_ils);
       } else {
@@ -292,7 +292,7 @@ export class RunwayAnalyzer {
     if (runway.he_ils) {
       const courseError = Math.abs(runway.he_ils.course - he_heading_degT);
       const normalizedError = Math.min(courseError, 360 - courseError);
-      if (normalizedError <= 5) {
+      if (normalizedError <= 20) {
         // Within 5 degrees tolerance
         ils_approaches.push(runway.he_ils);
       } else {

@@ -7,6 +7,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
 export type ChatMode = 'flight-ops' | 'weather-brief' | 'airport-planning' | 'deep-briefing';
+export type ModelSelection = 'auto' | 'flash-lite' | 'flash';
 
 interface ChatSettings {
   // Behavior
@@ -14,6 +15,7 @@ interface ChatSettings {
   currentMode: ChatMode | null; // null when simple mode active
   defaultMode: ChatMode;
   rememberLastMode: boolean;
+  selectedModel: ModelSelection;
   
   // Display
   showToolCards: boolean;
@@ -40,6 +42,7 @@ interface ChatSettings {
   setMode: (mode: ChatMode | null) => void;
   setDefaultMode: (mode: ChatMode) => void;
   setRememberLastMode: (remember: boolean) => void;
+  setSelectedModel: (model: ModelSelection) => void;
   resetToDefaults: () => void;
 }
 
@@ -48,6 +51,7 @@ const DEFAULT_SETTINGS = {
   currentMode: 'flight-ops' as ChatMode,
   defaultMode: 'flight-ops' as ChatMode,
   rememberLastMode: true,
+  selectedModel: 'auto' as ModelSelection,
   showToolCards: true,
   showRawData: true,
   compactMode: false,
@@ -80,6 +84,7 @@ export const useChatSettings = create<ChatSettings>()(
       setMode: (mode) => set({ currentMode: mode }),
       setDefaultMode: (mode) => set({ defaultMode: mode }),
       setRememberLastMode: (remember) => set({ rememberLastMode: remember }),
+      setSelectedModel: (model) => set({ selectedModel: model }),
       
       resetToDefaults: () => set(DEFAULT_SETTINGS),
     }),
@@ -90,6 +95,7 @@ export const useChatSettings = create<ChatSettings>()(
         currentMode: state.currentMode,
         defaultMode: state.defaultMode,
         rememberLastMode: state.rememberLastMode,
+        selectedModel: state.selectedModel,
         showToolCards: state.showToolCards,
         showRawData: state.showRawData,
         compactMode: state.compactMode,

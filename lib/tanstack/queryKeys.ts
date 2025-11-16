@@ -30,4 +30,17 @@ export const queryKeys = {
     riskExplanation: (params: { flightId?: string; airport?: string; riskData?: any }) =>
       [...queryKeys.weather.all, "risk-explanation", params] as const,
   },
+  flightAlerts: {
+    all: ["flight-alerts"] as const,
+    lists: () => ["flight-alerts", "list"] as const,
+    list: (filters?: Record<string, any>) =>
+      ["flight-alerts", "list", filters] as const,
+  },
+  airports: {
+    all: ["airports"] as const,
+    filtered: (filters?: Record<string, any>) =>
+      ["airports", "filtered", filters] as const,
+    filterOptions: () => ["airports", "filter-options"] as const,
+    allLite: () => ["airports", "all-lite"] as const,
+  },
 } as const;

@@ -16,15 +16,17 @@ import {
 import { useConversationMessages } from '@/lib/tanstack/hooks/useConversationMessages';
 import { useChatSettings } from '@/lib/chat-settings-store';
 import { usePageContextStore } from '@/lib/context/page-context-store';
+import type { ChatSurface } from '@/lib/ai/router-types';
 
 export interface UsePremiumChatOptions {
   conversationId: string | null;
   onConversationCreated?: (conversationId: string) => void;
   onError?: (error: Error) => void;
+  surface?: ChatSurface;
 }
 
 export function usePremiumChat(options: UsePremiumChatOptions) {
-  const { conversationId, onConversationCreated, onError } = options;
+  const { conversationId, onConversationCreated, onError, surface = 'main' } = options;
 
   const queryClient = useQueryClient();
   const conversationIdRef = useRef<string | null>(conversationId ?? null);
@@ -33,7 +35,7 @@ export function usePremiumChat(options: UsePremiumChatOptions) {
   }, [conversationId]);
 
   // ✅ Get chat mode from settings
-  const { currentMode, useSimpleChat } = useChatSettings();
+  const { currentMode, useSimpleChat, selectedModel } = useChatSettings();
   const effectiveMode = useSimpleChat ? null : currentMode;
   
   // ✅ Get page context for context-aware chat
@@ -45,10 +47,12 @@ export function usePremiumChat(options: UsePremiumChatOptions) {
       body: () => ({ 
         conversationId: conversationIdRef.current,
         mode: effectiveMode,
-        pageContext: contextEnabled ? pageContext : null
+        selectedModel,
+        pageContext: contextEnabled ? pageContext : null,
+        surface,
       }),
     });
-  }, [effectiveMode, pageContext, contextEnabled]);
+  }, [effectiveMode, selectedModel, pageContext, contextEnabled, surface]);
 
   const [input, setInput] = useState('');
   const [missingCredentials, setMissingCredentials] = useState<MissingCredentialsType>(null);
@@ -127,6 +131,29 @@ export function usePremiumChat(options: UsePremiumChatOptions) {
   const { data: conversationData } = useConversationMessages(conversationId);
   const dbMessages = useMemo(() => conversationData?.messages ?? [], [conversationData?.messages]);
 
+  const mergeHydratedMessages = useCallback((hydratedMessages: FlightChatMessage[]) => {
+    setMessages((current) => {
+      const incoming = new Map(hydratedMessages.map((msg) => [msg.id, msg]));
+      const next = current.map((msg) => {
+        if (!msg.id) return msg;
+        const replacement = incoming.get(msg.id);
+        if (!replacement) return msg;
+        incoming.delete(msg.id);
+        return replacement;
+      });
+
+      incoming.forEach((msg) => next.push(msg));
+
+      next.sort((a, b) => {
+        const aTime = a.createdAt ? a.createdAt.getTime() : 0;
+        const bTime = b.createdAt ? b.createdAt.getTime() : 0;
+        return aTime - bTime;
+      });
+
+      return next;
+    });
+  }, [setMessages]);
+
   // 🔧 FIX: Smarter hydration logic to prevent race conditions
   useEffect(() => {
     // Clear messages when no conversation
@@ -166,14 +193,16 @@ export function usePremiumChat(options: UsePremiumChatOptions) {
       lastHydrated: lastHydratedConvId,
     });
 
-    setMessages(hydratedMessages);
+    mergeHydratedMessages(hydratedMessages);
     setLastHydratedConvId(conversationId);
     setIsHydrating(false);
     
-  }, [dbMessages, conversationId, status, lastHydratedConvId, isHydrating]);
+  }, [dbMessages, conversationId, status, lastHydratedConvId, isHydrating, mergeHydratedMessages]);
   // 🔧 FIX: Removed 'messages' and 'setMessages' from deps to prevent loops
 
-  const isStreaming = status === 'streaming' || status === 'submitted';
+  const isResponseStreaming = status === 'streaming';
+  const isThinkingState = status === 'submitted';
+  const isStreaming = isResponseStreaming || isThinkingState;
 
   // 🔧 FIX: Handle conversation switching
   useEffect(() => {
@@ -260,7 +289,8 @@ export function usePremiumChat(options: UsePremiumChatOptions) {
       void stop();
     },
     isStreaming,
-    isThinking: isStreaming,
+    isThinking: isThinkingState,
+    isResponseStreaming,
     error: error?.message ?? null,
     clearError: () => {
       clearError();

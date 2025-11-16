@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { CheckCircle2, XCircle } from "lucide-react";
-import { CornerBracketsLoader } from "@/components/kokonutui/minimal-loaders";
+import { USERNAME_REGEX, MIN_USERNAME_LENGTH } from "@/lib/utils/username";
 
 interface UsernameStepProps {
   value: string;
@@ -13,75 +13,33 @@ interface UsernameStepProps {
 }
 
 export function UsernameStep({ value, onChange, onValidChange }: UsernameStepProps) {
-  const [checking, setChecking] = useState(false);
-  const [available, setAvailable] = useState<boolean | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [touched, setTouched] = useState(false);
 
-  const checkUsername = useCallback(async (username: string) => {
-    if (!username || username.length < 3) {
-      setAvailable(null);
+  const handleChange = (newValue: string) => {
+    setTouched(true);
+    onChange(newValue);
+
+    if (!newValue || newValue.length < MIN_USERNAME_LENGTH) {
       setError(null);
       onValidChange(false);
       return;
     }
 
-    if (!/^[a-zA-Z0-9_]{3,20}$/.test(username)) {
-      setAvailable(false);
+    if (!USERNAME_REGEX.test(newValue)) {
       setError("Only letters, numbers, and underscores allowed");
       onValidChange(false);
       return;
     }
 
-    setChecking(true);
     setError(null);
-
-    try {
-      const response = await fetch(`/api/user/check-username?username=${encodeURIComponent(username)}`);
-      const data = await response.json();
-
-      if (data.error) {
-        setError(data.error);
-        setAvailable(false);
-        onValidChange(false);
-      } else {
-        setAvailable(data.available);
-        onValidChange(data.available);
-        if (!data.available) {
-          setError("Username is already taken");
-        }
-      }
-    } catch (err) {
-      console.error("Error checking username:", err);
-      setError("Failed to check availability");
-      setAvailable(false);
-      onValidChange(false);
-    } finally {
-      setChecking(false);
-    }
-  }, [onValidChange]);
-
-  useEffect(() => {
-    if (!touched) return;
-
-    const timeoutId = setTimeout(() => {
-      checkUsername(value);
-    }, 500);
-
-    return () => clearTimeout(timeoutId);
-  }, [value, touched, checkUsername]);
-
-  const handleChange = (newValue: string) => {
-    setTouched(true);
-    onChange(newValue);
-    setChecking(true);
+    onValidChange(true);
   };
 
   const getStatusIcon = () => {
     if (!touched || !value) return null;
-    if (checking) return <CornerBracketsLoader size="sm" color="text-blue" />;
-    if (error || available === false) return <XCircle className="w-4 h-4 text-critical" />;
-    if (available === true) return <CheckCircle2 className="w-4 h-4 text-green" />;
+    if (error) return <XCircle className="w-4 h-4 text-critical" />;
+    if (value.length >= MIN_USERNAME_LENGTH) return <CheckCircle2 className="w-4 h-4 text-green" />;
     return null;
   };
 
@@ -107,7 +65,7 @@ export function UsernameStep({ value, onChange, onValidChange }: UsernameStepPro
             className={`pr-12 font-mono ${
               touched && error
                 ? "border-critical focus:border-critical"
-                : touched && available
+                : touched && value.length >= MIN_USERNAME_LENGTH && !error
                 ? "border-green focus:border-green"
                 : ""
             }`}
@@ -123,12 +81,6 @@ export function UsernameStep({ value, onChange, onValidChange }: UsernameStepPro
         {touched && error && (
           <div className="border-l-2 border-critical pl-3">
             <p className="text-xs text-critical font-medium">{error}</p>
-          </div>
-        )}
-
-        {touched && available === true && (
-          <div className="border-l-2 border-green pl-3">
-            <p className="text-xs text-green font-medium">Username is available</p>
           </div>
         )}
 

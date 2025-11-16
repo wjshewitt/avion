@@ -13,6 +13,20 @@ export interface AiProviderConfig {
   defaultProviderOptions?: ProviderOptionsMap;
 }
 
+export interface AiRouterModelsConfig {
+  provider: AiProvider;
+  supportsThinking: boolean;
+  defaultProviderOptions?: ProviderOptionsMap;
+  lite: {
+    model: LanguageModel;
+    modelId: string;
+  };
+  full: {
+    model: LanguageModel;
+    modelId: string;
+  };
+}
+
 export type ProviderOptionsMap = Record<string, Record<string, JSONValue>>;
 
 export class MissingAiProviderKeyError extends Error {
@@ -35,6 +49,23 @@ export class MissingAiProviderKeyError extends Error {
  * Priority: Vertex AI (if configured) → Gemini API (fallback)
  */
 export function getAiProviderConfig(): AiProviderConfig {
+  const config = getAiRouterModelsConfig();
+
+  // For backwards compatibility, expose the "full" model as the default
+  return {
+    provider: config.provider,
+    model: config.full.model,
+    modelId: config.full.modelId,
+    supportsThinking: config.supportsThinking,
+    defaultProviderOptions: config.defaultProviderOptions,
+  };
+}
+
+/**
+ * Get routing-ready configuration with both Lite and Full Gemini models.
+ * Priority: Vertex AI (if configured) → Gemini API (fallback).
+ */
+export function getAiRouterModelsConfig(): AiRouterModelsConfig {
   const env = process.env;
 
   const geminiApiKey = env.GOOGLE_API_KEY || env.GOOGLE_GENERATIVE_AI_API_KEY;
@@ -43,8 +74,10 @@ export function getAiProviderConfig(): AiProviderConfig {
   const vertexProjectId = rawVertexProjectId?.trim();
   const rawVertexLocation = env.GOOGLE_VERTEX_LOCATION || env.GOOGLE_CLOUD_LOCATION;
   const vertexLocation = rawVertexLocation?.trim() || 'us-central1';
-  const rawVertexModelId = env.GOOGLE_VERTEX_MODEL?.trim();
-  const vertexModelId = rawVertexModelId && rawVertexModelId.length > 0 ? rawVertexModelId : 'gemini-2.5-flash';
+  const rawVertexFullModelId = env.GOOGLE_VERTEX_MODEL?.trim();
+  const vertexFullModelId = rawVertexFullModelId && rawVertexFullModelId.length > 0 ? rawVertexFullModelId : 'gemini-2.5-flash';
+  const rawVertexLiteModelId = env.GOOGLE_VERTEX_LITE_MODEL?.trim();
+  const vertexLiteModelId = rawVertexLiteModelId && rawVertexLiteModelId.length > 0 ? rawVertexLiteModelId : 'gemini-2.5-flash-lite';
   const vertexSearchGrounding = parseBoolean(env.GOOGLE_VERTEX_USE_SEARCH_GROUNDING ?? 'false');
   const vertexEnableThinking = parseBoolean(env.GOOGLE_VERTEX_ENABLE_THINKING ?? 'true');
 
@@ -74,15 +107,16 @@ export function getAiProviderConfig(): AiProviderConfig {
     }
 
     const vertexProvider = createVertex(vertexOptions);
+    const liteModel = vertexProvider(vertexLiteModelId);
+    const fullModel = vertexProvider(vertexFullModelId);
     const supportsThinking = vertexEnableThinking;
-    const model = vertexProvider(vertexModelId);
 
-    console.log(`✅ Using Vertex AI provider (model: ${vertexModelId}${supportsThinking ? ', thinking enabled' : ''})`);
+    console.log(
+      `✅ Using Vertex AI provider (lite: ${vertexLiteModelId}, full: ${vertexFullModelId}${supportsThinking ? ', thinking enabled' : ''})`,
+    );
 
     return {
       provider: 'vertex',
-      model,
-      modelId: vertexModelId,
       supportsThinking,
       defaultProviderOptions: vertexSearchGrounding
         ? {
@@ -91,18 +125,33 @@ export function getAiProviderConfig(): AiProviderConfig {
             },
           }
         : undefined,
+      lite: {
+        model: liteModel,
+        modelId: vertexLiteModelId,
+      },
+      full: {
+        model: fullModel,
+        modelId: vertexFullModelId,
+      },
     };
   }
 
   if (geminiApiKey) {
-    const geminiModelId = env.GOOGLE_GEMINI_MODEL || 'gemini-2.5-flash';
-    console.log(`✅ Using Gemini API provider (model: ${geminiModelId})`);
+    const geminiFullModelId = env.GOOGLE_GEMINI_MODEL?.trim() || 'gemini-2.5-flash';
+    const geminiLiteModelId = env.GOOGLE_GEMINI_LITE_MODEL?.trim() || 'gemini-2.5-flash-lite';
+    console.log(`✅ Using Gemini API provider (lite: ${geminiLiteModelId}, full: ${geminiFullModelId})`);
     const google = createGoogleGenerativeAI({ apiKey: geminiApiKey });
     return {
       provider: 'gemini',
-      model: google(geminiModelId),
-      modelId: geminiModelId,
       supportsThinking: false,
+      lite: {
+        model: google(geminiLiteModelId),
+        modelId: geminiLiteModelId,
+      },
+      full: {
+        model: google(geminiFullModelId),
+        modelId: geminiFullModelId,
+      },
     };
   }
 

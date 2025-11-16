@@ -28,26 +28,11 @@ export async function completeOnboarding(data: OnboardingData): Promise<Onboardi
       };
     }
 
-    // Validate username format
-    if (!data.username || !/^[a-zA-Z0-9_]{3,20}$/.test(data.username)) {
+    // Basic username validation; no availability check
+    if (!data.username || data.username.length < 3) {
       return {
         success: false,
-        error: "Username must be 3-20 characters and contain only letters, numbers, and underscores",
-      };
-    }
-
-    // Check username availability
-    const { data: existingUser } = await (supabase as any)
-      .from('user_profiles')
-      .select('id')
-      .ilike('username', data.username)
-      .neq('user_id', user.id)
-      .single();
-
-    if (existingUser) {
-      return {
-        success: false,
-        error: "Username is already taken",
+        error: "Username must be at least 3 characters",
       };
     }
 

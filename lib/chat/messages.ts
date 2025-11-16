@@ -77,6 +77,14 @@ export function getToolParts(message: FlightChatMessage): ToolUIPart[] {
 export function mapConversationMessageToFlightChatMessage(
   message: ConversationMessage
 ): FlightChatMessage {
+  if (message.ui_message) {
+    const stored = message.ui_message as FlightChatMessage;
+    return {
+      ...stored,
+      createdAt: new Date(message.created_at),
+    };
+  }
+
   const parts: FlightChatMessage['parts'] = [];
 
   if (message.content?.trim()) {

@@ -11,6 +11,9 @@ interface AppState {
  aiChatOpen: boolean;
  toggleAiChat: () => void;
  
+ aiSettingsOpen: boolean;
+ setAiSettingsOpen: (open: boolean) => void;
+ 
  mapCollapsed: boolean;
  toggleMap: () => void;
  
@@ -41,6 +44,9 @@ export const useAppStore = create<AppState>()(
  // UI state
  aiChatOpen: false,
  toggleAiChat: () => set((state) => ({ aiChatOpen: !state.aiChatOpen })),
+ 
+ aiSettingsOpen: false,
+ setAiSettingsOpen: (open) => set({ aiSettingsOpen: open }),
  
  mapCollapsed: false,
  toggleMap: () => set((state) => ({ mapCollapsed: !state.mapCollapsed })),

@@ -1,25 +1,21 @@
 'use client';
 
 import { motion } from 'framer-motion';
+import { useFormContext } from 'react-hook-form';
+import { FLIGHT_STATUS_OPTIONS, type FlightFormValues } from '@/lib/validation/flight';
+import FlightStatusSelector from './FlightStatusSelector';
 
-interface StepFlightCodeProps {
-  flightCode: string;
-  status: 'On Time' | 'Delayed' | 'Cancelled';
-  onFlightCodeChange: (code: string) => void;
-  onStatusChange: (status: 'On Time' | 'Delayed' | 'Cancelled') => void;
-  errors: {
-    flightCode?: string;
-  };
-}
+export default function StepFlightCode() {
+  const {
+    register,
+    setValue,
+    watch,
+    formState: { errors },
+  } = useFormContext<FlightFormValues>();
 
-export default function StepFlightCode({
-  flightCode,
-  status,
-  onFlightCodeChange,
-  onStatusChange,
-  errors,
-}: StepFlightCodeProps) {
-  const statuses: Array<'On Time' | 'Delayed' | 'Cancelled'> = ['On Time', 'Delayed', 'Cancelled'];
+  const flightCode = watch('flightCode') || '';
+  const status = watch('status');
+  const flightCodeField = register('flightCode');
 
   return (
     <motion.div
@@ -27,74 +23,54 @@ export default function StepFlightCode({
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -20 }}
       transition={{ duration: 0.3 }}
-      className="max-w-4xl mx-auto"
+      className="max-w-3xl mx-auto space-y-8"
     >
-      <div className="grid grid-cols-2 gap-8">
+      <div>
+        <p className="text-[10px] font-mono uppercase tracking-[0.24em] text-muted-foreground mb-1">
+          IDENTIFICATION
+        </p>
+        <h2 className="text-xl font-light tracking-tight text-foreground mb-4">
+          Flight code &amp; status
+        </h2>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {/* Flight Code */}
         <div>
-          <label className="block text-xs font-semibold text-text-secondary uppercase tracking-wide mb-2">
+          <label className="block text-[11px] font-mono uppercase tracking-[0.14em] text-muted-foreground mb-1">
             Flight Code <span className="text-red">*</span>
           </label>
-          <input
-            type="text"
-            value={flightCode}
-            onChange={(e) => onFlightCodeChange(e.target.value.toUpperCase())}
-            placeholder="e.g., AA123, BAW456"
-            maxLength={10}
-            className={`w-full h-10 px-4 border text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue ${
-              errors.flightCode ? 'border-red' : 'border-border'
-            }`}
-          />
+          <div className="groove-input rounded-sm px-3 py-2 flex items-center gap-2">
+            <input
+              type="text"
+              {...flightCodeField}
+              value={flightCode}
+              onChange={(event) => {
+                const uppercase = event.target.value.toUpperCase();
+                setValue('flightCode', uppercase, { shouldDirty: true, shouldValidate: true });
+              }}
+              placeholder="e.g., AA123, BAW456"
+              maxLength={10}
+              className="w-full bg-transparent text-sm font-mono tabular-nums uppercase text-foreground placeholder:text-muted-foreground focus:outline-none"
+            />
+          </div>
           {errors.flightCode && (
-            <p className="mt-1 text-xs text-red">{errors.flightCode}</p>
+            <p className="mt-1 text-xs text-red">{errors.flightCode.message}</p>
           )}
-          <p className="mt-2 text-xs text-text-secondary">
+          <p className="mt-2 text-xs text-muted-foreground">
             Flight number or callsign (3-10 characters)
           </p>
         </div>
 
         {/* Status */}
         <div>
-          <label className="block text-xs font-semibold text-text-secondary uppercase tracking-wide mb-2">
+          <label className="block text-[11px] font-mono uppercase tracking-[0.14em] text-muted-foreground mb-1">
             Flight Status <span className="text-red">*</span>
           </label>
-          <div className="grid grid-cols-1 gap-2">
-            {statuses.map((statusOption) => {
-              const isSelected = status === statusOption;
-              const colorClasses = {
-                'On Time': isSelected 
-                  ? 'border-green bg-green/10' 
-                  : 'border-border hover:border-green/50',
-                'Delayed': isSelected 
-                  ? 'border-amber bg-amber/10' 
-                  : 'border-border hover:border-amber/50',
-                'Cancelled': isSelected 
-                  ? 'border-red bg-red/10' 
-                  : 'border-border hover:border-red/50',
-              };
-              
-              return (
-                <button
-                  key={statusOption}
-                  onClick={() => onStatusChange(statusOption)}
-                  className={`p-3 border-2 transition-all flex items-center gap-3 ${colorClasses[statusOption]}`}
-                >
-                  <div
-                    className={`w-2 h-2 rounded-full ${
-                      statusOption === 'On Time'
-                        ? 'bg-green'
-                        : statusOption === 'Delayed'
-                        ? 'bg-amber'
-                        : 'bg-red'
-                    }`}
-                  />
-                  <div className="text-sm font-semibold text-text-primary">
-                    {statusOption}
-                  </div>
-                </button>
-              );
-            })}
-          </div>
+          <FlightStatusSelector 
+            value={status} 
+            onChange={(newStatus) => setValue('status', newStatus, { shouldDirty: true, shouldValidate: true })}
+          />
         </div>
       </div>
     </motion.div>

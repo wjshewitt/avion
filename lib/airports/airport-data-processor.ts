@@ -43,7 +43,9 @@ export class AirportDataProcessorImpl implements AirportDataProcessor {
     const coreData = this.extractCoreData(parsedResponse);
 
     // Use specialized processors
-    const runwayAnalysis = analyzeRunways(parsedResponse.runways || []);
+    // De-duplicate runways before analysis
+    const uniqueRunways = this.deduplicateRunways(parsedResponse.runways || []);
+    const runwayAnalysis = analyzeRunways(uniqueRunways);
     const communicationData = organizeFrequencies(parsedResponse.freqs || []);
     const navigationData = categorizeNavaids(parsedResponse.navaids || []);
 
@@ -103,6 +105,37 @@ export class AirportDataProcessorImpl implements AirportDataProcessor {
         source: "airportdb",
       },
     };
+  }
+
+  private deduplicateRunways(runways: RunwayData[]): RunwayData[] {
+    if (!runways) {
+      return [];
+    }
+    
+    // Deduplicate by normalized runway-end pairs regardless of orientation.
+    // AirportDB sometimes lists each physical runway twice (LE/HE swapped),
+    // so we sort the identifiers to create a canonical key and drop duplicates.
+    const seen = new Map<string, RunwayData>();
+
+    runways.forEach((runway) => {
+      if (runway.closed === "1") {
+        return;
+      }
+
+      const normalizeIdent = (ident?: string | null) =>
+        ident?.trim().toUpperCase() ?? "";
+
+      const le = normalizeIdent(runway.le_ident);
+      const he = normalizeIdent(runway.he_ident);
+      const ends = [le, he].filter(Boolean).sort();
+      const key = ends.length ? ends.join("-") : `${runway.id ?? "unknown"}`;
+
+      if (!seen.has(key)) {
+        seen.set(key, runway);
+      }
+    });
+
+    return Array.from(seen.values());
   }
 
   private convertRunwayAnalysis(

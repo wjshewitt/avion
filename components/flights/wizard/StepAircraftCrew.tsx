@@ -1,156 +1,127 @@
-'use client';
+"use client";
 
-import { motion } from 'framer-motion';
-import { Plane, Users } from 'lucide-react';
+import { useState } from "react";
+import { motion } from "framer-motion";
+import { Plane } from "lucide-react";
+import { InteractiveManifest } from "./InteractiveManifest";
+import { ScratchpadInput } from "./ScratchpadInput";
+
+// Define types for crew and passengers within the component
+type CrewMember = {
+  id: string;
+  name: string;
+  role: "PIC" | "SIC" | "FA" | "Other";
+};
+
+type Passenger = {
+  id: string;
+  name: string;
+};
 
 interface StepAircraftCrewProps {
   operator: string;
   aircraft: string;
-  passengerCount: number | null;
-  crewCount: number | null;
   notes: string;
   onOperatorChange: (value: string) => void;
   onAircraftChange: (value: string) => void;
-  onPassengerCountChange: (value: number | null) => void;
   onCrewCountChange: (value: number | null) => void;
+  onPassengerCountChange: (value: number | null) => void;
   onNotesChange: (value: string) => void;
 }
 
 export default function StepAircraftCrew({
   operator,
   aircraft,
-  passengerCount,
-  crewCount,
   notes,
   onOperatorChange,
   onAircraftChange,
-  onPassengerCountChange,
   onCrewCountChange,
+  onPassengerCountChange,
   onNotesChange,
 }: StepAircraftCrewProps) {
+  // Local state to manage the detailed lists for the interactive component
+  const [crewMembers, setCrewMembers] = useState<CrewMember[]>([]);
+  const [passengers, setPassengers] = useState<Passenger[]>([]);
+
+  const handleCrewChange = (newCrew: CrewMember[]) => {
+    setCrewMembers(newCrew);
+    onCrewCountChange(newCrew.length);
+  };
+
+  const handlePassengersChange = (newPassengers: Passenger[]) => {
+    setPassengers(newPassengers);
+    onPassengerCountChange(newPassengers.length);
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -20 }}
       transition={{ duration: 0.3 }}
-      className="max-w-5xl mx-auto"
+      className="max-w-3xl mx-auto space-y-8"
     >
-      <div className="mb-4 p-3 bg-surface border-l-4 border-blue">
-        <p className="text-sm text-text-secondary">
-          All fields optional. Skip to review if you don&apos;t have this information yet.
+      <div>
+        <p className="text-[10px] font-mono uppercase tracking-[0.24em] text-muted-foreground mb-1">
+          Step 4
         </p>
+        <h2 className="text-xl font-light tracking-tight text-foreground mb-4">
+          Aircraft, Crew & Notes
+        </h2>
+        <div className="text-sm text-muted-foreground border-l-2 border-blue-500 pl-4">
+          All fields in this section are optional and can be added or edited later.
+        </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-6">
-        {/* Operator */}
-        <div>
-          <label className="block text-xs font-semibold text-text-secondary uppercase tracking-wide mb-2">
-            Operator
-          </label>
-          <input
-            type="text"
-            value={operator}
-            onChange={(e) => onOperatorChange(e.target.value)}
-            placeholder="e.g., NetJets, Vista Jet, Private"
-            className="w-full h-10 px-4 border border-border text-sm focus:outline-none focus:ring-2 focus:ring-blue"
-          />
-          <p className="mt-2 text-xs text-text-secondary">
-            The operating company or charter service
-          </p>
-        </div>
-
-        {/* Aircraft */}
-        <div>
-          <label className="block text-xs font-semibold text-text-secondary uppercase tracking-wide mb-2">
-            Aircraft Type
-          </label>
-          <div className="relative">
-            <Plane
-              size={16}
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary"
-            />
-            <input
-              type="text"
-              value={aircraft}
-              onChange={(e) => onAircraftChange(e.target.value)}
-              placeholder="e.g., G550, Citation X, King Air 350"
-              className="w-full h-10 pl-10 pr-4 border border-border text-sm focus:outline-none focus:ring-2 focus:ring-blue"
-            />
+      <div className="space-y-8">
+        {/* AIRCRAFT & OPERATOR */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label className="block text-[11px] font-mono uppercase tracking-widest text-muted-foreground mb-2">
+              Operator
+            </label>
+            <div className="groove p-2 flex items-center gap-2">
+              <input
+                type="text"
+                value={operator}
+                onChange={(e) => onOperatorChange(e.target.value)}
+                placeholder="e.g., NetJets, Vista Jet"
+                className="w-full bg-transparent text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
+              />
+            </div>
           </div>
-          <p className="mt-2 text-xs text-text-secondary">
-            Aircraft model or type designation
-          </p>
-        </div>
-
-        {/* Passenger Count */}
-        <div>
-            <label className="block text-xs font-semibold text-text-secondary uppercase tracking-wide mb-2">
-              Passengers
+          <div>
+            <label className="block text-[11px] font-mono uppercase tracking-widest text-muted-foreground mb-2">
+              Aircraft Type
             </label>
-            <div className="relative">
-              <Users
-                size={16}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary"
-              />
+            <div className="groove p-2 flex items-center gap-2">
+              <Plane size={14} className="text-muted-foreground" />
               <input
-                type="number"
-                min="0"
-                max="999"
-                value={passengerCount ?? ''}
-                onChange={(e) =>
-                  onPassengerCountChange(
-                    e.target.value ? parseInt(e.target.value, 10) : null
-                  )
-                }
-                placeholder="0"
-                className="w-full h-10 pl-10 pr-4 border border-border text-sm focus:outline-none focus:ring-2 focus:ring-blue"
+                type="text"
+                value={aircraft}
+                onChange={(e) => onAircraftChange(e.target.value)}
+                placeholder="e.g., G550, Citation X"
+                className="w-full bg-transparent text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
               />
             </div>
+          </div>
         </div>
 
-        {/* Crew Count */}
-        <div>
-            <label className="block text-xs font-semibold text-text-secondary uppercase tracking-wide mb-2">
-              Crew
-            </label>
-            <div className="relative">
-              <Users
-                size={16}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary"
-              />
-              <input
-                type="number"
-                min="0"
-                max="99"
-                value={crewCount ?? ''}
-                onChange={(e) =>
-                  onCrewCountChange(
-                    e.target.value ? parseInt(e.target.value, 10) : null
-                  )
-                }
-                placeholder="0"
-                className="w-full h-10 pl-10 pr-4 border border-border text-sm focus:outline-none focus:ring-2 focus:ring-blue"
-              />
-            </div>
-        </div>
+        {/* INTERACTIVE MANIFEST */}
+        <InteractiveManifest
+          initialCrew={crewMembers}
+          initialPassengers={passengers}
+          onCrewChange={handleCrewChange}
+          onPassengersChange={handlePassengersChange}
+        />
 
-        {/* Notes - full width */}
-        <div className="col-span-2">
-          <label className="block text-xs font-semibold text-text-secondary uppercase tracking-wide mb-2">
-            Notes
-          </label>
-          <textarea
-            value={notes}
-            onChange={(e) => onNotesChange(e.target.value)}
-            placeholder="Additional flight notes, special requirements, or remarks..."
-            rows={4}
-            className="w-full px-4 py-3 border border-border text-sm focus:outline-none focus:ring-2 focus:ring-blue resize-none"
-          />
-          <p className="mt-2 text-xs text-text-secondary">
-            Any additional information about this flight
-          </p>
-        </div>
+        {/* NOTES */}
+        <ScratchpadInput
+          label="Flight Notes"
+          value={notes}
+          onChange={onNotesChange}
+          placeholder="Additional flight notes, special requirements, or remarks..."
+        />
       </div>
     </motion.div>
   );

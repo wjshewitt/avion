@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils"
 import { FilePreview } from "@/components/ui/file-preview"
 import { MarkdownRenderer } from "@/components/ui/markdown-renderer"
 import { WeatherToolUI, FlightSelectorToolUI, AirportInfoToolUI } from "@/components/chat/tool-ui"
+import { GenericToolUI } from "@/components/chat/GenericToolUI"
 import { useChatSettings } from "@/lib/chat-settings-store"
 import { ThinkingBlock } from "@/components/chat/ThinkingBlock"
 import { BriefingRenderer } from "@/components/chat/BriefingRenderer"
@@ -162,6 +163,17 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
    return removeSources(content)
  }, [content, isUser, sources])
 
+ // Only show sources if tools were called or explicit citations present
+ const shouldShowSources = useMemo(() => {
+   if (isUser) return false;
+   // Has tool invocations?
+   if (toolParts.length > 0) return true;
+   // Has explicit sources in content?
+   if (sources && sources.length > 0) return true;
+   // Otherwise, no sources
+   return false;
+ }, [isUser, toolParts.length, sources])
+
  const formattedTime = timestamp?.toLocaleTimeString("en-US", {
  hour:"2-digit",
  minute:"2-digit",
@@ -202,8 +214,8 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
  // ✅ Assistant messages: unified rendering for all cases
  return (
  <div className="flex flex-col items-start gap-3 max-w-full">
- {/* 1. Sources (if present) - Show at top like Perplexity */}
- {sources && sources.length > 0 && (
+ {/* 1. Sources (only if tools were called or explicit citations) */}
+ {shouldShowSources && sources && sources.length > 0 && (
  <Sources>
  <SourcesTrigger count={sources.length} />
  <SourcesContent>
@@ -223,32 +235,76 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
  <ThinkingBlock content={reasoningText} />
  )}
 
- {/* 3. Check if this is a briefing document */}
- {cleanContent && cleanContent.trim() && isBriefingDocument(cleanContent) ? (
-   <BriefingRenderer content={cleanContent} />
- ) : cleanContent && cleanContent.trim() ? (
-   /* 4. Regular text content (if present) */
-   <div className={cn(chatBubbleVariants({ isUser, animation }))}>
-     <MarkdownRenderer>{cleanContent}</MarkdownRenderer>
-     {actions ? (
-       <div className="absolute -bottom-4 right-2 flex space-x-1 border bg-background p-1 text-foreground opacity-0 transition-opacity group-hover/message:opacity-100">
-         {actions}
+ {/* 3. Main message container with header */}
+ {(cleanContent && cleanContent.trim()) || toolParts.length > 0 ? (
+   <div className="w-full max-w-[85%] rounded-sm overflow-hidden border border-border shadow-sm">
+     {/* Header bar with subtle groove */}
+     <div 
+       className="flex items-center justify-between px-4 py-2 border-b border-border"
+       style={{
+         backgroundColor: 'var(--muted)',
+         boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.05)',
+       }}
+     >
+       <div className="flex items-center gap-2">
+         <span className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">AVION AI</span>
+         <span 
+           className="text-[9px] font-mono px-1.5 py-0.5 rounded-[2px]"
+           style={{
+             backgroundColor: 'rgba(37, 99, 235, 0.1)',
+             color: '#2563EB',
+           }}
+         >
+           2.5F
+         </span>
        </div>
-     ) : null}
+       {showTimeStamp && timestamp && (
+         <time
+           dateTime={timestamp.toISOString()}
+           className="text-[10px] font-mono tabular-nums text-muted-foreground"
+         >
+           {formattedTime}
+         </time>
+       )}
+     </div>
+
+     {/* Message body with tungsten treatment */}
+     <div 
+       className="p-5 border-l-2"
+       style={{
+         backgroundColor: 'var(--card)',
+         borderLeftColor: '#F04E30',
+         boxShadow: 'inset 1px 0 3px rgba(240, 78, 48, 0.1)',
+       }}
+     >
+       {/* Check if this is a briefing document */}
+       {cleanContent && cleanContent.trim() && isBriefingDocument(cleanContent) ? (
+         <BriefingRenderer content={cleanContent} />
+       ) : cleanContent && cleanContent.trim() ? (
+         <div className="relative">
+           <MarkdownRenderer>{cleanContent}</MarkdownRenderer>
+           {actions ? (
+             <div className="absolute -bottom-4 right-2 flex space-x-1 border border-border rounded-sm bg-background p-1 text-foreground opacity-0 transition-opacity group-hover/message:opacity-100 shadow-sm">
+               {actions}
+             </div>
+           ) : null}
+         </div>
+       ) : null}
+
+       {/* Tool invocations inside message body */}
+       {toolParts.length > 0 && (
+         <div className={cn("flex flex-col gap-2", cleanContent && cleanContent.trim() && "mt-4")}>
+           {toolParts.map((part) => (
+             <ToolInvocationRenderer key={part.toolCallId} part={part} />
+           ))}
+         </div>
+       )}
+     </div>
    </div>
  ) : null}
 
- {/* 5. Tool invocations (if present and enabled) */}
- {toolParts.length > 0 && (
- <div className="flex flex-col gap-2 w-full">
- {toolParts.map((part) => (
- <ToolInvocationRenderer key={part.toolCallId} part={part} />
- ))}
- </div>
- )}
-
- {/* 6. Timestamp */}
- {showTimeStamp && timestamp && (
+ {/* Timestamp for messages without main content (shouldn't happen but keeping as fallback) */}
+ {showTimeStamp && timestamp && !(cleanContent && cleanContent.trim()) && toolParts.length === 0 && (
  <time
  dateTime={timestamp.toISOString()}
  className={cn(
@@ -264,7 +320,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
 }
 
 /**
- * ✅ Render individual tool invocation with loading states
+ * ✅ Render individual tool invocation with loading states and groove treatment
  */
 function ToolInvocationRenderer({ part }: { part: ToolUIPart }) {
  const toolName = part.type.replace("tool-", "")
@@ -272,9 +328,14 @@ function ToolInvocationRenderer({ part }: { part: ToolUIPart }) {
  // Loading state
  if (part.state === "input-streaming" || part.state === "input-available") {
  return (
- <div className="border bg-muted/50 px-3 py-2 text-sm text-muted-foreground rounded-lg flex items-center gap-2">
+ <div 
+   className="border border-border bg-muted/30 px-3 py-2 text-sm text-muted-foreground rounded-sm flex items-center gap-2"
+   style={{
+     boxShadow: 'inset 1px 1px 3px rgba(0,0,0,0.08), inset -1px -1px 3px rgba(255,255,255,0.05)'
+   }}
+ >
  <div className="animate-spin h-4 w-4 border-2 border-current border-t-transparent rounded-full" />
- <span>Calling {toolName}...</span>
+ <span className="font-mono text-xs">Calling {toolName}...</span>
  </div>
  )
  }
@@ -282,8 +343,13 @@ function ToolInvocationRenderer({ part }: { part: ToolUIPart }) {
  // Error state
  if (part.state === "output-error") {
  return (
- <div className="border border-destructive bg-destructive/10 px-3 py-2 text-sm rounded-lg">
- <span className="text-destructive">Error in {toolName}</span>
+ <div 
+   className="border border-destructive bg-destructive/10 px-3 py-2 text-sm rounded-sm"
+   style={{
+     boxShadow: 'inset 1px 1px 3px rgba(0,0,0,0.08), inset -1px -1px 3px rgba(255,255,255,0.05)'
+   }}
+ >
+ <span className="text-destructive font-mono text-xs">Error in {toolName}</span>
  </div>
  )
  }
@@ -294,8 +360,13 @@ function ToolInvocationRenderer({ part }: { part: ToolUIPart }) {
 
  if (data && typeof data === 'object' && '__cancelled' in data) {
   return (
-    <div className="border bg-muted/50 px-3 py-2 text-sm text-muted-foreground rounded-lg">
-      <span>Tool execution was cancelled.</span>
+    <div 
+      className="border border-border bg-muted/30 px-3 py-2 text-sm text-muted-foreground rounded-sm"
+      style={{
+        boxShadow: 'inset 1px 1px 3px rgba(0,0,0,0.08), inset -1px -1px 3px rgba(255,255,255,0.05)'
+      }}
+    >
+      <span className="font-mono text-xs">Tool execution was cancelled.</span>
     </div>
   )
  }
@@ -312,17 +383,8 @@ function ToolInvocationRenderer({ part }: { part: ToolUIPart }) {
   return <FlightSelectorToolUI result={{ data: data as any }} />
  }
  
- // Fallback: Generic JSON display
- return (
- <div className="border bg-muted/50 px-3 py-2 text-sm rounded-lg">
- <div className="font-mono text-xs">
- {toolName}
- </div>
- <pre className="mt-2 text-xs overflow-x-auto">
- {JSON.stringify(data, null, 2)}
- </pre>
- </div>
- )
+ // Fallback: Generic collapsible tool UI
+ return <GenericToolUI toolName={toolName} data={data} />
  }
 
  return null

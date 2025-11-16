@@ -5,7 +5,15 @@ import { ChevronDown, ChevronUp, Cloud, Wind, Eye, Gauge, Calendar } from "lucid
 import { cn } from "@/lib/utils";
 import { MetarCard } from "./MetarCard";
 import { TafCard } from "./TafCard";
-import { WeatherData, TafPeriod as TafPeriodDisplay, formatTafValidity } from "./weather-card-components";
+import { 
+  WeatherData, 
+  TafPeriod as TafPeriodDisplay, 
+  formatTafValidity,
+  MetarDataGrid,
+  CloudLayers,
+  RawDataExpander,
+  formatTimestamp
+} from "./weather-card-components";
 
 interface WeatherToolUIProps {
   result: {
@@ -78,198 +86,117 @@ function SmartWeatherCard({ data, defaultExpanded = false }: { data: WeatherData
 }
 
 /**
- * Combined weather card showing both METAR and TAF
- * This is the original WeatherCard component, now used only when both data types are available
+ * Combined weather card showing both METAR and TAF - Avion v1.5
+ * Precision instrument style with tungsten groove aesthetic
  */
 function CombinedWeatherCard({ data, defaultExpanded = false }: { data: WeatherData; defaultExpanded?: boolean }) {
   const [expanded, setExpanded] = useState(defaultExpanded);
   const { icao, metar, taf } = data;
 
+  // Avion v1.5 LED-style flight category colors
   const getFlightCategoryColor = (category?: string) => {
     switch (category) {
       case "VFR":
-        return "bg-green-500/10 text-green-700 dark:text-green-400 border-green-500/20";
+        return "bg-emerald-500/10 text-emerald-600 border border-emerald-500/20";
       case "MVFR":
-        return "bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/20";
+        return "bg-blue-500/10 text-blue-600 border border-blue-500/20";
       case "IFR":
-        return "bg-yellow-500/10 text-yellow-700 dark:text-yellow-400 border-yellow-500/20";
+        return "bg-amber-500/10 text-amber-600 border border-amber-500/20";
       case "LIFR":
-        return "bg-red-500/10 text-red-700 dark:text-red-400 border-red-500/20";
+        return "bg-[#F04E30]/10 text-[#F04E30] border border-[#F04E30]/20";
       default:
-        return "bg-muted text-muted-foreground border-border";
+        return "bg-muted/50 text-muted-foreground border border-border";
     }
   };
 
   return (
-    <div className="border border-border overflow-hidden bg-card max-w-2xl">
-      {/* Header */}
+    <div className="border border-border rounded-sm overflow-hidden bg-card max-w-2xl">
+      {/* Avion v1.5 Groove Header */}
       <div
-        className="flex items-center justify-between p-3 cursor-pointer bg-muted hover:bg-muted/80 transition-colors"
+        className="flex items-center justify-between px-3 py-2 cursor-pointer bg-muted/30 hover:bg-muted/40 transition-colors border-b border-border"
+        style={{ boxShadow: 'inset 1px 1px 3px rgba(0,0,0,0.06)' }}
         onClick={() => setExpanded(!expanded)}
       >
-        <div className="flex items-center gap-3">
-          <Cloud className="h-5 w-5 text-muted-foreground" />
-          <div>
-            <div className="font-semibold text-sm text-foreground">
-              {icao?.toUpperCase()} Weather Briefing
-            </div>
-            <div className="text-xs text-muted-foreground mt-0.5">
-              Current conditions & forecast
-            </div>
+        <div className="flex-1">
+          <div className="flex items-center gap-3">
+            {/* ICAO - Large mono */}
+            <span className="text-[14px] font-mono font-semibold tracking-wider">
+              {icao?.toUpperCase()}
+            </span>
+            
+            {/* Flight category LED badge */}
             {metar?.flight_category && (
-              <div className="flex items-center gap-2 mt-1">
-                <span
-                  className={cn(
-                    "text-xs px-2 py-0.5 border font-medium",
-                    getFlightCategoryColor(metar.flight_category)
-                  )}
-                >
-                  {metar.flight_category}
-                </span>
-              </div>
+              <span className={cn("text-[10px] font-mono uppercase px-2 py-0.5 rounded-sm", getFlightCategoryColor(metar.flight_category))}>
+                {metar.flight_category}
+              </span>
             )}
           </div>
+          
+          {/* Timestamp */}
+          {metar?.observed && (
+            <div className="text-[10px] font-mono text-muted-foreground mt-1">
+              {formatTimestamp(metar.observed)}
+            </div>
+          )}
         </div>
-        {expanded ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
+        
+        <ChevronDown 
+          size={12} 
+          strokeWidth={1.5} 
+          className={cn("text-muted-foreground transition-transform", expanded && "rotate-180")} 
+        />
       </div>
 
       {/* Expanded Content */}
       {expanded && (
-        <div className="border-t border-border p-3 space-y-4 bg-muted/30">
-          {/* METAR Section */}
+        <div className="px-3 py-3 space-y-4 bg-card/50">
+          {/* METAR Section - Use Avion MetarDataGrid */}
           {metar && (
-            <div>
-              <div className="flex items-center gap-2 mb-3 pb-2 border-b border-border">
-                <Cloud className="h-4 w-4 text-muted-foreground" />
-                <h3 className="text-sm font-semibold text-foreground">
-                  Current Conditions
-                </h3>
+            <div className="space-y-3">
+              <div className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
+                CURRENT CONDITIONS
               </div>
               
-          {/* Current Conditions Grid */}
-          <div className="grid grid-cols-2 gap-3 text-sm">
-            {metar.temperature?.celsius !== undefined && (
-              <div className="flex items-center gap-2">
-                <Gauge className="h-4 w-4 text-muted-foreground" />
-                <div>
-                  <div className="text-xs text-muted-foreground">Temperature</div>
-                  <div className="font-semibold">{metar.temperature.celsius}°C</div>
-                </div>
-              </div>
-            )}
+              {/* Use the Avion v1.5 MetarDataGrid component */}
+              <MetarDataGrid metar={metar} />
 
-            {metar.wind && (
-              <div className="flex items-center gap-2">
-                <Wind className="h-4 w-4 text-muted-foreground" />
-                <div>
-                  <div className="text-xs text-muted-foreground">Wind</div>
-                  <div className="font-semibold">
-                    {metar.wind.speed_kts}kt @ {metar.wind.degrees}°
-                    {metar.wind.gust_kts && (
-                      <span className="text-yellow-600 dark:text-yellow-400 ml-1">
-                        G{metar.wind.gust_kts}
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </div>
-            )}
+              {/* Use the Avion v1.5 CloudLayers component */}
+              <CloudLayers clouds={metar.clouds} />
 
-            {metar.visibility?.miles_float !== undefined && (
-              <div className="flex items-center gap-2">
-                <Eye className="h-4 w-4 text-muted-foreground" />
-                <div>
-                  <div className="text-xs text-muted-foreground">Visibility</div>
-                  <div className="font-semibold">{metar.visibility.miles_float} SM</div>
-                </div>
-              </div>
-            )}
-
-            {metar.barometer?.hg !== undefined && (
-              <div className="flex items-center gap-2">
-                <Gauge className="h-4 w-4 text-muted-foreground" />
-                <div>
-                  <div className="text-xs text-muted-foreground">Altimeter</div>
-                  <div className="font-semibold">{metar.barometer.hg.toFixed(2)} inHg</div>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Clouds */}
-          {metar.clouds && metar.clouds.length > 0 && (
-            <div>
-              <div className="text-xs text-muted-foreground mb-1">Cloud Layers</div>
-              <div className="space-y-1">
-                {metar.clouds.slice(0, 3).map((cloud, idx) => (
-                  <div key={idx} className="text-xs">
-                    <span className="font-medium">{cloud.code}</span>
-                    {cloud.feet && (
-                      <span className="text-muted-foreground ml-2">
-                        @ {cloud.feet.toLocaleString()} ft
-                      </span>
-                    )}
-                  </div>
-                ))}
-              </div>
+              {/* Raw METAR */}
+              {metar.raw_text && (
+                <RawDataExpander rawText={metar.raw_text} label="METAR" />
+              )}
             </div>
           )}
 
-          {/* Raw METAR */}
-          {metar.raw_text && (
-            <details className="group">
-              <summary className="text-xs text-muted-foreground cursor-pointer hover:text-foreground transition-colors">
-                Show Raw METAR ▼
-              </summary>
-              <div className="mt-2 text-xs font-mono bg-muted p-2 border border-border overflow-x-auto">
-                {metar.raw_text}
-              </div>
-            </details>
-          )}
-            </div>
-          )}
-
-          {/* TAF Section */}
+          {/* TAF Section - Avion v1.5 */}
           {taf && (
-            <div>
-              <div className="flex items-center gap-2 mb-3 pb-2 border-b border-border">
-                <Calendar className="h-4 w-4 text-muted-foreground" />
-                <h3 className="text-sm font-semibold text-foreground">
-                  Terminal Forecast
-                </h3>
+            <div className="space-y-3">
+              <div className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
+                TERMINAL FORECAST
               </div>
 
               {/* Validity Period */}
               {taf.timestamp && (
-                <div className="bg-muted border border-border p-2 mb-3">
-                  <div className="text-xs text-foreground font-medium text-center">
+                <div className="bg-muted/50 border border-border px-3 py-2 rounded-sm">
+                  <div className="text-[11px] font-mono text-foreground text-center">
                     Valid: {formatTafValidity(taf.timestamp.from || '', taf.timestamp.to || '')}
                   </div>
-                  {taf.timestamp.issued && (
-                    <div className="text-xs text-muted-foreground text-center mt-1">
-                      Issued: {new Date(taf.timestamp.issued).toLocaleTimeString('en-US', {
-                        month: 'short',
-                        day: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit',
-                        hour12: false
-                      })}
-                    </div>
-                  )}
                 </div>
               )}
 
               {/* Forecast Periods */}
               {taf.forecast && taf.forecast.length > 0 && (
-                <div className="space-y-2 mb-3">
-                  <div className="text-xs font-semibold text-muted-foreground">
+                <div className="space-y-2">
+                  <div className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
                     Forecast Periods ({taf.forecast.length})
                   </div>
                   {taf.forecast.slice(0, 3).map((period, index) => (
                     <TafPeriodDisplay key={index} period={period} index={index} />
                   ))}
                   {taf.forecast.length > 3 && (
-                    <div className="text-xs text-center text-muted-foreground py-2">
+                    <div className="text-[11px] font-mono text-center text-muted-foreground py-2">
                       + {taf.forecast.length - 3} more periods (expand to see all)
                     </div>
                   )}
@@ -278,14 +205,7 @@ function CombinedWeatherCard({ data, defaultExpanded = false }: { data: WeatherD
               
               {/* Raw TAF */}
               {taf.raw_text && (
-                <details className="group">
-                  <summary className="text-xs text-muted-foreground cursor-pointer hover:text-foreground transition-colors">
-                    Show Raw TAF ▼
-                  </summary>
-                  <div className="mt-2 text-xs font-mono bg-muted p-2 border border-border overflow-x-auto">
-                    {taf.raw_text}
-                  </div>
-                </details>
+                <RawDataExpander rawText={taf.raw_text} label="TAF" />
               )}
             </div>
           )}

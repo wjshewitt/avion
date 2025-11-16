@@ -47,18 +47,25 @@ export interface WeatherData {
   };
 }
 
+/**
+ * Avion v1.5 flight category LED badges
+ * - VFR: Emerald (nominal)
+ * - MVFR: Info Blue
+ * - IFR: Amber (caution)
+ * - LIFR: Safety Orange (critical)
+ */
 export function getFlightCategoryColor(category?: string) {
   switch (category) {
     case "VFR":
-      return "bg-green-500/10 text-green-700 dark:text-green-400 border-green-500/20";
+      return "bg-emerald-500/10 text-emerald-600 border border-emerald-500/20";
     case "MVFR":
-      return "bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/20";
+      return "bg-blue-500/10 text-blue-600 border border-blue-500/20";
     case "IFR":
-      return "bg-yellow-500/10 text-yellow-700 dark:text-yellow-400 border-yellow-500/20";
+      return "bg-amber-500/10 text-amber-600 border border-amber-500/20";
     case "LIFR":
-      return "bg-red-500/10 text-red-700 dark:text-red-400 border-red-500/20";
+      return "bg-[#F04E30]/10 text-[#F04E30] border border-[#F04E30]/20";
     default:
-      return "bg-muted text-muted-foreground border-border";
+      return "bg-muted/50 text-muted-foreground border border-border";
   }
 }
 
@@ -133,6 +140,12 @@ interface WeatherCardHeaderProps {
   darkHeader?: boolean;
 }
 
+/**
+ * Avion v1.5 weather card header with instrument aesthetic
+ * - ICAO in large mono
+ * - LED-style flight category badge
+ * - Timestamp in small mono
+ */
 export function WeatherCardHeader({
   icao,
   title,
@@ -143,30 +156,30 @@ export function WeatherCardHeader({
 }: WeatherCardHeaderProps) {
   return (
     <div className="flex items-center gap-3">
-      {icon}
-      <div>
-        <div className={cn(
-          "font-semibold text-sm",
-          darkHeader ? "text-white" : "text-foreground"
-        )}>
-          {icao?.toUpperCase()} {title}
-        </div>
-        {subtitle && (
-          <div className={cn(
-            "text-xs mt-0.5",
-            darkHeader ? "text-white/90" : "text-muted-foreground"
-          )}>{subtitle}</div>
-        )}
-        {flightCategory && (
-          <div className="flex items-center gap-2 mt-1">
+      <div className="flex-1">
+        <div className="flex items-center gap-3">
+          {/* ICAO code - Large mono */}
+          <span className="text-[14px] font-mono font-semibold tracking-wider">
+            {icao?.toUpperCase()}
+          </span>
+          
+          {/* Flight category - LED style instrument badge */}
+          {flightCategory && (
             <span
               className={cn(
-                "text-xs px-2 py-0.5 border font-medium",
+                "text-[10px] font-mono uppercase px-2 py-0.5 rounded-sm",
                 getFlightCategoryColor(flightCategory)
               )}
             >
               {flightCategory}
             </span>
+          )}
+        </div>
+        
+        {/* Timestamp - Small mono muted */}
+        {subtitle && (
+          <div className="text-[10px] font-mono text-muted-foreground mt-1">
+            {subtitle}
           </div>
         )}
       </div>
@@ -178,68 +191,64 @@ interface MetarDataGridProps {
   metar: NonNullable<WeatherData['metar']>;
 }
 
+/**
+ * Avion v1.5 METAR data grid with precision instrument layout
+ * - 10px mono uppercase labels
+ * - 13px tabular mono data values
+ * - No decorative icons
+ */
 export function MetarDataGrid({ metar }: MetarDataGridProps) {
   return (
-    <div className="grid grid-cols-2 gap-3 text-sm">
+    <div className="grid grid-cols-2 gap-3">
+      {/* Temperature */}
       {metar.temperature?.celsius !== undefined && (
-        <div className="flex items-center gap-2">
-          <Gauge className="h-4 w-4 text-muted-foreground" />
-          <div>
-            <div className="text-xs text-muted-foreground">Temperature</div>
-            <div className="font-semibold">
-              {metar.temperature.celsius}°C ({metar.temperature.fahrenheit || Math.round(metar.temperature.celsius * 9/5 + 32)}°F)
-            </div>
+        <div>
+          <div className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground mb-0.5">
+            TEMP/DEW
+          </div>
+          <div className="text-[13px] font-mono tabular-nums text-foreground">
+            {metar.temperature.celsius}°C / {metar.dewpoint?.celsius || '--'}°C
           </div>
         </div>
       )}
 
+      {/* Wind */}
       {metar.wind && (
-        <div className="flex items-center gap-2">
-          <Wind className="h-4 w-4 text-muted-foreground" />
-          <div>
-            <div className="text-xs text-muted-foreground">Wind</div>
-            <div className="font-semibold">
-              {metar.wind.degrees}° @ {metar.wind.speed_kts}kt
-              {metar.wind.gust_kts && (
-                <span className="text-yellow-600 dark:text-yellow-400 ml-1">
-                  G{metar.wind.gust_kts}
-                </span>
-              )}
-            </div>
+        <div>
+          <div className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground mb-0.5">
+            WIND
+          </div>
+          <div className="text-[13px] font-mono tabular-nums text-foreground">
+            {metar.wind.degrees?.toString().padStart(3, '0')}° @ {metar.wind.speed_kts}kt
+            {metar.wind.gust_kts && (
+              <span className="text-amber-600 ml-1">
+                G{metar.wind.gust_kts}
+              </span>
+            )}
           </div>
         </div>
       )}
 
+      {/* Visibility */}
       {metar.visibility?.miles_float !== undefined && (
-        <div className="flex items-center gap-2">
-          <Eye className="h-4 w-4 text-muted-foreground" />
-          <div>
-            <div className="text-xs text-muted-foreground">Visibility</div>
-            <div className="font-semibold">
-              {metar.visibility.miles_float >= 10 ? '10+' : metar.visibility.miles_float} SM
-            </div>
+        <div>
+          <div className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground mb-0.5">
+            VISIBILITY
+          </div>
+          <div className="text-[13px] font-mono tabular-nums text-foreground">
+            {metar.visibility.miles_float >= 10 ? '10+' : metar.visibility.miles_float} SM
           </div>
         </div>
       )}
 
+      {/* Altimeter */}
       {metar.barometer?.hg !== undefined && (
-        <div className="flex items-center gap-2">
-          <Gauge className="h-4 w-4 text-muted-foreground" />
-          <div>
-            <div className="text-xs text-muted-foreground">Altimeter</div>
-            <div className="font-semibold">
-              {metar.barometer.hg.toFixed(2)} inHg
-            </div>
+        <div>
+          <div className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground mb-0.5">
+            ALTIMETER
           </div>
-        </div>
-      )}
-
-      {metar.dewpoint?.celsius !== undefined && (
-        <div className="flex items-center gap-2">
-          <Gauge className="h-4 w-4 text-muted-foreground" />
-          <div>
-            <div className="text-xs text-muted-foreground">Dewpoint</div>
-            <div className="font-semibold">{metar.dewpoint.celsius}°C</div>
+          <div className="text-[13px] font-mono tabular-nums text-foreground">
+            {metar.barometer.hg.toFixed(2)} inHg
           </div>
         </div>
       )}
@@ -251,23 +260,25 @@ interface CloudLayersProps {
   clouds: NonNullable<WeatherData['metar']>['clouds'];
 }
 
+/**
+ * Avion v1.5 cloud layers display
+ */
 export function CloudLayers({ clouds }: CloudLayersProps) {
   if (!clouds || clouds.length === 0) return null;
 
   return (
     <div>
-      <div className="text-xs text-muted-foreground mb-1">Cloud Layers</div>
+      <div className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground mb-1">
+        CEILING
+      </div>
       <div className="space-y-1">
         {clouds.slice(0, 3).map((cloud, idx) => (
-          <div key={idx} className="text-xs">
-            <span className="font-medium">{cloud.code}</span>
+          <div key={idx} className="text-[12px] font-mono text-foreground">
+            <span>{cloud.code}</span>
             {cloud.feet && (
               <span className="text-muted-foreground ml-2">
-                @ {cloud.feet.toLocaleString()} ft
+                {cloud.feet.toLocaleString()}ft
               </span>
-            )}
-            {cloud.text && (
-              <span className="text-muted-foreground ml-2">({cloud.text})</span>
             )}
           </div>
         ))}

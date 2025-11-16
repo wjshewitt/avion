@@ -14,71 +14,60 @@ export default function WizardStepIndicator({
   stepLabels,
 }: WizardStepIndicatorProps) {
   return (
-    <div className="w-full max-w-5xl mx-auto mb-8">
-      {/* Progress text */}
-      <div className="text-center mb-4">
-        <p className="text-sm text-text-secondary">
-          Step {currentStep} of {totalSteps}
-        </p>
-        <h2 className="text-lg font-semibold text-text-primary mt-1">
-          {stepLabels[currentStep - 1]}
-        </h2>
+    <div className="w-full">
+      <div className="mb-3 flex items-center justify-between">
+        <div>
+          <p className="text-[10px] font-mono uppercase tracking-[0.25em] text-muted-foreground">
+            FLIGHT SETUP
+          </p>
+          <h2 className="text-xl font-light tracking-tight text-foreground">
+            {stepLabels[currentStep - 1]}
+          </h2>
+        </div>
+        <div className="text-[10px] font-mono uppercase tracking-[0.2em] text-muted-foreground">
+          Step {currentStep.toString().padStart(2, '0')} / {totalSteps
+            .toString()
+            .padStart(2, '0')}
+        </div>
       </div>
 
-      {/* Progress dots and lines */}
-      <div className="flex items-center justify-center gap-2">
+      <div className="mb-2 flex items-center gap-0.5">
         {Array.from({ length: totalSteps }).map((_, index) => {
           const stepNumber = index + 1;
           const isCompleted = stepNumber < currentStep;
           const isActive = stepNumber === currentStep;
 
           return (
-            <div key={stepNumber} className="flex items-center">
-              {/* Dot */}
+            <div key={stepNumber} className="flex-1 flex items-center">
               <motion.div
                 initial={false}
                 animate={{
-                  scale: isActive ? 1.2 : 1,
-                  backgroundColor: isCompleted || isActive ? '#2563eb' : '#e2e8f0',
+                  scale: isActive ? 1.08 : 1,
+                  backgroundColor: isActive
+                    ? 'var(--color-orange)'
+                    : 'var(--color-border-subtle)',
                 }}
                 transition={{ duration: 0.3 }}
-                className="w-3 h-3 rounded-full"
+                className="h-1 rounded-sm flex-1"
               />
-
-              {/* Line (not after last step) */}
-              {stepNumber < totalSteps && (
-                <motion.div
-                  initial={false}
-                  animate={{
-                    backgroundColor: isCompleted ? '#2563eb' : '#e2e8f0',
-                  }}
-                  transition={{ duration: 0.3 }}
-                  className="w-12 h-0.5 mx-1"
-                />
-              )}
             </div>
           );
         })}
       </div>
 
-      {/* Step labels (desktop only) */}
-      <div className="hidden md:flex items-start justify-between mt-3 px-4">
+      <div className="hidden md:flex items-start justify-between mt-1">
         {stepLabels.map((label, index) => {
           const stepNumber = index + 1;
           const isCompleted = stepNumber < currentStep;
           const isActive = stepNumber === currentStep;
 
           return (
-            <div
-              key={label}
-              className="text-xs text-center"
-              style={{ width: `${100 / totalSteps}%` }}
-            >
+            <div key={label} className="flex-1 text-left">
               <span
                 className={
                   isActive || isCompleted
-                    ? 'text-blue font-semibold'
-                    : 'text-text-secondary'
+                    ? 'text-foreground font-medium'
+                    : 'text-muted-foreground'
                 }
               >
                 {label}

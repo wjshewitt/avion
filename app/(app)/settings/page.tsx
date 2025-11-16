@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Save, User, Bell, Monitor, Database, Shield, Globe } from 'lucide-react';
+import { useTheme } from 'next-themes';
 import { useStore } from '@/store/index';
 
 type SettingsSection = 'profile' | 'notifications' | 'display' | 'data' | 'security' | 'system';
@@ -62,6 +63,7 @@ export default function SettingsPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
 
+  const { theme, setTheme } = useTheme();
   const { userProfile, isLoadingProfile, setUserProfile } = useStore();
   const weatherViewMode = useStore((s) => s.weatherViewMode);
   const setWeatherViewMode = useStore((s) => s.setWeatherViewMode);
@@ -89,8 +91,13 @@ export default function SettingsPage() {
         timezone: userProfile.timezone || 'UTC',
         bio: userProfile.bio || '',
       });
+
+      // Load theme from profile if it exists
+      if (userProfile.theme_preference && userProfile.theme_preference !== theme) {
+        setTheme(userProfile.theme_preference);
+      }
     }
-  }, [userProfile]);
+  }, [userProfile, theme, setTheme]);
 
   // Notification settings
   const [notificationSettings, setNotificationSettings] = useState({
@@ -142,6 +149,7 @@ export default function SettingsPage() {
         affiliated_organization: profileSettings.affiliated_organization,
         timezone: profileSettings.timezone,
         bio: profileSettings.bio,
+        theme_preference: theme || 'light', // Save current theme preference
       };
 
       const response = await fetch('/api/user/profile', {
@@ -157,15 +165,15 @@ export default function SettingsPage() {
       }
 
       const savedProfile = await response.json();
-      setUserProfile(savedProfile);
+      setUserProfile(savedProfile.profile);
       setHasChanges(false);
-      setSaveMessage('Profile saved successfully!');
+      setSaveMessage('Settings saved successfully!');
 
       // Clear message after 3 seconds
       setTimeout(() => setSaveMessage(null), 3000);
     } catch (error) {
       console.error('Error saving profile:', error);
-      setSaveMessage('Error saving profile. Please try again.');
+      setSaveMessage('Error saving settings. Please try again.');
 
       // Clear message after 5 seconds
       setTimeout(() => setSaveMessage(null), 5000);
@@ -178,14 +186,14 @@ export default function SettingsPage() {
   const isSuccess = saveMessage && !isError;
 
   return (
-    <div className="min-h-full bg-[#e8e8e8] dark:bg-zinc-950">
-      <div className="relative h-full px-6 md:px-8 py-8">
+    <div className="h-screen overflow-hidden bg-[#e8e8e8] dark:bg-zinc-950">
+      <div className="relative h-full px-4 md:px-6 py-4 md:py-6">
         <div className="absolute inset-0 tech-grid opacity-40 pointer-events-none" aria-hidden />
 
         <div className="relative h-full corner-brackets corner-brackets-lg corner-brackets-default">
-          <div className="corner-brackets-inner h-full p-6 md:p-8 bg-surface/80 dark:bg-zinc-900/80 backdrop-blur-md space-y-8">
+          <div className="corner-brackets-inner flex h-full flex-col gap-4 p-4 md:p-6 bg-surface/80 dark:bg-zinc-900/80 backdrop-blur-md">
             {/* Header */}
-            <div className="flex items-center justify-between border-b border-border pb-4">
+            <div className="flex flex-shrink-0 items-center justify-between border-b border-border pb-3">
               <div>
                 <p className="text-[10px] font-mono tracking-[0.3em] uppercase text-muted-foreground mb-1">
                   User Control Panel
@@ -198,10 +206,10 @@ export default function SettingsPage() {
               </div>
             </div>
 
-            <div className="flex flex-col lg:flex-row gap-6 lg:gap-10">
+            <div className="flex flex-1 min-h-0 flex-col lg:flex-row gap-4 lg:gap-6">
               {/* Sidebar Navigation */}
               <aside className="w-full lg:w-64 flex-shrink-0">
-                <div className="glass-panel rounded-sm p-4 h-full">
+                <div className="glass-panel rounded-sm p-4 h-full overflow-y-auto">
                   <div className="mb-3 flex items-center justify-between">
                     <span className="text-[10px] font-mono uppercase tracking-[0.25em] text-muted-foreground">
                       Sections
@@ -241,8 +249,8 @@ export default function SettingsPage() {
               </aside>
 
               {/* Main Content */}
-              <main className="flex-1 flex flex-col">
-                <div className="glass-panel rounded-sm p-6 md:p-8 flex-1">
+              <main className="flex-1 flex min-h-0 flex-col">
+                <div className="glass-panel rounded-sm p-4 md:p-6 flex-1 min-h-0 overflow-y-auto">
               {/* Profile Settings */}
               {activeSection === 'profile' && (
                 <div>
@@ -487,6 +495,28 @@ export default function SettingsPage() {
 
                     <div>
                       <label className={FIELD_LABEL}>Theme</label>
+                      <div className="flex gap-3 mt-2">
+                        {[
+                          { id: 'light', label: 'Ceramic (Light)' },
+                          { id: 'dark', label: 'Tungsten (Dark)' },
+                          { id: 'system', label: 'System' },
+                        ].map((opt) => (
+                          <button
+                            key={opt.id}
+                            onClick={() => {
+                              setTheme(opt.id);
+                              setHasChanges(true);
+                            }}
+                            className={`px-4 py-2 text-[11px] font-mono uppercase tracking-[0.14em] border transition-colors ${
+                              theme === opt.id
+                                ? 'border-blue bg-blue text-white'
+                                : 'border-border text-muted-foreground hover:text-foreground hover:border-text-primary'
+                            }`}
+                          >
+                            {opt.label}
+                          </button>
+                        ))}
+                      </div>
                       <p className={SETTING_DESC}>
                         Choose your preferred color scheme or use system preference
                       </p>
@@ -730,7 +760,7 @@ export default function SettingsPage() {
                 {/* Save Bar */}
                 {(hasChanges || saveMessage) && (
                   <div
-                    className={`mt-6 glass-panel rounded-sm px-4 py-3 flex items-center justify-between text-[11px] font-mono border-l-4 ${
+                    className={`mt-4 glass-panel rounded-sm px-4 py-3 flex flex-shrink-0 items-center justify-between text-[11px] font-mono border-l-4 ${
                       isError
                         ? 'border-l-red-500'
                         : isSuccess

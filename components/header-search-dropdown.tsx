@@ -128,12 +128,14 @@ export default function HeaderSearchDropdown({
       return (
         <div
           ref={dropdownRef}
-          className="absolute z-50 w-full mt-1 bg-white dark:bg-card border border-border shadow-lg max-h-96 overflow-y-auto"
+          className="absolute z-50 w-full mt-2"
         >
-          <div className="p-4 text-center text-sm text-text-secondary">
-            <SearchIcon size={32} className="mx-auto mb-2 text-text-tertiary" />
-            <p>No results found for &quot;{inputValue}&quot;</p>
-            <p className="text-xs mt-1 text-text-tertiary">Try searching for an airport code (e.g., KJFK) or flight number</p>
+          <div className="mx-auto max-w-xl rounded-sm border border-border bg-card shadow-[0_8px_24px_rgba(0,0,0,0.18)] overflow-hidden">
+            <div className="p-4 text-center text-xs text-muted-foreground">
+              <SearchIcon size={20} className="mx-auto mb-2 text-muted-foreground" />
+              <p className="font-medium text-foreground mb-1">No results for &quot;{inputValue}&quot;</p>
+              <p className="text-[11px] text-muted-foreground">Try searching for an airport code (e.g., KJFK) or flight number.</p>
+            </div>
           </div>
         </div>
       );
@@ -144,123 +146,122 @@ export default function HeaderSearchDropdown({
   return (
     <div
       ref={dropdownRef}
-      className="absolute z-50 w-full mt-1 bg-white dark:bg-card border border-border shadow-lg max-h-96 overflow-y-auto"
+      className="absolute z-50 w-full mt-2"
       role="listbox"
       aria-label="Search results"
     >
-      {isLoading && (
-        <div className="p-4 flex items-center justify-center gap-3 text-sm text-text-secondary">
-          <ScannerLoader size="sm" color="text-blue" />
-          <span className="font-mono">Searching...</span>
-        </div>
-      )}
-
-      {/* Recent Searches */}
-      {showRecent && (
-        <div>
-          <div className="px-3 py-2 text-xs font-semibold text-text-secondary uppercase tracking-wide bg-surface border-l-2 border-transparent hover:border-gray hover:bg-gradient-to-r hover:from-gray/5 hover:to-transparent transition-all duration-200 cursor-default">
-            Recent Searches
+      <div className="mx-auto max-w-xl rounded-sm border border-border bg-card shadow-[0_8px_24px_rgba(0,0,0,0.18)] max-h-96 overflow-y-auto">
+        {isLoading && (
+          <div className="p-4 flex items-center justify-center gap-3 text-xs text-muted-foreground border-b border-border/80">
+            <ScannerLoader size="sm" color="text-blue" />
+            <span className="font-mono">Searching…</span>
           </div>
-          {recentSearches.map((recent, index) => (
-            <button
-              key={recent.id}
-              data-index={index}
-              onClick={() => handleSelect({ type: 'recent', id: recent.id, data: recent })}
-              onMouseEnter={() => onSelectIndex(index)}
-              className={`w-full text-left p-3 transition-all duration-200 ${
-                index === selectedIndex 
-                  ? 'bg-gradient-to-r from-gray/5 via-gray/3 to-transparent' 
-                  : 'hover:bg-gradient-to-r hover:from-gray/5 hover:via-gray/3 hover:to-transparent'
-              }`}
-              role="option"
-              aria-selected={index === selectedIndex}
-            >
-              <div className="flex items-start gap-3">
-                <Clock size={16} className="text-text-tertiary mt-0.5 flex-shrink-0" />
-                <div className="flex-1 min-w-0">
-                  <div className="font-mono font-semibold text-text-primary text-sm">
-                    {recent.label}
-                  </div>
-                  <div className="text-xs text-text-secondary truncate">
-                    {recent.sublabel}
-                  </div>
-                </div>
-              </div>
-            </button>
-          ))}
-        </div>
-      )}
+        )}
 
-      {/* Airport Results */}
-      {results && results.airports.length > 0 && (
-        <div>
-          <div className="px-3 py-2 text-xs font-semibold text-text-secondary uppercase tracking-wide bg-surface border-l-2 border-transparent hover:border-blue hover:bg-gradient-to-r hover:from-blue/5 hover:to-transparent transition-all duration-200 cursor-default">
-            Airports
-          </div>
-          {results.airports.map((airport, index) => (
-            <AirportResultRow
-              key={airport.icao}
-              airport={airport}
-              index={index}
-              isSelected={index === selectedIndex}
-              onSelect={() => handleSelect({ type: 'airport', id: airport.icao, data: airport })}
-              onMouseEnter={() => onSelectIndex(index)}
-            />
-          ))}
-        </div>
-      )}
-
-      {/* Flight Results */}
-      {results && results.flights.length > 0 && (
-        <div>
-          <div className="px-3 py-2 text-xs font-semibold text-text-secondary uppercase tracking-wide bg-surface border-l-2 border-transparent hover:border-blue hover:bg-gradient-to-r hover:from-blue/5 hover:to-transparent transition-all duration-200 cursor-default">
-            Flights
-          </div>
-          {results.flights.map((flight, index) => {
-            const globalIndex = results.airports.length + index;
-            const statusColors = {
-              'On Time': 'text-green',
-              'Delayed': 'text-amber',
-              'Cancelled': 'text-red',
-            };
-            const statusColor = statusColors[flight.status as keyof typeof statusColors] || 'text-text-secondary';
-
-            return (
+        {/* Recent Searches */}
+        {showRecent && (
+          <div>
+            <div className="px-3 py-2 text-[10px] font-mono uppercase tracking-[0.16em] text-muted-foreground bg-muted/40 border-b border-border/80">
+              Recent Searches
+            </div>
+            {recentSearches.map((recent, index) => (
               <button
-                key={flight.id}
-                data-index={globalIndex}
-                onClick={() => handleSelect({ type: 'flight', id: flight.id, data: flight })}
-                onMouseEnter={() => onSelectIndex(globalIndex)}
-                className={`w-full text-left p-3 transition-all duration-200 ${
-                  globalIndex === selectedIndex 
-                    ? 'bg-gradient-to-r from-blue/5 via-blue/3 to-transparent' 
-                    : 'hover:bg-gradient-to-r hover:from-blue/5 hover:via-blue/3 hover:to-transparent'
+                key={recent.id}
+                data-index={index}
+                onClick={() => handleSelect({ type: 'recent', id: recent.id, data: recent })}
+                onMouseEnter={() => onSelectIndex(index)}
+                className={`w-full text-left px-3 py-2 text-xs transition-colors ${
+                  index === selectedIndex 
+                    ? 'bg-muted/80' 
+                    : 'hover:bg-muted/60'
                 }`}
                 role="option"
-                aria-selected={globalIndex === selectedIndex}
+                aria-selected={index === selectedIndex}
               >
                 <div className="flex items-start gap-3">
-                  <Plane size={16} className="text-blue mt-0.5 flex-shrink-0" />
+                  <Clock size={14} className="text-muted-foreground mt-0.5 flex-shrink-0" />
                   <div className="flex-1 min-w-0">
-                    <div className="font-mono font-semibold text-text-primary text-sm">
-                      {flight.code}
+                    <div className="font-mono font-semibold text-foreground text-xs">
+                      {recent.label}
                     </div>
-                    <div className="text-xs text-text-secondary">
-                      {flight.origin} → {flight.destination}
+                    <div className="text-[11px] text-muted-foreground truncate">
+                      {recent.sublabel}
                     </div>
-                    <div className={`text-xs font-medium ${statusColor}`}>
-                      {flight.status}
-                    </div>
-                  </div>
-                  <div className="text-xs text-blue font-medium">
-                    Details
                   </div>
                 </div>
               </button>
-            );
-          })}
-        </div>
-      )}
+            ))}
+          </div>
+        )}
+
+        {/* Airport Results */}
+        {results && results.airports.length > 0 && (
+          <div>
+            <div className="px-3 py-2 text-[10px] font-mono uppercase tracking-[0.16em] text-muted-foreground bg-muted/40 border-t border-border/80">
+              Airports
+            </div>
+            {results.airports.map((airport, index) => (
+              <AirportResultRow
+                key={airport.icao}
+                airport={airport}
+                index={index}
+                isSelected={index === selectedIndex}
+                onSelect={() => handleSelect({ type: 'airport', id: airport.icao, data: airport })}
+                onMouseEnter={() => onSelectIndex(index)}
+              />
+            ))}
+          </div>
+        )}
+
+        {/* Flight Results */}
+        {results && results.flights.length > 0 && (
+          <div>
+            <div className="px-3 py-2 text-[10px] font-mono uppercase tracking-[0.16em] text-muted-foreground bg-muted/40 border-t border-border/80">
+              Flights
+            </div>
+            {results.flights.map((flight, index) => {
+              const globalIndex = results.airports.length + index;
+              const statusColors = {
+                'On Time': 'text-green',
+                'Delayed': 'text-amber',
+                'Cancelled': 'text-red',
+              };
+              const statusColor = statusColors[flight.status as keyof typeof statusColors] || 'text-muted-foreground';
+
+              return (
+                <button
+                  key={flight.id}
+                  data-index={globalIndex}
+                  onClick={() => handleSelect({ type: 'flight', id: flight.id, data: flight })}
+                  onMouseEnter={() => onSelectIndex(globalIndex)}
+                  className={`w-full text-left px-3 py-2 text-xs transition-colors ${
+                    globalIndex === selectedIndex 
+                      ? 'bg-muted/80' 
+                      : 'hover:bg-muted/60'
+                  }`}
+                  role="option"
+                  aria-selected={globalIndex === selectedIndex}
+                >
+                  <div className="flex items-start gap-3">
+                    <Plane size={14} className="text-muted-foreground mt-0.5 flex-shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <div className="font-mono font-semibold text-foreground text-xs">
+                        {flight.code}
+                      </div>
+                      <div className="text-[11px] text-muted-foreground">
+                        {flight.origin} → {flight.destination}
+                      </div>
+                      <div className={`text-[11px] font-medium ${statusColor}`}>
+                        {flight.status}
+                      </div>
+                    </div>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
@@ -341,8 +342,8 @@ function AirportResultRow({
         w-full text-left border-b border-border last:border-0
         transition-all duration-200
         ${isSelected 
-          ? 'bg-gradient-to-r from-blue/5 via-blue/3 to-transparent' 
-          : 'hover:bg-gradient-to-r hover:from-blue/5 hover:via-blue/3 hover:to-transparent'
+          ? 'bg-muted/80' 
+          : 'hover:bg-muted/60'
         }
       `}
       role="option"
@@ -354,7 +355,7 @@ function AirportResultRow({
       {/* Expanded State - Swiss Grid System */}
       {isExpanded && (
         <div 
-          className="grid grid-cols-2 border-t border-border transform-gpu will-change-transform bg-gradient-to-b from-blue/5 to-transparent"
+          className="grid grid-cols-2 border-t border-border transform-gpu will-change-transform bg-muted/40"
           style={{
             animation: 'expandHeight 200ms cubic-bezier(0.4, 0, 0.2, 1)',
           }}

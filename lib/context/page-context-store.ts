@@ -5,7 +5,7 @@
 
 import { create } from 'zustand';
 
-export type PageContextType = 'weather' | 'airport' | 'flight' | 'briefing' | 'general';
+export type PageContextType = 'weather' | 'airport' | 'flight' | 'briefing' | 'page' | 'general';
 
 export interface WeatherContext {
   type: 'weather';
@@ -36,32 +36,62 @@ export interface BriefingContext {
   title?: string;
 }
 
+export interface PageRouteContext {
+  type: 'page';
+  path: string;
+  label: string;
+  content?: string;
+}
+
 export interface GeneralContext {
   type: 'general';
 }
 
-export type PageContext = WeatherContext | AirportContext | FlightContext | BriefingContext | GeneralContext;
+export type PageContext =
+  | WeatherContext
+  | AirportContext
+  | FlightContext
+  | BriefingContext
+  | PageRouteContext
+  | GeneralContext;
 
 interface PageContextStore {
   context: PageContext;
   contextEnabled: boolean;
-  badgeDismissed: boolean;
+  isContextSetByUser: boolean; // True if context was set by a user action (e.g. clicking a button)
   
-  setContext: (context: PageContext) => void;
-  setContextEnabled: (enabled: boolean) => void;
-  dismissBadge: () => void;
-  resetBadge: () => void;
+  setContext: (context: PageContext, isUserAction?: boolean) => void;
   clearContext: () => void;
+  setContextEnabled: (enabled: boolean) => void;
 }
 
 export const usePageContextStore = create<PageContextStore>((set) => ({
   context: { type: 'general' },
   contextEnabled: true,
-  badgeDismissed: false,
+  isContextSetByUser: false,
   
-  setContext: (context) => set({ context, badgeDismissed: false }),
-  setContextEnabled: (enabled) => set({ contextEnabled: enabled }),
-  dismissBadge: () => set({ badgeDismissed: true }),
-  resetBadge: () => set({ badgeDismissed: false }),
-  clearContext: () => set({ context: { type: 'general' }, badgeDismissed: false }),
+  setContext: (context, isUserAction = false) =>
+    set({
+      context,
+      isContextSetByUser: isUserAction,
+    }),
+  
+  clearContext: () =>
+    set({
+      context: { type: 'general' },
+      isContextSetByUser: false,
+    }),
+
+  setContextEnabled: (enabled) =>
+    set((state) => {
+      // If disabling context, also clear it
+      if (!enabled) {
+        return {
+          contextEnabled: false,
+          context: { type: 'general' },
+          isContextSetByUser: false,
+        };
+      }
+      return { contextEnabled: true };
+    }),
 }));

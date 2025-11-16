@@ -1,5 +1,13 @@
 'use client';
 
+/**
+ * @deprecated This component has been replaced by AiChatDrawer (ai-chat-drawer.tsx)
+ * which implements the Avion Design Language v1.5 with precision instrumentation.
+ * This file will be removed in the next release.
+ * 
+ * Migration: Use <AiChatDrawer /> instead of <AiChatPanel />
+ */
+
 import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -22,6 +30,11 @@ import { usePageContext } from '@/lib/context/usePageContext';
 import ContextBadge from '@/components/chat/ContextBadge';
 
 export default function AiChatPanel() {
+  // Log deprecation warning
+  useEffect(() => {
+    console.warn('⚠️  AiChatPanel is deprecated. Please use AiChatDrawer instead.');
+  }, []);
+
   const pathname = usePathname();
   const { aiChatOpen, toggleAiChat, setSearchValue } = useAppStore();
   
@@ -53,6 +66,7 @@ export default function AiChatPanel() {
     providerInfo,
   } = usePremiumChat({
     conversationId,
+    surface: 'sidebar',
     onConversationCreated: (newConversationId) => {
       setActiveConversationId(newConversationId);
 

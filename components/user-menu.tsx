@@ -46,33 +46,57 @@ export default function UserMenu() {
     <div ref={menuRef} className="relative">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-3 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+        className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-foreground bg-muted/40 border border-border rounded-sm hover:bg-muted transition-colors shadow-sm"
         aria-expanded={isOpen}
         aria-haspopup="true"
       >
-        <User size={16} />
+        <User size={14} className="text-muted-foreground" />
+        <span className="truncate max-w-[7rem]">W. Shewitt</span>
         <ChevronDown size={14} className={`transition-transform ${isOpen ? 'rotate-180' : ''}`} />
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 top-full mt-2 w-48 bg-card border border-border shadow-lg z-50">
-          <div className="py-1">
+        <div
+          className="absolute right-0 top-full mt-2 w-56 z-50 rounded-sm border border-border bg-card shadow-[0_8px_24px_rgba(0,0,0,0.18)] overflow-hidden"
+          role="menu"
+        >
+          {/* Identity block */}
+          <div className="px-3 py-2.5 flex items-center gap-3 bg-muted/40">
+            <div className="w-7 h-7 rounded-sm border border-border flex items-center justify-center text-[11px] font-semibold text-muted-foreground">
+              WS
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="text-xs font-semibold text-foreground truncate">W. Shewitt</div>
+              <div className="text-[10px] font-mono text-muted-foreground truncate">ops@avion.ai</div>
+            </div>
+          </div>
+
+          <div className="border-t border-border/80 py-1 bg-card">
             <button
               onClick={handleSettingsClick}
-              className="w-full flex items-center gap-3 px-4 py-2 text-sm text-foreground hover:bg-muted transition-colors"
+              className="w-full flex items-center gap-3 px-3 py-2 text-xs text-foreground hover:bg-muted transition-colors"
+              role="menuitem"
             >
-              <Settings size={16} />
+              <Settings size={14} className="text-muted-foreground" />
               Settings
             </button>
             <div className="border-t border-border my-1" />
             <button
               onClick={handleSignOut}
               disabled={isLoggingOut}
-              className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red hover:bg-red/5 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full flex items-center gap-3 px-3 py-2 text-xs text-red hover:bg-red/5 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              role="menuitem"
             >
-              <LogOut size={16} />
+              <LogOut size={14} />
               {isLoggingOut ? 'Signing out...' : 'Sign out'}
             </button>
+          </div>
+
+          <div className="border-t border-border/80 px-3 py-1.5 bg-card">
+            <p className="text-[9px] font-mono uppercase tracking-widest text-muted-foreground flex items-center justify-between">
+              <span>Profile</span>
+              <span>⌘, Settings</span>
+            </p>
           </div>
         </div>
       )}

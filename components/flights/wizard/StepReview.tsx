@@ -2,31 +2,17 @@
 
 import { motion } from 'framer-motion';
 import { Plane, MapPin, Calendar, Users, Edit2 } from 'lucide-react';
-
-interface Airport {
-  icao: string;
-  iata?: string;
-  name: string;
-}
+import { useFormContext, useWatch } from 'react-hook-form';
+import type { FlightFormValues } from '@/lib/validation/flight';
 
 interface StepReviewProps {
-  data: {
-    flightCode: string;
-    status: 'On Time' | 'Delayed' | 'Cancelled';
-    origin: Airport | null;
-    destination: Airport | null;
-    scheduledAt: string;
-    arrivalAt: string;
-    operator: string;
-    aircraft: string;
-    passengerCount: number | null;
-    crewCount: number | null;
-    notes: string;
-  };
   onEdit: (step: number) => void;
 }
 
-export default function StepReview({ data, onEdit }: StepReviewProps) {
+export default function StepReview({ onEdit }: StepReviewProps) {
+  const { control } = useFormContext<FlightFormValues>();
+  const data = useWatch({ control }) as FlightFormValues;
+
   const formatDateTime = (isoString: string): string => {
     if (!isoString) return '—';
     const date = new Date(isoString);
@@ -51,28 +37,31 @@ export default function StepReview({ data, onEdit }: StepReviewProps) {
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -20 }}
       transition={{ duration: 0.3 }}
-      className="max-w-6xl mx-auto"
+      className="max-w-5xl mx-auto space-y-6"
     >
-      <div className="mb-4 text-center">
-        <h3 className="text-lg font-semibold text-text-primary">Review Your Flight</h3>
-        <p className="text-sm text-text-secondary mt-1">
-          Verify all information before creating
+      <div className="text-center">
+        <p className="text-[10px] font-mono uppercase tracking-[0.24em] text-muted-foreground mb-1">
+          Final Check
+        </p>
+        <h3 className="text-xl font-light tracking-tight text-foreground">Review your flight</h3>
+        <p className="text-sm text-muted-foreground mt-1">
+          Verify all information before creating.
         </p>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Flight Code & Status */}
-        <div className="border border-border bg-white p-4">
+        <div className="ceramic p-4 rounded-sm border border-border">
           <div className="flex items-start justify-between mb-3">
             <div className="flex items-center gap-2">
               <Plane size={18} className="text-blue" />
-              <h4 className="text-xs font-semibold text-text-secondary uppercase tracking-wide">
+              <h4 className="text-[10px] font-mono uppercase tracking-[0.24em] text-muted-foreground">
                 Flight Information
               </h4>
             </div>
             <button
               onClick={() => onEdit(1)}
-              className="text-blue hover:underline flex items-center gap-1 text-xs"
+              className="text-[10px] font-mono uppercase tracking-[0.18em] text-blue hover:underline flex items-center gap-1"
             >
               <Edit2 size={12} />
               Edit
@@ -80,13 +69,13 @@ export default function StepReview({ data, onEdit }: StepReviewProps) {
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <div className="text-xs text-text-secondary mb-1">Flight Code</div>
-              <div className="text-lg font-mono font-bold text-text-primary">
+              <div className="text-xs text-muted-foreground mb-1">Flight Code</div>
+              <div className="text-lg font-mono tabular-nums font-bold text-foreground">
                 {data.flightCode}
               </div>
             </div>
             <div>
-              <div className="text-xs text-text-secondary mb-1">Status</div>
+              <div className="text-xs text-muted-foreground mb-1">Status</div>
               <div className={`text-sm font-semibold ${statusColors[data.status]}`}>
                 {data.status}
               </div>
@@ -95,17 +84,17 @@ export default function StepReview({ data, onEdit }: StepReviewProps) {
         </div>
 
         {/* Route */}
-        <div className="border border-border bg-white p-4">
+        <div className="ceramic p-4 rounded-sm border border-border">
           <div className="flex items-start justify-between mb-3">
             <div className="flex items-center gap-2">
               <MapPin size={18} className="text-blue" />
-              <h4 className="text-xs font-semibold text-text-secondary uppercase tracking-wide">
+              <h4 className="text-[10px] font-mono uppercase tracking-[0.24em] text-muted-foreground">
                 Route
               </h4>
             </div>
             <button
               onClick={() => onEdit(2)}
-              className="text-blue hover:underline flex items-center gap-1 text-xs"
+              className="text-[10px] font-mono uppercase tracking-[0.18em] text-blue hover:underline flex items-center gap-1"
             >
               <Edit2 size={12} />
               Edit
@@ -113,23 +102,23 @@ export default function StepReview({ data, onEdit }: StepReviewProps) {
           </div>
           <div className="flex items-center gap-4">
             <div className="flex-1">
-              <div className="text-xs text-text-secondary mb-1">Origin</div>
-              <div className="font-mono font-semibold text-text-primary">
+              <div className="text-xs text-muted-foreground mb-1">Origin</div>
+              <div className="font-mono font-semibold text-foreground">
                 {data.origin?.icao}
                 {data.origin?.iata && ` (${data.origin.iata})`}
               </div>
-              <div className="text-sm text-text-secondary mt-0.5">
+              <div className="text-sm text-muted-foreground mt-0.5">
                 {data.origin?.name}
               </div>
             </div>
             <div className="text-blue font-bold text-xl">→</div>
             <div className="flex-1">
-              <div className="text-xs text-text-secondary mb-1">Destination</div>
-              <div className="font-mono font-semibold text-text-primary">
+              <div className="text-xs text-muted-foreground mb-1">Destination</div>
+              <div className="font-mono font-semibold text-foreground">
                 {data.destination?.icao}
                 {data.destination?.iata && ` (${data.destination.iata})`}
               </div>
-              <div className="text-sm text-text-secondary mt-0.5">
+              <div className="text-sm text-muted-foreground mt-0.5">
                 {data.destination?.name}
               </div>
             </div>
@@ -137,51 +126,51 @@ export default function StepReview({ data, onEdit }: StepReviewProps) {
         </div>
 
         {/* Schedule */}
-        <div className="border border-border bg-white p-4 col-span-2">
+        <div className="ceramic p-4 rounded-sm border border-border md:col-span-2">
           <div className="flex items-start justify-between mb-3">
             <div className="flex items-center gap-2">
               <Calendar size={18} className="text-blue" />
-              <h4 className="text-xs font-semibold text-text-secondary uppercase tracking-wide">
+              <h4 className="text-[10px] font-mono uppercase tracking-[0.24em] text-muted-foreground">
                 Schedule
               </h4>
             </div>
             <button
               onClick={() => onEdit(3)}
-              className="text-blue hover:underline flex items-center gap-1 text-xs"
+              className="text-[10px] font-mono uppercase tracking-[0.18em] text-blue hover:underline flex items-center gap-1"
             >
               <Edit2 size={12} />
               Edit
             </button>
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <div className="text-xs text-text-secondary mb-1">Departure</div>
-              <div className="text-sm font-mono text-text-primary">
+              <div className="text-xs text-muted-foreground mb-1">Departure</div>
+              <div className="text-sm font-mono text-foreground">
                 {formatDateTime(data.scheduledAt)}
               </div>
             </div>
             <div>
-              <div className="text-xs text-text-secondary mb-1">Arrival</div>
-              <div className="text-sm font-mono text-text-primary">
+              <div className="text-xs text-muted-foreground mb-1">Arrival</div>
+              <div className="text-sm font-mono text-foreground">
                 {formatDateTime(data.arrivalAt)}
               </div>
             </div>
           </div>
         </div>
 
-        {/* Aircraft & Crew (if provided) */}
-        {(data.operator || data.aircraft || data.passengerCount !== null || data.crewCount !== null || data.notes) && (
-          <div className="border border-border bg-white p-4 col-span-2">
+        {/* Aircraft (if provided) */}
+        {(data.operator || data.aircraft) && (
+          <div className="ceramic p-4 rounded-sm border border-border">
             <div className="flex items-start justify-between mb-3">
               <div className="flex items-center gap-2">
-                <Users size={18} className="text-blue" />
-                <h4 className="text-xs font-semibold text-text-secondary uppercase tracking-wide">
-                  Aircraft & Crew
+                <Plane size={18} className="text-blue" />
+                <h4 className="text-[10px] font-mono uppercase tracking-[0.24em] text-muted-foreground">
+                  Aircraft
                 </h4>
               </div>
               <button
                 onClick={() => onEdit(4)}
-                className="text-blue hover:underline flex items-center gap-1 text-xs"
+                className="text-[10px] font-mono uppercase tracking-[0.18em] text-blue hover:underline flex items-center gap-1"
               >
                 <Edit2 size={12} />
                 Edit
@@ -190,31 +179,54 @@ export default function StepReview({ data, onEdit }: StepReviewProps) {
             <div className="space-y-3">
               {data.operator && (
                 <div>
-                  <div className="text-xs text-text-secondary mb-1">Operator</div>
-                  <div className="text-sm text-text-primary">{data.operator}</div>
+                  <div className="text-xs text-muted-foreground mb-1">Operator</div>
+                  <div className="text-sm text-foreground">{data.operator}</div>
                 </div>
               )}
               {data.aircraft && (
                 <div>
-                  <div className="text-xs text-text-secondary mb-1">Aircraft</div>
-                  <div className="text-sm text-text-primary">{data.aircraft}</div>
+                  <div className="text-xs text-muted-foreground mb-1">Aircraft Type</div>
+                  <div className="text-sm text-foreground">{data.aircraft}</div>
                 </div>
               )}
-              {(data.passengerCount !== null || data.crewCount !== null) && (
+            </div>
+          </div>
+        )}
+
+        {/* Crew & Passengers (if provided) */}
+        {(data.passengerCount !== null || data.crewCount !== null || data.notes) && (
+          <div className="ceramic p-4 rounded-sm border border-border">
+            <div className="flex items-start justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <Users size={18} className="text-blue" />
+                <h4 className="text-[10px] font-mono uppercase tracking-[0.24em] text-muted-foreground">
+                  Crew &amp; Passengers
+                </h4>
+              </div>
+              <button
+                onClick={() => onEdit(5)}
+                className="text-[10px] font-mono uppercase tracking-[0.18em] text-blue hover:underline flex items-center gap-1"
+              >
+                <Edit2 size={12} />
+                Edit
+              </button>
+            </div>
+            <div className="space-y-3">
+              {(data.crewCount !== null || data.passengerCount !== null) && (
                 <div className="grid grid-cols-2 gap-4">
-                  {data.passengerCount !== null && (
+                  {data.crewCount !== null && (
                     <div>
-                      <div className="text-xs text-text-secondary mb-1">Passengers</div>
-                      <div className="text-sm font-mono text-text-primary">
-                        {data.passengerCount}
+                      <div className="text-xs text-muted-foreground mb-1">Crew</div>
+                      <div className="text-sm font-mono text-foreground tabular-nums">
+                        {data.crewCount}
                       </div>
                     </div>
                   )}
-                  {data.crewCount !== null && (
+                  {data.passengerCount !== null && (
                     <div>
-                      <div className="text-xs text-text-secondary mb-1">Crew</div>
-                      <div className="text-sm font-mono text-text-primary">
-                        {data.crewCount}
+                      <div className="text-xs text-muted-foreground mb-1">Passengers</div>
+                      <div className="text-sm font-mono text-foreground tabular-nums">
+                        {data.passengerCount}
                       </div>
                     </div>
                   )}
@@ -222,8 +234,8 @@ export default function StepReview({ data, onEdit }: StepReviewProps) {
               )}
               {data.notes && (
                 <div>
-                  <div className="text-xs text-text-secondary mb-1">Notes</div>
-                  <div className="text-sm text-text-primary whitespace-pre-wrap">
+                  <div className="text-xs text-muted-foreground mb-1">Flight Notes</div>
+                  <div className="text-sm text-foreground whitespace-pre-wrap leading-relaxed">
                     {data.notes}
                   </div>
                 </div>

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { ChevronDown, ChevronUp, Cloud } from "lucide-react";
+import { cn } from "@/lib/utils";
 import {
   WeatherData,
   WeatherCardHeader,
@@ -33,10 +34,11 @@ export function MetarCard({ data, defaultExpanded = true }: MetarCardProps) {
   }
 
   return (
-    <div className="border border-border overflow-hidden bg-card max-w-2xl">
-      {/* Header */}
+    <div className="border border-border rounded-sm overflow-hidden bg-card max-w-2xl">
+      {/* Avion v1.5 groove header */}
       <div
-        className="flex items-center justify-between p-3 cursor-pointer bg-muted hover:bg-muted/80 transition-colors"
+        className="flex items-center justify-between px-3 py-2 cursor-pointer bg-muted/30 hover:bg-muted/40 transition-colors border-b border-border"
+        style={{ boxShadow: 'inset 1px 1px 3px rgba(0,0,0,0.06)' }}
         onClick={() => setExpanded(!expanded)}
       >
         <WeatherCardHeader
@@ -47,12 +49,19 @@ export function MetarCard({ data, defaultExpanded = true }: MetarCardProps) {
           subtitle={formatTimestamp(metar.observed)}
           darkHeader={false}
         />
-        {expanded ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
+        <ChevronDown 
+          size={12} 
+          strokeWidth={1.5} 
+          className={cn(
+            "text-muted-foreground transition-transform",
+            expanded && "rotate-180"
+          )} 
+        />
       </div>
 
       {/* Expanded Content */}
       {expanded && (
-        <div className="border-t border-border p-3 space-y-3 bg-muted/30">
+        <div className="px-3 py-3 space-y-3 bg-card/50">
           {/* Current Observation Time - Prominent */}
           <div className="bg-muted border border-border p-2 text-center">
             <div className="text-xs text-foreground font-medium">

@@ -3,6 +3,7 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
+import type { FlightChatMessage } from '@/lib/chat/messages';
 
 export interface ConversationMessage {
   id: string;
@@ -27,6 +28,8 @@ export interface ConversationMessage {
     suitability?: any;
   }> | null;
   metadata?: Record<string, any> | null;
+  ui_message?: FlightChatMessage | null;
+  text_content?: string | null;
 }
 
 export interface ConversationMessagesResult {

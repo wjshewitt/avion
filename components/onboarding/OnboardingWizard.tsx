@@ -1,282 +1,332 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { UsernameStep } from "./UsernameStep";
-import { ProfilePictureStep } from "./ProfilePictureStep";
-import { PreferencesStep } from "./PreferencesStep";
-import { SetupAnimation } from "./SetupAnimation";
-import { completeOnboarding } from "@/app/actions/onboarding";
-import { ArrowRight, ArrowLeft } from "lucide-react";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { ArrowRight } from "lucide-react";
+import { IdentityStep } from "./IdentityStep";
+import { VisualStep } from "./VisualStep";
+import { RoleStep } from "./RoleStep";
+import { CalibrationStep } from "./CalibrationStep";
+import { InterfaceStep } from "./InterfaceStep";
+import { InitializationStep } from "./InitializationStep";
+import { MIN_USERNAME_LENGTH, USERNAME_REGEX } from "@/lib/utils/username";
 
-const STEPS = [
-  { id: 1, title: "Username", required: true },
-  { id: 2, title: "Profile Picture", required: false },
-  { id: 3, title: "Preferences", required: false },
-];
+interface OnboardingData {
+  name: string;
+  username: string;
+  avatar: string | null;
+  role: string;
+  timezone: string;
+  theme: string;
+  hqLocation: string;
+  hqTimezoneSameAsMain: boolean;
+}
 
-export function OnboardingWizard() {
-  const router = useRouter();
-  const [currentStep, setCurrentStep] = useState(1);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+interface OnboardingWizardProps {
+  onComplete: (data: OnboardingData) => void;
+}
 
-  // Setup animation state
-  const [showSetupAnimation, setShowSetupAnimation] = useState(false);
-  const [setupStep, setSetupStep] = useState(0);
-  const [isSetupComplete, setIsSetupComplete] = useState(false);
+const LOCAL_STORAGE_KEY = "avion:onboarding:v1";
 
-  // Form data
-  const [username, setUsername] = useState("");
-  const [isUsernameValid, setIsUsernameValid] = useState(false);
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
-  const [role, setRole] = useState<'pilot' | 'crew' | 'admin' | 'dispatcher'>('pilot');
-  const [timezone, setTimezone] = useState('UTC');
-  const [theme, setTheme] = useState<'light' | 'dark' | 'system'>('system');
+export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
+  const totalSteps = 6;
 
-  const canProceed = () => {
-    if (currentStep === 1) return isUsernameValid;
-    return true; // Other steps are optional
+  const [step, setStep] = useState(1);
+  const [data, setData] = useState<OnboardingData>({
+    name: "",
+    username: "",
+    avatar: null,
+    role: "",
+    timezone: "",
+    theme: "ceramic",
+    hqLocation: "",
+    hqTimezoneSameAsMain: true,
+  });
+
+  const [stepErrors, setStepErrors] = useState<string[]>([]);
+  const [isHydrated, setIsHydrated] = useState(false);
+
+  const persistState = (nextStep: number, nextData: OnboardingData) => {
+    if (typeof window === "undefined") return;
+    try {
+      const payload = JSON.stringify({ step: nextStep, data: nextData });
+      window.localStorage.setItem(LOCAL_STORAGE_KEY, payload);
+    } catch {
+      // Ignore quota / storage errors
+    }
+  };
+
+  const updateData = (newData: Partial<OnboardingData>) => {
+    setData((prev) => {
+      const merged = { ...prev, ...newData };
+      persistState(step, merged);
+      return merged;
+    });
+  };
+
+  const nextStep = () => {
+    if (step < totalSteps) {
+      const next = step + 1;
+      setStep(next);
+      persistState(next, data);
+    }
+  };
+
+  // Load cached wizard progress on first mount
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    try {
+      const raw = window.localStorage.getItem(LOCAL_STORAGE_KEY);
+      if (!raw) return;
+
+      const parsed = JSON.parse(raw) as {
+        step?: number;
+        data?: Partial<OnboardingData>;
+      };
+
+      if (parsed.data) {
+        setData((prev) => ({ ...prev, ...parsed.data }));
+      }
+      if (typeof parsed.step === "number" && parsed.step >= 1 && parsed.step <= totalSteps) {
+        setStep(parsed.step);
+      }
+    } catch {
+      // Ignore malformed cache
+    }
+    setIsHydrated(true);
+  }, [totalSteps]);
+
+  const prevStep = () => {
+    if (step > 1) {
+      const next = step - 1;
+      setStep(next);
+      persistState(next, data);
+    }
+  };
+
+  const getStepErrors = (): string[] => {
+    const errors: string[] = [];
+
+    if (step === 1) {
+      const trimmedName = data.name.trim();
+      const hasSurname = trimmedName.split(/\s+/).length >= 2;
+      const usernameTrimmed = data.username.trim();
+
+      if (!hasSurname) {
+        errors.push("Include at least a first and last name.");
+      }
+      if (usernameTrimmed.length < MIN_USERNAME_LENGTH) {
+        errors.push(`Username must be at least ${MIN_USERNAME_LENGTH} characters.`);
+      }
+      if (usernameTrimmed !== "" && !USERNAME_REGEX.test(usernameTrimmed)) {
+        errors.push("Username can only contain letters, numbers, and underscores.");
+      }
+    }
+    if (step === 2) {
+      // Optional step; no blocking errors.
+    }
+    if (step === 3 && data.role === "") {
+      errors.push("Select a primary role.");
+    }
+    if (step === 4 && data.timezone === "") {
+      errors.push("Choose a main operations timezone.");
+    }
+    if (step === 5 && data.theme === "") {
+      errors.push("Choose an interface theme.");
+    }
+    return errors;
+  };
+
+  const isStepValid = () => {
+    return getStepErrors().length === 0;
   };
 
   const handleNext = () => {
-    if (currentStep < STEPS.length) {
-      setCurrentStep(currentStep + 1);
-      setError(null);
+    const errors = getStepErrors();
+    if (errors.length > 0) {
+      setStepErrors(errors);
+      return;
+    }
+
+    setStepErrors([]);
+    if (step < totalSteps) {
+      setStep((prev) => prev + 1);
     }
   };
 
-  const handleBack = () => {
-    if (currentStep > 1) {
-      setCurrentStep(currentStep - 1);
-      setError(null);
+  const renderStep = () => {
+    switch (step) {
+      case 1:
+        return (
+          <IdentityStep
+            name={data.name}
+            username={data.username}
+            updateData={updateData}
+          />
+        );
+      case 2:
+        return (
+          <VisualStep
+            avatar={data.avatar}
+            username={data.username}
+            name={data.name}
+            updateData={updateData}
+          />
+        );
+      case 3:
+        return <RoleStep role={data.role} updateData={updateData} />;
+      case 4:
+        return (
+          <CalibrationStep
+            timezone={data.timezone}
+            hqLocation={data.hqLocation}
+            hqTimezoneSameAsMain={data.hqTimezoneSameAsMain}
+            updateData={updateData}
+          />
+        );
+      case 5:
+        return <InterfaceStep theme={data.theme} updateData={updateData} />;
+      case 6:
+        return (
+          <InitializationStep
+            onComplete={() => {
+              onComplete(data);
+              if (typeof window !== "undefined") {
+                window.localStorage.removeItem(LOCAL_STORAGE_KEY);
+              }
+            }}
+          />
+        );
+      default:
+        return null;
     }
   };
 
-  const handleSkip = () => {
-    if (currentStep < STEPS.length) {
-      setCurrentStep(currentStep + 1);
-      setError(null);
-    } else {
-      handleComplete();
-    }
-  };
+  const isCalibrationStep = step === 4;
 
-  const handleComplete = async () => {
-    setLoading(true);
-    setError(null);
-    setShowSetupAnimation(true);
-    setSetupStep(0);
-    setIsSetupComplete(false);
-
-    // Artificial delay with step progression for nice animation
-    const progressSteps = async () => {
-      // Step 1: Creating profile
-      await new Promise(resolve => setTimeout(resolve, 800));
-      setSetupStep(1);
-
-      // Step 2: Configuring preferences
-      await new Promise(resolve => setTimeout(resolve, 800));
-      setSetupStep(2);
-
-      // Step 3: Preparing workspace (call API during this step)
-      const apiPromise = completeOnboarding({
-        username,
-        avatar_url: avatarUrl,
-        role,
-        timezone,
-        theme,
-      });
-
-      await new Promise(resolve => setTimeout(resolve, 800));
-      setSetupStep(3);
-
-      // Wait for API to complete
-      const result = await apiPromise;
-
-      // Step 4: Almost done
-      await new Promise(resolve => setTimeout(resolve, 600));
-
-      if (result.success) {
-        setIsSetupComplete(true);
-        
-        // Show success state briefly before redirect
-        await new Promise(resolve => setTimeout(resolve, 800));
-        
-        router.push("/flights");
-        router.refresh();
-      } else {
-        setShowSetupAnimation(false);
-        setError(result.error);
-        setLoading(false);
-      }
-    };
-
-    try {
-      await progressSteps();
-    } catch (err) {
-      console.error("Onboarding completion error:", err);
-      setShowSetupAnimation(false);
-      setError("Failed to complete onboarding. Please try again.");
-      setLoading(false);
-    }
-  };
+  if (!isHydrated && typeof window !== "undefined") {
+    // Avoid flicker before we've had a chance to load cached state
+    return null;
+  }
 
   return (
-    <>
-      <SetupAnimation 
-        isVisible={showSetupAnimation}
-        currentStep={setupStep}
-        isComplete={isSetupComplete}
-      />
-      
-      <div className="min-h-screen flex items-center justify-center bg-background-main p-4" data-onboarding>
-      <div className="w-full max-w-2xl">
-        {/* Progress Bar */}
-        <div className="mb-12">
-          <div className="flex items-center justify-center mb-4">
-            {STEPS.map((step, index) => (
-              <div key={step.id} className="flex items-center">
-                <div className="flex flex-col items-center">
-                  <div
-                    className={`w-10 h-10 flex items-center justify-center text-sm font-medium transition-all border ${
-                      currentStep > step.id
-                        ? "bg-primary text-white border-primary"
-                        : currentStep === step.id
-                        ? "bg-primary text-white border-primary"
-                        : "bg-transparent text-text-muted border-border-subtle"
-                    }`}
-                  >
-                    {currentStep > step.id ? (
-                      "✓"
-                    ) : (
-                      step.id
-                    )}
-                  </div>
-                  <span className={`mt-2 text-xs font-medium tracking-wide uppercase ${
-                    currentStep === step.id ? "text-text-primary" : "text-text-muted"
-                  }`}>
-                    {step.title}
-                  </span>
-                </div>
-                {index < STEPS.length - 1 && (
-                  <div className="w-16 h-px mx-4 bg-border-subtle relative top-[-12px]">
-                    <div
-                      className="h-full bg-primary transition-all duration-500"
-                      style={{ width: currentStep > step.id ? "100%" : "0%" }}
-                    />
-                  </div>
-                )}
+    <div className={`w-full px-4 ${isCalibrationStep ? "max-w-4xl" : "max-w-md"}`}>
+      {/* Logo Header */}
+      <div className="flex flex-col items-center mb-8">
+        <div className="w-10 h-10 bg-zinc-900 dark:bg-zinc-50 text-white dark:text-zinc-900 flex items-center justify-center font-bold tracking-tighter shadow-md mb-3 transition-colors border border-blue">
+          Av
+        </div>
+        {step < 6 && (
+          <div className="text-xs font-mono tracking-widest flex items-center gap-2">
+            <span className="text-zinc-500 dark:text-zinc-400">ONBOARDING</span>
+            <span className="h-px w-6 bg-[#F04E30]" />
+          </div>
+        )}
+      </div>
+
+      {/* Main Card */}
+      <div className="ceramic-card overflow-hidden relative min-h-[480px] flex flex-col">
+        {/* Progress Rail (Top) */}
+        {step < 6 && (
+          <div className="h-1 w-full bg-zinc-100 dark:bg-zinc-800 flex">
+            {[...Array(5)].map((_, i) => (
+              <div key={i} className="flex-1 relative">
+                <motion.div
+                  className="absolute inset-0 bg-[#F04E30]"
+                  initial={{ scaleX: 0 }}
+                  animate={{
+                    scaleX: step > i + 1 ? 1 : step === i + 1 ? 1 : 0,
+                  }}
+                  style={{ transformOrigin: "left" }}
+                  transition={{ duration: 0.4 }}
+                />
+                {/* Separators */}
+                <div className="absolute right-0 top-0 bottom-0 w-[1px] bg-white dark:bg-zinc-700 z-10"></div>
               </div>
             ))}
           </div>
-        </div>
+        )}
 
-        {/* Main Card */}
-        <div className="bg-white border border-border-subtle p-12 space-y-8">
-          {error && (
-            <div className="bg-critical/5 p-4 border-l-4 border-critical">
-              <p className="text-sm text-critical font-medium">{error}</p>
+        {/* Content Area */}
+        <div className="flex-1 p-8 flex flex-col">
+          <div className="flex-1 flex flex-col justify-center">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={step}
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.3 }}
+                className="w-full"
+              >
+                {renderStep()}
+              </motion.div>
+            </AnimatePresence>
+          </div>
+
+          {/* Navigation Footer */}
+          {step < 6 && (
+            <div className="mt-8 pt-6 border-t border-zinc-100 dark:border-zinc-700 flex justify-between items-center">
+              <button
+                onClick={prevStep}
+                disabled={step === 1}
+                className={`text-xs font-medium px-4 py-2 rounded-sm transition-colors ${
+                  step === 1
+                    ? "text-zinc-300 dark:text-zinc-600 cursor-not-allowed"
+                    : "text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                }`}
+              >
+                Back
+              </button>
+
+              <div className="flex flex-col items-end">
+                <button
+                  onClick={handleNext}
+                  className={`btn-primary px-6 py-2.5 rounded-sm text-xs font-bold uppercase tracking-wide flex items-center gap-2 ${
+                    !isStepValid() ? "opacity-80" : ""
+                  }`}
+                >
+                  <span>{step === 5 ? "Initialize" : "Confirm"}</span>
+                  <ArrowRight size={14} strokeWidth={1.5} />
+                </button>
+
+                <AnimatePresence>
+                  {stepErrors.length > 0 && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 4 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 4 }}
+                      transition={{ duration: 0.18 }}
+                      className="mt-3 w-full max-w-xs rounded-sm border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900/90 px-3 py-2 shadow-sm"
+                    >
+                      <div className="text-[10px] font-mono uppercase tracking-[0.25em] text-zinc-500 dark:text-zinc-400 mb-1">
+                        Cannot continue
+                      </div>
+                      <ul className="space-y-0.5">
+                        {stepErrors.map((msg, idx) => (
+                          <li
+                            key={idx}
+                            className="text-[10px] font-mono text-zinc-700 dark:text-zinc-200"
+                          >
+                            • {msg}
+                          </li>
+                        ))}
+                      </ul>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
             </div>
           )}
-
-          {/* Step Content with Animation */}
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={currentStep}
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.3 }}
-            >
-              {currentStep === 1 && (
-                <UsernameStep
-                  value={username}
-                  onChange={setUsername}
-                  onValidChange={setIsUsernameValid}
-                />
-              )}
-              {currentStep === 2 && (
-                <ProfilePictureStep value={avatarUrl} onChange={setAvatarUrl} />
-              )}
-              {currentStep === 3 && (
-                <PreferencesStep
-                  role={role}
-                  timezone={timezone}
-                  theme={theme}
-                  onRoleChange={setRole}
-                  onTimezoneChange={setTimezone}
-                  onThemeChange={setTheme}
-                />
-              )}
-            </motion.div>
-          </AnimatePresence>
-
-          {/* Navigation Buttons */}
-          <div className="flex items-center justify-between pt-8 border-t border-border-subtle">
-            <div>
-              {currentStep > 1 && (
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={handleBack}
-                  disabled={loading}
-                  className="font-medium tracking-wide uppercase text-xs"
-                >
-                  <ArrowLeft className="w-4 h-4 mr-2" />
-                  Back
-                </Button>
-              )}
-            </div>
-
-            <div className="flex items-center gap-4">
-              {!STEPS[currentStep - 1].required && currentStep < STEPS.length && (
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={handleSkip}
-                  disabled={loading}
-                  className="font-medium tracking-wide uppercase text-xs"
-                >
-                  Skip
-                </Button>
-              )}
-
-              {currentStep < STEPS.length ? (
-                <Button
-                  type="button"
-                  onClick={handleNext}
-                  disabled={!canProceed() || loading}
-                  className="font-medium tracking-wide uppercase text-xs px-8"
-                >
-                  Continue
-                  <ArrowRight className="w-4 h-4 ml-2" />
-                </Button>
-              ) : (
-                <Button
-                  type="button"
-                  onClick={handleComplete}
-                  disabled={loading}
-                  className="bg-green hover:bg-green/90 font-medium tracking-wide uppercase text-xs px-8"
-                >
-                  {loading ? "Completing..." : "Complete Setup"}
-                </Button>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Help Text */}
-        <div className="mt-4 text-center">
-          <p className="text-sm text-text-muted">
-            Step {currentStep} of {STEPS.length}
-            {!STEPS[currentStep - 1].required && " • Optional"}
-          </p>
         </div>
       </div>
+
+      {/* Footer Metadata */}
+      <div className="mt-6 flex justify-between text-[9px] font-mono text-zinc-400 dark:text-zinc-500 uppercase tracking-widest">
+        <span>Avion OS v2.4</span>
+        <span>Secure Connection</span>
+      </div>
     </div>
-    </>
   );
 }

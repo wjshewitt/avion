@@ -4,6 +4,7 @@
  */
 
 import { NextRequest } from 'next/server';
+import { performance } from 'node:perf_hooks';
 import { createClient } from '@/lib/supabase/server';
 import { streamText, tool, stepCountIs, convertToModelMessages, NoSuchToolError, InvalidToolInputError } from 'ai';
 import type { JSONValue } from 'ai';
@@ -12,11 +13,14 @@ import { z } from 'zod';
 import { getAirfieldWeatherSnapshot } from '@/lib/weather/riskEngine';
 import { getMessageText } from '@/lib/chat/messages';
 import {
-  getAiProviderConfig,
+  getAiRouterModelsConfig,
   isMissingAiProviderKeyError,
   type AiProvider,
   type ProviderOptionsMap,
 } from '@/lib/config/ai';
+import { estimateTokens } from '@/lib/ai/tokens';
+import { chooseGeminiModel } from '@/lib/ai/router';
+import type { ModeHint, ChatSurface } from '@/lib/ai/router-types';
 import { 
   SIMPLE_CHAT_PROMPT, 
   FLIGHT_OPS_PROMPT, 
@@ -24,7 +28,7 @@ import {
   AIRPORT_PLANNING_PROMPT,
   DEEP_BRIEFING_PROMPT 
 } from '@/lib/gemini/prompts';
-import type { ChatMode } from '@/lib/chat-settings-store';
+import type { ChatMode, ModelSelection } from '@/lib/chat-settings-store';
 
 /**
  * Select system prompt based on chat mode
@@ -219,6 +223,23 @@ function readUsageNumber(usage: unknown, key: string): number | undefined {
   return typeof value === 'number' ? value : undefined;
 }
 
+function cloneUiMessageForStorage(message: UIMessage, conversationId: string | null): UIMessage {
+  const cloned = safeClone(message);
+  cloned.metadata = {
+    ...(cloned.metadata ?? {}),
+    conversationId: conversationId ?? cloned.metadata?.conversationId ?? null,
+  };
+  return cloned;
+}
+
+function safeClone<T>(value: T): T {
+  const cloner = (globalThis as any).structuredClone;
+  if (typeof cloner === 'function') {
+    return cloner(value);
+  }
+  return JSON.parse(JSON.stringify(value));
+}
+
 type IncomingMessage = UIMessage & {
   metadata?: { conversationId?: string };
 };
@@ -236,7 +257,11 @@ interface ChatRequestBody {
   messages?: IncomingMessage[];
   conversationId?: string | null;
   mode?: ChatMode | null;
+  selectedModel?: ModelSelection;
   pageContext?: PageContext | null;
+   surface?: ChatSurface;
+   modeHint?: ModeHint;
+   requiresHighReliability?: boolean;
   trigger?: 'submit-message' | 'regenerate-message';
   messageId?: string | null;
 }
@@ -244,7 +269,18 @@ interface ChatRequestBody {
 export async function POST(req: NextRequest) {
   try {
     const body = (await req.json()) as ChatRequestBody;
+    console.log('[/api/chat/general] Request body:', JSON.stringify(body, null, 2));
     const uiMessages = body.messages ?? [];
+
+    const timings = {
+      start: performance.now(),
+      authStart: 0,
+      authEnd: 0,
+      conversationStart: 0,
+      conversationEnd: 0,
+      persistStart: 0,
+      persistEnd: 0,
+    };
 
     if (uiMessages.length === 0) {
       return new Response(
@@ -257,13 +293,16 @@ export async function POST(req: NextRequest) {
     const queryContent = lastUserMessage ? getMessageText(lastUserMessage) : '';
     
     const supabase = await createClient();
+    timings.authStart = performance.now();
     const { data: { user }, error: authError } = await supabase.auth.getUser();
+    timings.authEnd = performance.now();
     
     if (authError || !user) {
       return new Response('Unauthorized', { status: 401 });
     }
 
     // Get or create conversation
+    timings.conversationStart = performance.now();
     const metadataConversationId = uiMessages.find((msg) => msg.metadata?.conversationId)?.metadata?.conversationId ?? null;
     let convId = body.conversationId ?? metadataConversationId ?? null;
     let wasNewConversation = false;
@@ -294,6 +333,7 @@ export async function POST(req: NextRequest) {
       wasNewConversation = true;
       console.log('✅ Created new conversation:', convId);
     }
+    timings.conversationEnd = performance.now();
 
     // Import tool executor functions
     const { executeFlightTool } = await import('@/lib/gemini/tool-executor');
@@ -402,27 +442,82 @@ export async function POST(req: NextRequest) {
     
     console.log('🎯 Using chat mode:', body.mode || 'simple', '| Prompt length:', systemPrompt.length);
 
-    // ✅ Get model and provider config (Vertex AI or Gemini API)
-    const { model, supportsThinking, provider, modelId, defaultProviderOptions } = getAiProviderConfig();
+    // Determine routing surface and mode hint
+    const surface: ChatSurface = body.surface ?? 'main';
+    const modeHint: ModeHint | undefined = body.modeHint
+      ?? (body.mode === 'deep-briefing'
+        ? 'planning'
+        : body.mode
+        ? 'analysis'
+        : 'casual');
+
+    const coreMessages = modelMessages; // already CoreMessage-compatible
+    const totalTokensEstimate = estimateTokens(coreMessages);
+
+    const routerConfig = getAiRouterModelsConfig();
+    
+    // Respect user's model selection or use router
+    let decision;
+    if (body.selectedModel === 'flash-lite') {
+      // Force Flash Lite
+      decision = {
+        model: routerConfig.lite.model,
+        modelName: routerConfig.lite.modelId,
+        routingReason: 'User selected Flash Lite',
+      };
+    } else if (body.selectedModel === 'flash') {
+      // Force Flash
+      decision = {
+        model: routerConfig.full.model,
+        modelName: routerConfig.full.modelId,
+        routingReason: 'User selected Flash',
+      };
+    } else {
+      // Auto mode - use router
+      decision = await chooseGeminiModel({
+        surface,
+        userMessage: queryContent,
+        totalTokensEstimate,
+        hasTools: true,
+        requiresHighReliability: body.requiresHighReliability,
+        modeHint,
+        contextType: body.pageContext?.type ?? 'general',
+      });
+    }
+
+    const { provider, defaultProviderOptions } = routerConfig;
+    const modelId = decision.modelName;
+
+    const supportsThinkingForModel =
+      routerConfig.supportsThinking && decision.modelName === routerConfig.full.modelId;
+
+    const weatherToolPayloads: any[] = [];
+    const airportToolPayloads: any[] = [];
+    let usageSnapshot: unknown = null;
+    let reasoningSnapshot: string | null = null;
 
     console.log('💬 Starting chat stream', {
       thinkingBudget,
       provider,
       modelId,
-      supportsThinking,
+      supportsThinking: supportsThinkingForModel,
       mode: body.mode,
+      surface,
+      routingReason: decision.routingReason,
+      totalTokensEstimate,
+      routingDebug: decision.debug,
     });
 
     const providerOptions = buildProviderOptions({
       defaultOptions: defaultProviderOptions,
-      supportsThinking,
+      supportsThinking: supportsThinkingForModel,
       thinkingBudget,
     });
 
     const result = streamText({
-      model, // ✅ Uses either Vertex or Gemini based on environment
+      model: decision.model,
       system: systemPrompt,
-      messages: modelMessages,
+      messages: coreMessages,
       tools,
       stopWhen: stepCountIs(5), // Prevent infinite tool loops (AI SDK v5)
       ...(providerOptions ? { providerOptions } : {}),
@@ -438,85 +533,90 @@ export async function POST(req: NextRequest) {
       
       // ✅ SERVER-SIDE PERSISTENCE - Clean, race-condition-free
       onFinish: async (event) => {
-        console.log('💾 Saving conversation to database...');
-        
-        // Prepare tool data for database storage
-        const weatherData: any[] = [];
-        const airportData: any[] = [];
-        
+        reasoningSnapshot = event.reasoningText ?? null;
+        usageSnapshot = event.usage ?? null;
+
         if (event.toolResults) {
           for (const result of event.toolResults) {
             if (result.toolName === 'get_airport_weather') {
-              weatherData.push(result.output);
+              weatherToolPayloads.push(result.output);
             } else if (result.toolName === 'get_airport_capabilities' || result.toolName === 'get_user_flights') {
-              airportData.push(result.output);
+              airportToolPayloads.push(result.output);
             }
           }
         }
+      }
+    });
 
-        // Get the user message content
-        const userContent = lastUserMessage ? getMessageText(lastUserMessage) : '';
+    // ✅ CRITICAL FIX: Pass new conversation ID to client via metadata & header
+    const persistMessages = async (responseMessage: UIMessage) => {
+      if (!convId) return;
 
-        // Save both user and assistant messages
-        const usage = event.usage;
+      try {
+        timings.persistStart = performance.now();
+        const normalizedAssistant = cloneUiMessageForStorage(responseMessage, convId);
+        const assistantText = getMessageText(normalizedAssistant);
+
+        const userMessageForStorage = lastUserMessage
+          ? cloneUiMessageForStorage(lastUserMessage, convId)
+          : null;
+        const userText = userMessageForStorage ? getMessageText(userMessageForStorage) : '';
+
         const inputTokens =
-          usage?.inputTokens ?? readUsageNumber(usage, 'promptTokens') ?? 0;
+          readUsageNumber(usageSnapshot, 'inputTokens') ?? readUsageNumber(usageSnapshot, 'promptTokens') ?? 0;
         const outputTokens =
-          usage?.outputTokens ?? readUsageNumber(usage, 'completionTokens') ?? 0;
+          readUsageNumber(usageSnapshot, 'outputTokens') ?? readUsageNumber(usageSnapshot, 'completionTokens') ?? 0;
         const reasoningTokens =
-          readUsageNumber(usage, 'reasoningTokens') ?? readUsageNumber(usage, 'thinkingTokens') ?? 0;
+          readUsageNumber(usageSnapshot, 'reasoningTokens') ?? readUsageNumber(usageSnapshot, 'thinkingTokens') ?? 0;
 
-        const messagesToInsert = [
-          {
+        const payloads: Array<Record<string, unknown>> = [];
+
+        if (userMessageForStorage) {
+          payloads.push({
             conversation_id: convId,
             role: 'user',
-            content: userContent,
+            content: userText,
+            text_content: userText,
+            ui_message: userMessageForStorage,
             tokens_used: null,
             weather_tool_data: null,
             airport_tool_data: null,
             thinking_content: null,
             thinking_tokens: 0,
-            metadata: null,
-          },
-          {
-            conversation_id: convId,
-            role: 'assistant',
-            content: event.text,
-            tokens_used: {
-              input: inputTokens,
-              output: outputTokens,
-              thinking: reasoningTokens,
-            },
-            weather_tool_data: weatherData.length > 0 ? weatherData : null,
-            airport_tool_data: airportData.length > 0 ? airportData : null,
-            thinking_content: event.reasoningText ?? null,
-            thinking_tokens: reasoningTokens,
-            metadata: {
-              provider,
-              model: modelId,
-              supportsThinking,
-              conversationId: convId,
-            },
-          }
-        ];
-
-        const { error: insertError } = await supabase
-          .from('chat_messages')
-          // @ts-ignore - Supabase type inference issue
-          .insert(messagesToInsert);
-
-        if (insertError) {
-          console.error('❌ Error saving messages:', insertError);
-        } else {
-          console.log('✅ Messages saved successfully');
+            metadata: userMessageForStorage.metadata ?? null,
+          });
         }
 
-        // Log usage for cost tracking
+        payloads.push({
+          conversation_id: convId,
+          role: 'assistant',
+          content: assistantText,
+          text_content: assistantText,
+          ui_message: normalizedAssistant,
+          tokens_used: {
+            input: inputTokens,
+            output: outputTokens,
+            thinking: reasoningTokens,
+          },
+          weather_tool_data: weatherToolPayloads.length > 0 ? weatherToolPayloads : null,
+          airport_tool_data: airportToolPayloads.length > 0 ? airportToolPayloads : null,
+          thinking_content: reasoningSnapshot,
+          thinking_tokens: reasoningTokens,
+          metadata: normalizedAssistant.metadata ?? null,
+        });
+
+        await supabase
+          .from('chat_messages')
+          // @ts-ignore - Supabase type inference issue
+          .insert(payloads);
+
         const costUsd = calculateCost({
           promptTokens: inputTokens,
           completionTokens: outputTokens,
         });
-        await supabase.from('gemini_usage_logs')
+
+        await supabase
+          .from('gemini_usage_logs')
           // @ts-ignore - Supabase type inference issue
           .insert({
             conversation_id: convId,
@@ -527,33 +627,48 @@ export async function POST(req: NextRequest) {
             model: modelId,
             diagnostics: {
               provider,
-              supportsThinking,
+              supportsThinking: supportsThinkingForModel,
               thinkingTokens: reasoningTokens,
             },
           });
 
-        // Update conversation timestamp
-        if (convId) {
-          await supabase
-            .from('chat_conversations')
-            // @ts-ignore - Supabase type inference issue
-            .update({ updated_at: new Date().toISOString() })
-            .eq('id', convId);
-        }
-        
-        console.log('✅ Conversation processing complete');
-      }
-    });
+        await supabase
+          .from('chat_conversations')
+          // @ts-ignore - Supabase type inference issue
+          .update({ updated_at: new Date().toISOString() })
+          .eq('id', convId);
 
-    // ✅ CRITICAL FIX: Pass new conversation ID to client via metadata & header
+        timings.persistEnd = performance.now();
+      } catch (persistError) {
+        console.error('❌ Error persisting chat messages:', persistError);
+      } finally {
+        if (!timings.persistEnd) {
+          timings.persistEnd = performance.now();
+        }
+        console.log('📊 Chat timings', {
+          conversationId: convId,
+          surface,
+          durations: {
+            totalMs: Number((performance.now() - timings.start).toFixed(2)),
+            authMs: Number((timings.authEnd - timings.authStart).toFixed(2)),
+            conversationMs: Number((timings.conversationEnd - timings.conversationStart).toFixed(2)),
+            persistMs: Number((timings.persistEnd - timings.persistStart).toFixed(2)),
+          },
+        });
+      }
+    };
+
     const response = result.toUIMessageStreamResponse({
       originalMessages: uiMessages,
       messageMetadata: () => buildMessageMetadata({
         conversationId: convId,
         provider,
         modelId,
-        supportsThinking,
+        supportsThinking: supportsThinkingForModel,
       }),
+      onFinish: (event) => {
+        void persistMessages(event.responseMessage);
+      },
       onError: (error) => {
         if (NoSuchToolError.isInstance(error)) {
           return 'The model tried to call an unknown tool.';

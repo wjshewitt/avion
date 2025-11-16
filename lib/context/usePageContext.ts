@@ -1,84 +1,79 @@
-/**
- * Page Context Detection Hook
- * Automatically detects the current page and extracts relevant context
- */
 
 'use client';
 
-import { useEffect } from 'react';
-import { usePathname, useParams } from 'next/navigation';
-import { usePageContextStore, type PageContext } from './page-context-store';
+import { useEffect, useState } from 'react';
+import { usePathname } from 'next/navigation';
+import { usePageContextStore } from './page-context-store';
 
-export function usePageContext() {
+// List of routes that should NOT trigger page context
+const CONTEXT_EXCLUSION_LIST = [
+  '/chat-enhanced',
+  '/sidebar-header-test',
+  '/ai-test-components',
+  '/kokonutui-test',
+  '/ui-lab',
+  '/weathertest',
+  '/airporttest',
+  '/dashboard-test',
+];
+
+// Maps pathnames to user-friendly labels
+const ROUTE_LABELS: { [key: string]: string } = {
+  '/flights': 'Flights Dashboard',
+  '/weather': 'Global Weather',
+  '/airports': 'Airport Directory',
+  '/settings': 'User Settings',
+  '/': 'Dashboard',
+};
+
+const getElementText = (element: Element | null): string => {
+  if (!element) return '';
+  return (element as HTMLElement).innerText || '';
+};
+
+/**
+ * A client hook that automatically detects the current page and its content,
+ * updating the global page context store.
+ */
+export const usePageContext = () => {
   const pathname = usePathname();
-  const params = useParams();
-  const { setContext, context, contextEnabled } = usePageContextStore();
+  const { setContext, contextEnabled, isContextSetByUser } = usePageContextStore();
+  const [pageContent, setPageContent] = useState('');
 
   useEffect(() => {
-    if (!pathname) return;
+    const extractContent = () => {
+      const mainContentElement = document.querySelector('main');
+      const content = getElementText(mainContentElement);
+      setPageContent(content);
+    };
 
-    let newContext: PageContext = { type: 'general' };
+    extractContent();
 
-    // Weather pages
-    if (pathname.startsWith('/weather/')) {
-      if (pathname.includes('/briefing/')) {
-        // Professional briefing page: /weather/briefing/[icao]
-        const icao = (params?.icao as string)?.toUpperCase();
-        if (icao) {
-          newContext = {
-            type: 'briefing',
-            icao,
-            title: `Professional Briefing for ${icao}`,
-          };
-        }
-      } else if (params?.icao) {
-        // Individual weather page: /weather/[icao]
-        const icao = (params.icao as string).toUpperCase();
-        newContext = {
-          type: 'weather',
-          icao,
-          title: `Weather for ${icao}`,
-        };
-      } else if (pathname === '/weather') {
-        // General weather page - no specific context
-        newContext = { type: 'general' };
+    const observer = new MutationObserver(extractContent);
+    const mainContentElement = document.querySelector('main');
+    if (mainContentElement) {
+      observer.observe(mainContentElement, { childList: true, subtree: true, characterData: true });
+    }
+
+    return () => observer.disconnect();
+  }, [pathname]);
+
+  useEffect(() => {
+    if (contextEnabled && !isContextSetByUser) {
+      const isExcluded = CONTEXT_EXCLUSION_LIST.some(route => pathname.startsWith(route));
+      if (isExcluded) {
+        return;
       }
-    }
-    // Airport pages
-    else if (pathname.startsWith('/airports')) {
-      // Check if we have a selected airport (could be in URL params or query)
-      // For now, airports page doesn't have individual airport routes in the URL
-      // but we could detect this from the search params later
-      newContext = { type: 'general' };
-    }
-    // Flight pages (if they exist)
-    else if (pathname.startsWith('/flights/')) {
-      const flightId = params?.id as string;
-      if (flightId) {
-        newContext = {
-          type: 'flight',
-          flightId,
-        };
-      }
-    }
-    // Chat enhanced page - never show context badge here
-    else if (pathname === '/chat-enhanced') {
-      newContext = { type: 'general' };
-    }
-    // All other pages
-    else {
-      newContext = { type: 'general' };
-    }
 
-    // Only update if context actually changed
-    if (JSON.stringify(context) !== JSON.stringify(newContext)) {
-      setContext(newContext);
-    }
-  }, [pathname, params, setContext, context]);
+      const label = ROUTE_LABELS[pathname] || document.title || 'Current Page';
+      const summary = pageContent.substring(0, 1000); // Increased summary length
 
-  return {
-    context,
-    contextEnabled,
-    hasContext: context.type !== 'general',
-  };
-}
+      setContext({
+        type: 'page',
+        path: pathname,
+        label: label,
+        content: summary,
+      });
+    }
+  }, [pageContent, pathname, contextEnabled, isContextSetByUser, setContext]);
+};

@@ -40,7 +40,7 @@ export function Sources({
 }
 
 /**
- * Trigger button showing source count
+ * Trigger button showing source count - Avion style (minimal)
  */
 export function SourcesTrigger({
   count,
@@ -55,32 +55,30 @@ export function SourcesTrigger({
   return (
     <CollapsiblePrimitive.Trigger
       className={cn(
-        "inline-flex items-center gap-1.5 px-2 py-1 text-xs",
-        "text-muted-foreground hover:text-foreground",
-        "transition-colors rounded-sm hover:bg-muted/50",
-        "border border-transparent hover:border-border",
+        "flex items-center gap-2 px-2 py-1 text-left",
+        "hover:bg-muted/30 transition-colors rounded-sm",
         className
       )}
       {...props}
     >
-      <BookOpen className="h-3 w-3" />
+      <BookOpen className="h-2.5 w-2.5 text-muted-foreground" />
       {children || (
-        <>
-          <span>Used {count || 0} {count === 1 ? 'source' : 'sources'}</span>
-          <motion.div
-            animate={{ rotate: isOpen ? 180 : 0 }}
-            transition={{ duration: 0.2 }}
-          >
-            <ChevronDown className="h-3 w-3" />
-          </motion.div>
-        </>
+        <span className="text-[9px] font-mono uppercase tracking-widest text-muted-foreground">
+          Sources · {count || 0}
+        </span>
       )}
+      <motion.div
+        animate={{ rotate: isOpen ? 180 : 0 }}
+        transition={{ duration: 0.2 }}
+      >
+        <ChevronDown className="h-2.5 w-2.5 text-muted-foreground" />
+      </motion.div>
     </CollapsiblePrimitive.Trigger>
   );
 }
 
 /**
- * Content area for sources
+ * Content area for sources - Avion style minimal
  */
 export function SourcesContent({
   children,
@@ -91,13 +89,13 @@ export function SourcesContent({
     <CollapsiblePrimitive.Content
       className={cn(
         "overflow-hidden",
-        "data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:slide-in-from-top-1",
-        "data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:slide-out-to-top-1",
+        "data-[state=open]:animate-in data-[state=open]:fade-in-0",
+        "data-[state=closed]:animate-out data-[state=closed]:fade-out-0",
         className
       )}
       {...props}
     >
-      <div className="pt-2 space-y-1">
+      <div className="pl-5 pr-2 py-1 space-y-1">
         {children}
       </div>
     </CollapsiblePrimitive.Content>
@@ -105,8 +103,9 @@ export function SourcesContent({
 }
 
 /**
- * Individual source link
+ * Individual source link - Avion style minimal
  */
+let sourceCounter = 0;
 export function Source({
   href,
   title,
@@ -116,24 +115,36 @@ export function Source({
 }: React.ComponentProps<'a'> & {
   title?: string;
 }) {
+  const [index] = React.useState(() => ++sourceCounter);
+  
+  // Reset counter when component unmounts (start of new list)
+  React.useEffect(() => {
+    return () => {
+      sourceCounter = 0;
+    };
+  }, []);
+
   return (
     <a
       href={href}
       target="_blank"
       rel="noopener noreferrer"
       className={cn(
-        "flex items-start gap-2 px-2 py-1.5 text-xs rounded-sm",
-        "text-muted-foreground hover:text-foreground hover:bg-muted/50",
-        "transition-colors group",
+        "flex items-start gap-1.5 px-1 py-0.5 text-xs rounded-sm",
+        "hover:bg-muted/30 transition-colors group",
         className
       )}
       {...props}
     >
       {children || (
         <>
-          <BookOpen className="h-3 w-3 mt-0.5 flex-shrink-0" />
-          <span className="flex-1 line-clamp-2">{title || href}</span>
-          <ExternalLink className="h-3 w-3 mt-0.5 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" />
+          <span className="font-mono text-[9px] text-muted-foreground flex-shrink-0">
+            [{index}]
+          </span>
+          <div className="flex-1 min-w-0 text-[10px] text-muted-foreground line-clamp-1">
+            {title || 'Source'}
+          </div>
+          <ExternalLink className="h-2.5 w-2.5 flex-shrink-0 opacity-0 group-hover:opacity-50 transition-opacity text-muted-foreground" />
         </>
       )}
     </a>

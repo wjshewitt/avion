@@ -249,7 +249,37 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
-      [_ in never]: never;
+      filter_airports: {
+        Args: {
+          p_query?: string | null;
+          p_country?: string | null;
+          p_region?: string | null;
+          p_type?: string | null;
+          p_scheduled_service?: boolean | null;
+          p_min_runway_length?: number | null;
+          p_requires_ils?: boolean | null;
+          p_requires_lighting?: boolean | null;
+          p_limit?: number | null;
+          p_offset?: number | null;
+        };
+        Returns: Array<{
+          icao_code: string | null;
+          iata_code: string | null;
+          core_data: Record<string, any> | null;
+          runway_data: Record<string, any> | null;
+          capability_data: Record<string, any> | null;
+          total_count: number | null;
+        }>;
+      };
+      airport_filter_dimensions: {
+        Args: Record<string, never>;
+        Returns: Array<{
+          country: string | null;
+          region: string | null;
+          type: string | null;
+          airport_count: number | null;
+        }>;
+      };
     };
     Enums: {
       [_ in never]: never;

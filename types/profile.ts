@@ -4,20 +4,24 @@ export interface UserProfile {
   username: string | null;
   display_name: string;
   avatar_url: string | null;
-  role: 'pilot' | 'crew' | 'admin' | 'dispatcher';
-  status: 'online' | 'offline' | 'away' | 'busy';
+  role?: 'flight_ops' | 'broker' | 'pilot' | 'crew' | 'admin' | 'dispatcher' | null;
+  status?: 'online' | 'offline' | 'away' | 'busy';
   bio: string | null;
   phone: string | null;
   affiliated_organization: string | null;
-  timezone: string;
-  language: string;
-  theme: 'light' | 'dark' | 'system';
-  notifications_email: boolean;
-  notifications_push: boolean;
-  notifications_flight_updates: boolean;
-  notifications_weather_alerts: boolean;
-  preferences: UserPreferences;
-  onboarding_completed: boolean;
+  timezone?: string;
+  language?: string;
+  theme?: 'light' | 'dark' | 'system'; // Legacy field
+  theme_preference?: 'light' | 'dark' | 'system'; // Database column name
+  hq_location?: string | null;
+  hq_timezone_same_as_main?: boolean;
+  operations_date?: string | null; // yyyy-MM-dd
+  notifications_email?: boolean;
+  notifications_push?: boolean;
+  notifications_flight_updates?: boolean;
+  notifications_weather_alerts?: boolean;
+  preferences?: UserPreferences;
+  onboarding_completed?: boolean;
 }
 
 export interface UserPreferences {

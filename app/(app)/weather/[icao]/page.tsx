@@ -28,6 +28,9 @@ import {
   type WeatherConcern,
   DEFAULT_WEATHER_THRESHOLDS,
 } from "@/lib/weather/weatherConcerns";
+import { AirportWeatherGeminiCard } from "@/components/weather/AirportWeatherGeminiCard";
+import { AvionAtmosphereCard } from "@/components/weather/AvionAtmosphereCard";
+import { selectAtmosphereCard } from "@/lib/weather/avionAtmosphereMapping";
 import type { DecodedMetar, TafForecastPeriod } from "@/types/checkwx";
 import { getUserFriendlyErrorMessage } from "@/lib/utils/errors";
 import { toast } from "sonner";
@@ -140,6 +143,11 @@ export default function IndividualWeatherPage() {
   }, [metar, taf]);
 
   const weatherSummary = generateWeatherSummary(concerns);
+
+  const atmosphere = useMemo(
+    () => selectAtmosphereCard({ metar: metar ?? undefined, taf: taf ?? undefined }),
+    [metar, taf],
+  );
 
   // Sort concerns by severity
   const sortedConcerns = useMemo(() => {
@@ -319,6 +327,23 @@ export default function IndividualWeatherPage() {
             </div>
           </div>
         </div>
+      )}
+
+      {atmosphere && (
+        <div className="mb-6 max-w-[720px]">
+          <AvionAtmosphereCard
+            variant={atmosphere.variant}
+            isNight={atmosphere.isNight}
+            tempC={atmosphere.tempC ?? undefined}
+            visibilitySm={atmosphere.visibilitySm ?? undefined}
+            qnhInHg={atmosphere.qnhInHg ?? undefined}
+          />
+        </div>
+      )}
+
+      {/* Gemini-design at-a-glance card */}
+      {!isLoading && (metar || taf) && (
+        <AirportWeatherGeminiCard icao={icao} metar={metar ?? undefined} taf={taf ?? undefined} />
       )}
 
       {isLoading ? (
