@@ -92,6 +92,9 @@ supabase/.temp/
 # HTML test files
 *.html
 
+# Documentation and Database files
+*.sql
+
 # Temporary directories
 scripts/temp/
 lib/temp/
