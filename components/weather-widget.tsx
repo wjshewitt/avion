@@ -13,10 +13,10 @@ interface WeatherWidgetProps {
 }
 
 const conditionColors: Record<WeatherCondition, string> = {
- VFR: 'bg-green/10 text-green border-green/20',
- MVFR: 'bg-blue/10 text-blue border-blue/20',
- IFR: 'bg-amber/10 text-amber border-amber/20',
- LIFR: 'bg-red/10 text-red border-red/20',
+  VFR: 'text-emerald-400 border-emerald-400/30',
+  MVFR: 'text-blue-400 border-blue-400/30',
+  IFR: 'text-amber-400 border-amber-400/30',
+  LIFR: 'text-[#F04E30] border-[#F04E30]/30',
 };
 
 const conditionLabels: Record<WeatherCondition, string> = {
@@ -40,14 +40,17 @@ export default function WeatherWidget({ location, weather, onClick, icao }: Weat
  // Safety check for weather data
  if (!weather || !weather.condition) {
    return (
-     <CornerBracket size="md" variant="hover">
-       <div className="bg-white border border-border p-4">
-         <div className="text-center text-muted-foreground">
-           <div className="font-mono text-md font-semibold">{location}</div>
+       <div 
+        className="bg-[#2A2A2A] border border-zinc-700 rounded-sm p-6 text-zinc-300"
+        style={{
+          boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.5), 0 10px 20px rgba(0,0,0,0.2)'
+        }}
+       >
+         <div className="text-center text-zinc-500">
+           <div className="font-mono text-lg font-medium text-zinc-100">{location}</div>
            <div className="text-sm mt-2">Weather data unavailable</div>
          </div>
        </div>
-     </CornerBracket>
    );
  }
 
@@ -55,58 +58,61 @@ export default function WeatherWidget({ location, weather, onClick, icao }: Weat
  const conditionLabel = conditionLabels[weather.condition] || 'Unknown';
 
  return (
- <CornerBracket size="md" variant="hover">
- <div
- onClick={handleClick}
- className={`bg-white border border-border p-4 ${
- (onClick || icao) ? 'cursor-pointer hover:shadow-md transition-all duration-150' : ''
- }`}
- >
- <div className="flex items-start justify-between mb-4">
- <div>
- <div className="font-mono text-md font-semibold text-text-primary">{location}</div>
- <span
- className={`inline-block text-xs px-2 py-1 border font-semibold mt-1 ${
- conditionStyle
- }`}
- >
- {conditionLabel}
- </span>
- </div>
- <div className="text-right">
- <div className="text-2xl font-semibold text-text-primary">{weather.temperature}°</div>
- </div>
- </div>
+    <div
+      onClick={handleClick}
+      className={`bg-[#2A2A2A] border border-zinc-700 rounded-sm p-6 text-zinc-300 ${(
+        onClick || icao
+      ) ? 'cursor-pointer hover:border-[#F04E30]/50 transition-all duration-150' : ''}`}
+      style={{
+        boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.5), 0 10px 20px rgba(0,0,0,0.2)',
+      }}
+    >
+     <div className="grid grid-cols-2 gap-4 mb-6">
+      <div>
+        <div className="text-[10px] font-mono uppercase tracking-widest text-zinc-400 mb-1">AIRPORT</div>
+        <div className="font-mono text-lg font-medium text-zinc-100">{location}</div>
+        <span
+          className={`inline-block text-[10px] px-2 py-0.5 border rounded-full font-mono uppercase mt-2 ${
+            conditionStyle
+          }`}
+        >
+          {conditionLabel}
+        </span>
+      </div>
+      <div className="text-right">
+        <div className="text-[10px] font-mono uppercase tracking-widest text-zinc-400 mb-1">TEMP</div>
+        <div className="font-mono text-3xl font-light text-zinc-100">{weather.temperature}°</div>
+      </div>
+    </div>
 
- <div className="space-y-2">
- <div className="flex items-center gap-2 text-sm text-text-secondary">
- <Wind size={14} />
- <span>
- {weather.wind.speed}kt {getWindDirection(weather.wind.direction)}
- </span>
- </div>
- <div className="flex items-center gap-2 text-sm text-text-secondary">
- <Eye size={14} />
- <span>{weather.visibility} SM</span>
- </div>
- {weather.ceiling && (
- <div className="flex items-center gap-2 text-sm text-text-secondary">
- <span>↕</span>
- <span>{weather.ceiling.toLocaleString()} ft</span>
- </div>
- )}
- </div>
+     <div className="grid grid-cols-3 gap-4 text-center">
+      <div>
+        <div className="text-[10px] font-mono uppercase tracking-widest text-zinc-400 mb-1">WIND</div>
+        <div className="font-mono text-lg text-zinc-100">
+          {weather.wind.speed}<span className="text-sm">kt</span> {getWindDirection(weather.wind.direction)}
+        </div>
+      </div>
+      <div>
+        <div className="text-[10px] font-mono uppercase tracking-widest text-zinc-400 mb-1">VISIBILITY</div>
+        <div className="font-mono text-lg text-zinc-100">{weather.visibility}<span className="text-sm">SM</span></div>
+      </div>
+      {weather.ceiling && (
+        <div>
+          <div className="text-[10px] font-mono uppercase tracking-widest text-zinc-400 mb-1">CEILING</div>
+          <div className="font-mono text-lg text-zinc-100">{weather.ceiling.toLocaleString()}<span className="text-sm">ft</span></div>
+        </div>
+      )}
+    </div>
 
- {weather.risks.length > 0 && (
- <div className="mt-3 pt-3 border-t border-border">
- <div className="flex items-center gap-1 text-xs text-amber">
- <span>⚠</span>
- <span>{weather.risks[0]}</span>
+     {weather.risks.length > 0 && (
+      <div className="mt-4 pt-4 border-t border-zinc-700/50">
+        <div className="flex items-center gap-2 text-xs text-amber-400">
+          <span>⚠</span>
+          <span className="font-mono">{weather.risks[0]}</span>
+        </div>
+      </div>
+    )}
  </div>
- </div>
- )}
- </div>
- </CornerBracket>
  );
 }
 

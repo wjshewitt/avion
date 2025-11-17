@@ -43,4 +43,7 @@ export const queryKeys = {
     filterOptions: () => ["airports", "filter-options"] as const,
     allLite: () => ["airports", "all-lite"] as const,
   },
+  time: {
+    airport: (icao: string) => ["time", "airport", icao.toUpperCase()] as const,
+  },
 } as const;

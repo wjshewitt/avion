@@ -6,6 +6,8 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { z } from "zod";
 import { handleServerError, type ActionResult } from "@/lib/utils/errors";
 import { Flight, type Database } from "@/lib/supabase/types";
+import { buildFlightComplianceContext } from "@/lib/compliance/context";
+import { fetchComplianceRegulations, type ComplianceScope } from "@/lib/compliance/regulation-service";
 import { fetchFlightWeather } from "@/lib/weather/weather-integration";
 import { convertToIcao } from "@/lib/airports/conversion";
 import { getOrRefreshAirport } from "@/lib/airports/airportdb";
@@ -30,6 +32,11 @@ const createFlightSchema = z.object({
     .optional()
     .nullable(),
   operator: z.string().optional().nullable(),
+  tail_number: z
+    .string()
+    .max(12, "Tail number must be 12 characters or fewer")
+    .optional()
+    .nullable(),
   aircraft: z.string().optional().nullable(),
   notes: z.string().optional().nullable(),
   passenger_count: z.number().int().optional().nullable(),
@@ -72,6 +79,10 @@ const updateFlightSchema = z.object({
     .optional()
     .nullable(),
   operator: z.preprocess(emptyToUndefined, z.string()).optional().nullable(),
+  tail_number: z
+    .preprocess(emptyToUndefined, z.string().max(12))
+    .optional()
+    .nullable(),
   aircraft: z.preprocess(emptyToUndefined, z.string()).optional().nullable(),
   notes: z.preprocess((v) => (typeof v === "string" ? v : v ?? null), z.string()).optional().nullable(),
   passenger_count: z.number().int().optional().nullable(),
@@ -89,6 +100,7 @@ export async function createFlight(
     const validatedData = createFlightSchema.parse(data);
 
     const supabase = await createServerSupabase();
+    const admin = createAdminClient();
 
     // Get current user - required for user isolation
     const {
@@ -120,7 +132,16 @@ export async function createFlight(
       );
     }
 
-    // Add user_id and ICAO codes to the flight data
+    const complianceContext = await buildFlightComplianceContext({
+      supabase,
+      operatorName: validatedData.operator,
+      tailNumber: validatedData.tail_number,
+      originIcao,
+      destinationIcao,
+      persistAircraft: Boolean(validatedData.tail_number),
+    });
+
+    // Add user_id, normalized ICAO codes, and compliance context to the flight data
     const flightDataWithUser = {
       code: validatedData.code.trim().toUpperCase(),
       origin: originInput,
@@ -130,12 +151,19 @@ export async function createFlight(
       arrival_at: validatedData.arrival_at ?? null,
       operator: validatedData.operator ?? null,
       aircraft: validatedData.aircraft ?? null,
+      operator_id: complianceContext.operatorId,
+      operator_country_code: complianceContext.operatorCountryCode,
+      aircraft_tail_number: complianceContext.aircraftTailNumber,
+      aircraft_registry_code: complianceContext.aircraftRegistryCode,
       notes: validatedData.notes ?? null,
       passenger_count: validatedData.passenger_count ?? null,
       crew_count: validatedData.crew_count ?? null,
       user_id: user.id,
       origin_icao: originIcao,
       destination_icao: destinationIcao,
+      origin_country_code: complianceContext.originCountryCode,
+      destination_country_code: complianceContext.destinationCountryCode,
+      compliance_context: complianceContext.contextPayload,
     } satisfies Database['public']['Tables']['user_flights']['Insert'];
 
     // Insert flight record
@@ -190,9 +218,32 @@ export async function createFlight(
       console.error("Background airport fetch failed:", airportErr);
     }
 
+    // Evaluate compliance requirements now that the flight exists
+    try {
+      const complianceResults = await fetchComplianceRegulations(admin, {
+        destinationCountryCode: complianceContext.destinationCountryCode,
+        originCountryCode: complianceContext.originCountryCode,
+        operatorCountryCode: complianceContext.operatorCountryCode,
+        registryCountryCode: complianceContext.aircraftRegistryCode,
+        operatorType: complianceContext.operatorType,
+      });
+
+      const payload = (Object.keys(complianceResults) as ComplianceScope[]).map((scope) => ({
+        flight_id: flight.id,
+        scope,
+        regulation_ids: complianceResults[scope].map((reg) => reg.id),
+        context: complianceContext.contextPayload,
+      }));
+
+      if (payload.length) {
+        await (admin as any).from('flight_compliance_entries').upsert(payload);
+      }
+    } catch (complianceError) {
+      console.error('Failed to compute compliance for flight:', complianceError);
+    }
+
     // Log creation event
     try {
-      const admin = createAdminClient();
       const eventData = {
         flight_id: flight.id,
         event_type: "created" as const,
@@ -241,6 +292,7 @@ export async function updateFlight(
     const { id, ...updateFields } = validatedData;
 
     const supabase = await createServerSupabase();
+    const admin = createAdminClient();
 
     // Get current user for event logging
     const {
@@ -249,10 +301,14 @@ export async function updateFlight(
 
     // Get the current flight data before update for event logging
     const { data: currentFlight } = await supabase
-      .from("user_flights")
+      .from<Database['public']['Tables']['user_flights']['Row']>("user_flights")
       .select()
       .eq("id", id)
       .single();
+
+    if (!currentFlight) {
+      throw new Error("Flight not found");
+    }
 
     // Prepare typed update payload
     const typedUpdateFields: Record<string, any> = {};
@@ -304,6 +360,28 @@ export async function updateFlight(
     if (updateFields.passenger_count !== undefined) typedUpdateFields.passenger_count = updateFields.passenger_count ?? null;
     if (updateFields.crew_count !== undefined) typedUpdateFields.crew_count = updateFields.crew_count ?? null;
 
+    const resolvedOperator = updateFields.operator ?? currentFlight?.operator ?? null;
+    const resolvedTail = updateFields.tail_number ?? currentFlight?.aircraft_tail_number ?? null;
+    const resolvedOriginIcao = typedUpdateFields.origin_icao ?? currentFlight?.origin_icao ?? null;
+    const resolvedDestinationIcao = typedUpdateFields.destination_icao ?? currentFlight?.destination_icao ?? null;
+
+    const complianceContext = await buildFlightComplianceContext({
+      supabase,
+      operatorName: resolvedOperator,
+      tailNumber: resolvedTail,
+      originIcao: resolvedOriginIcao,
+      destinationIcao: resolvedDestinationIcao,
+      persistAircraft: Boolean(resolvedTail),
+    });
+
+    typedUpdateFields.operator_id = complianceContext.operatorId;
+    typedUpdateFields.operator_country_code = complianceContext.operatorCountryCode;
+    typedUpdateFields.aircraft_tail_number = complianceContext.aircraftTailNumber;
+    typedUpdateFields.aircraft_registry_code = complianceContext.aircraftRegistryCode;
+    typedUpdateFields.origin_country_code = complianceContext.originCountryCode;
+    typedUpdateFields.destination_country_code = complianceContext.destinationCountryCode;
+    typedUpdateFields.compliance_context = complianceContext.contextPayload;
+
     // Update flight record
     const { data: flight, error: flightError } = await ((supabase as any)
       .from("user_flights")
@@ -315,9 +393,31 @@ export async function updateFlight(
     if (flightError) throw flightError;
     if (!flight) throw new Error("Flight not found");
 
+    try {
+      const complianceResults = await fetchComplianceRegulations(admin, {
+        destinationCountryCode: complianceContext.destinationCountryCode,
+        originCountryCode: complianceContext.originCountryCode,
+        operatorCountryCode: complianceContext.operatorCountryCode,
+        registryCountryCode: complianceContext.aircraftRegistryCode,
+        operatorType: complianceContext.operatorType,
+      });
+
+      const payload = (Object.keys(complianceResults) as ComplianceScope[]).map((scope) => ({
+        flight_id: flight.id,
+        scope,
+        regulation_ids: complianceResults[scope].map((reg) => reg.id),
+        context: complianceContext.contextPayload,
+      }));
+
+      if (payload.length) {
+        await (admin as any).from('flight_compliance_entries').upsert(payload);
+      }
+    } catch (complianceError) {
+      console.error('Failed to refresh compliance entries:', complianceError);
+    }
+
     // Log update event
     try {
-      const admin = createAdminClient();
       const eventData = {
         flight_id: flight.id,
         event_type: "updated" as const,

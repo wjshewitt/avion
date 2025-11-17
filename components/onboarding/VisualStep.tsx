@@ -63,7 +63,7 @@ export function VisualStep({ avatar, username, name, updateData }: VisualStepPro
       <div className="flex justify-center">
         <div
           onClick={() => fileInputRef.current?.click()}
-          className="group relative w-32 h-32 rounded-full border-2 border-dashed border-zinc-300 dark:border-zinc-600 hover:border-[#F04E30] transition-colors cursor-pointer flex items-center justify-center overflow-hidden bg-zinc-50 dark:bg-zinc-800"
+          className="group relative w-32 h-32 rounded-full border-2 border-dashed border-zinc-300 dark:border-zinc-600 hover:border-[var(--accent-primary)] transition-colors cursor-pointer flex items-center justify-center overflow-hidden bg-zinc-50 dark:bg-zinc-800"
         >
           {preview ? (
             <img
@@ -72,7 +72,7 @@ export function VisualStep({ avatar, username, name, updateData }: VisualStepPro
               className="w-full h-full object-cover"
             />
           ) : (
-            <div className="flex flex-col items-center text-zinc-400 group-hover:text-[#F04E30] transition-colors">
+            <div className="flex flex-col items-center text-zinc-400 group-hover:text-[var(--accent-primary)] transition-colors">
               <Aperture size={24} strokeWidth={1.5} />
               <span className="text-[10px] font-mono mt-2 uppercase">Upload</span>
             </div>

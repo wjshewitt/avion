@@ -183,7 +183,7 @@ export function AnimatedSearchBox({ currentRoute }: AnimatedSearchBoxProps) {
             onFocus={() => !aiChatOpen && setShowSearchDropdown(true)}
             onKeyDown={handleSearchKeyDown}
             placeholder={placeholder}
-            className="h-10 px-5 placeholder:text-muted-foreground focus:outline-none transition-all duration-200 ease-out bg-surface text-foreground rounded-sm"
+            className={`${aiChatOpen ? "h-10" : "h-8"} px-5 placeholder:text-muted-foreground focus:outline-none transition-all duration-200 ease-out bg-surface text-foreground rounded-sm`}
             style={{
               width: "418px",
               borderColor: "var(--border)",
@@ -227,7 +227,7 @@ export function AnimatedSearchBox({ currentRoute }: AnimatedSearchBoxProps) {
                 transition={{ duration: 0.2 }}
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.95 }}
-                className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-sm flex items-center justify-center transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                className={`absolute right-2 top-1/2 -translate-y-1/2 ${aiChatOpen ? "w-8 h-8" : "w-6 h-6"} rounded-sm flex items-center justify-center transition-all disabled:opacity-50 disabled:cursor-not-allowed`}
                 style={{
                   backgroundColor: "var(--accent-primary)",
                   color: "var(--color-text-inverse)",
@@ -237,7 +237,7 @@ export function AnimatedSearchBox({ currentRoute }: AnimatedSearchBoxProps) {
                 }}
                 title="Send (Enter)"
               >
-                <Send size={16} className="text-[color:var(--color-text-inverse)]" strokeWidth={1.5} />
+                <Send size={aiChatOpen ? 16 : 14} className="text-[color:var(--color-text-inverse)]" strokeWidth={1.5} />
               </motion.button>
             )}
           </AnimatePresence>

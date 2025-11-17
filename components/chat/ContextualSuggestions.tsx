@@ -33,35 +33,81 @@ export function ContextualSuggestions({
 
   if (variant === 'drawer-empty-hero') {
     return (
-      <div className="flex flex-col items-center gap-6 py-8 px-6">
-        {/* Icon tile */}
-        <div className="w-16 h-16 rounded-xl border flex items-center justify-center mb-1" style={{ borderColor: 'var(--accent-info)' }}>
-          <Sparkles size={28} strokeWidth={1.5} className="text-[color:var(--accent-info)]" />
+      <div className="flex flex-col items-center py-8 px-6 max-w-[360px] mx-auto">
+        {/* Icon tile - Instrument precision */}
+        <div 
+          className="w-16 h-16 rounded-lg border-[1.5px] flex items-center justify-center mb-6 relative"
+          style={{ 
+            borderColor: 'var(--accent-info)',
+            backgroundColor: 'var(--color-surface)',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.05)',
+            animation: 'float 3s ease-in-out infinite',
+          }}
+        >
+          <Sparkles size={28} strokeWidth={1.5} style={{ color: 'var(--accent-info)' }} />
         </div>
 
-        {/* Heading */}
-        <p className="text-[15px] text-center" style={{ color: 'var(--zinc-600)' }}>
+        {/* Label - Avion micro-label system */}
+        <div 
+          className="text-[11px] font-mono uppercase tracking-widest text-center mb-6"
+          style={{ color: 'var(--color-text-secondary)' }}
+        >
           Ask about operations, weather, or flights
-        </p>
+        </div>
 
-        {/* Chips */}
-        <div className="flex flex-col w-full gap-2 max-w-xs">
-          {suggestions.map((s) => (
+        {/* Suggestion chips - Instrument buttons with stagger animation */}
+        <div className="flex flex-col w-full gap-3">
+          {suggestions.map((s, index) => (
             <button
               key={s.id}
               type="button"
               onClick={() => onSelect(s.payload ?? s.label)}
-              className="w-full rounded-full border px-4 py-2.5 text-[14px] text-left shadow-[0_1px_2px_rgba(0,0,0,0.04)] hover:bg-[color:var(--zinc-100)] transition-colors"
+              className="group w-full rounded-sm border h-[40px] px-4 text-[13px] font-mono text-left transition-all duration-150 ease-out hover:scale-[1.01] active:scale-[0.99]"
               style={{
-                backgroundColor: 'rgba(244,244,244,0.6)',
-                borderColor: 'var(--zinc-200)',
-                color: 'var(--zinc-700)',
+                backgroundColor: 'var(--color-surface)',
+                borderColor: 'var(--color-border)',
+                color: 'var(--color-text-primary)',
+                boxShadow: 'inset 1px 1px 3px rgba(0,0,0,0.12), inset -1px -1px 4px rgba(255,255,255,0.04)',
+                animation: `slideIn 0.3s ease-out ${index * 50}ms backwards`,
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = 'var(--accent-safety)';
+                e.currentTarget.style.color = 'var(--accent-safety)';
+                e.currentTarget.style.boxShadow = 'inset 1px 1px 3px rgba(0,0,0,0.12), inset -1px -1px 4px rgba(255,255,255,0.04), 0 1px 3px rgba(0,0,0,0.12)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = 'var(--color-border)';
+                e.currentTarget.style.color = 'var(--color-text-primary)';
+                e.currentTarget.style.boxShadow = 'inset 1px 1px 3px rgba(0,0,0,0.12), inset -1px -1px 4px rgba(255,255,255,0.04)';
               }}
             >
               {s.label}
             </button>
           ))}
         </div>
+
+        {/* Inject keyframe animations */}
+        <style jsx>{`
+          @keyframes float {
+            0%, 100% {
+              transform: translateY(0px);
+            }
+            50% {
+              transform: translateY(-2px);
+            }
+          }
+          
+          @keyframes slideIn {
+            from {
+              opacity: 0;
+              transform: translateY(10px);
+            }
+            to {
+              opacity: 1;
+              transform: translateY(0);
+            }
+          }
+        `}</style>
       </div>
     );
   }

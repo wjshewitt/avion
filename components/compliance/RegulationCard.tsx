@@ -3,14 +3,16 @@
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion';
-import type { CountryAuthorization, ComplianceStatus } from '@/types/compliance';
+import type { CountryAuthorization } from '@/types/compliance';
+
+type AuthorizationStatus = 'compliant' | 'current' | 'expiring' | 'expired' | 'due_soon' | 'overdue' | 'non-compliant';
 import { ExpiryCountdown } from './ExpiryCountdown';
 
 interface RegulationCardProps {
   authorization: CountryAuthorization;
 }
 
-function StatusLED({ status }: { status: ComplianceStatus }) {
+function StatusLED({ status }: { status: AuthorizationStatus }) {
   const getStatusColor = () => {
     switch (status) {
       case 'compliant':

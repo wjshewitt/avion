@@ -1,7 +1,10 @@
 import { assertServerOnly, getAirportDbToken } from "@/lib/config/airports";
-import { createAdminClient } from "@/lib/supabase/admin";
 import { createServerSupabase } from "@/lib/supabase/server";
-import type { AirportRow, Database } from "@/lib/supabase/types";
+import { getServerCacheService } from "@/lib/airports/cache-service";
+import type { AirportRow } from "@/lib/supabase/types";
+import type { AirportDBResponse } from "@/types/airportdb";
+import tzLookup from "tz-lookup";
+import { describeTimezoneOffsets } from "@/lib/time/format";
 
 export interface AirportDataNormalized {
   icao: string;
@@ -27,6 +30,11 @@ export interface AirportDataNormalized {
   region_details?: any;
   navaids?: any[];
   station?: any;
+  timezone_metadata?: {
+    timezone: string | null;
+    computedAt: string;
+    offsets: ReturnType<typeof describeTimezoneOffsets> | null;
+  };
 }
 
 export async function fetchAirportByIcao(icao: string): Promise<any> {
@@ -45,6 +53,24 @@ export async function fetchAirportByIcao(icao: string): Promise<any> {
 export function mapAirportDb(a: any): AirportDataNormalized {
   // Map fields defensively; AirportDB returns strings for some numerics
   const num = (v: any) => (v === null || v === undefined ? undefined : Number(v));
+  const latitude = typeof a.latitude_deg === "number" ? a.latitude_deg : num(a.latitude_deg);
+  const longitude = typeof a.longitude_deg === "number" ? a.longitude_deg : num(a.longitude_deg);
+  let timezone: string | undefined = a.timezone || undefined;
+  if (!timezone && typeof latitude === "number" && typeof longitude === "number") {
+    try {
+      timezone = tzLookup(latitude, longitude);
+    } catch {
+      timezone = undefined;
+    }
+  }
+  const timezone_metadata = timezone
+    ? {
+        timezone,
+        computedAt: new Date().toISOString(),
+        offsets: describeTimezoneOffsets(timezone),
+      }
+    : undefined;
+
   return {
     icao: a.ident || a.icao_code,
     iata: a.iata_code || undefined,
@@ -52,13 +78,12 @@ export function mapAirportDb(a: any): AirportDataNormalized {
     city: a.municipality || undefined,
     state: a.region?.local_code || a.iso_region || undefined,
     country: a.country?.name || a.iso_country || undefined,
-    latitude: typeof a.latitude_deg === "number" ? a.latitude_deg : num(a.latitude_deg),
-    longitude: typeof a.longitude_deg === "number" ? a.longitude_deg : num(a.longitude_deg),
-    timezone: a.timezone || undefined,
+    latitude,
+    longitude,
+    timezone,
     elevation_ft: typeof a.elevation_ft === "number" ? a.elevation_ft : num(a.elevation_ft),
     runways: a.runways || [],
     frequencies: a.freqs || [],
-    // Comprehensive fields from API
     airport_type: a.type || undefined,
     continent: a.continent || undefined,
     scheduled_service: a.scheduled_service === "yes",
@@ -69,16 +94,18 @@ export function mapAirportDb(a: any): AirportDataNormalized {
     region_details: a.region || undefined,
     navaids: a.navaids || [],
     station: a.station || undefined,
+    timezone_metadata,
   };
 }
 
-export async function upsertAirport(airport: AirportDataNormalized, raw: unknown): Promise<AirportRow> {
+export async function upsertAirport(
+  airport: AirportDataNormalized,
+  raw: AirportDBResponse
+): Promise<AirportRow> {
   assertServerOnly();
-  const admin = createAdminClient();
-  
-  // Enrich raw with comprehensive fields for storage
+  const cacheService = getServerCacheService();
   const enrichedRaw = {
-    ...(raw as any),
+    ...(raw as Record<string, any>),
     airport_type: airport.airport_type,
     continent: airport.continent,
     scheduled_service: airport.scheduled_service,
@@ -89,33 +116,24 @@ export async function upsertAirport(airport: AirportDataNormalized, raw: unknown
     region_details: airport.region_details,
     navaids: airport.navaids,
     station: airport.station,
+    timezone_metadata:
+      airport.timezone_metadata ?? (raw as Record<string, any>)?.timezone_metadata ?? null,
   };
-  
-  const payload = {
-    icao: airport.icao,
-    iata: airport.iata ?? null,
-    name: airport.name,
-    city: airport.city ?? null,
-    state: airport.state ?? null,
-    country: airport.country ?? null,
-    latitude: airport.latitude ?? null,
-    longitude: airport.longitude ?? null,
-    timezone: airport.timezone ?? null,
-    elevation_ft: airport.elevation_ft ?? null,
-    runways: airport.runways ?? null,
-    frequencies: airport.frequencies ?? null,
-    raw: enrichedRaw as Record<string, any>,
-  } satisfies Database["public"]["Tables"]["airports"]["Insert"];
 
-  const { data, error } = await (admin as any)
+  await cacheService.setCachedAirport(airport.icao, enrichedRaw as any);
+
+  const supabase = await createServerSupabase();
+  const { data, error } = await supabase
     .from("airports")
-    .upsert(payload)
-    .select()
-    .single();
-  if (error) {
-    console.error(`Failed to upsert airport ${airport.icao}:`, error);
-    throw error;
+    .select("*")
+    .eq("icao", airport.icao)
+    .maybeSingle();
+
+  if (error || !data) {
+    console.error(`Failed to read airport ${airport.icao} after cache upsert`, error);
+    throw error || new Error(`Airport ${airport.icao} not returned after upsert`);
   }
+
   return data as AirportRow;
 }
 

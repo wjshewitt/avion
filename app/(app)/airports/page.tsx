@@ -3,6 +3,7 @@
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Search, MapPin, Plane, Loader2, Compass, TrendingUp, AlertTriangle, ChevronDown } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useAirport } from "@/lib/tanstack/hooks/useAirports";
 import { useAirportFilter, useFilterOptions, type FilteredAirport } from "@/lib/tanstack/hooks/useAirportFilter";
 import { useAllAirportsLite } from "@/lib/tanstack/hooks/useAllAirportsLite";
@@ -32,7 +33,7 @@ type FilterState = {
   offset: number;
 };
 
-const parseFiltersFromParams = (params: ReadonlyURLSearchParams): FilterState => {
+const parseFiltersFromParams = (params: ReturnType<typeof useSearchParams>): FilterState => {
   const toNullable = (value: string | null) => (value && value.length ? value : null);
   const parseNumber = (key: string, fallback: number) => {
     const value = params.get(key);
@@ -75,11 +76,11 @@ const filtersEqual = (a: FilterState, b: FilterState) => (
   a.offset === b.offset
 );
 
-const surfaceOptions = [
+const surfaceOptions: Array<{ value: SurfaceType; label: string }> = [
   { value: 'ALL', label: 'All Surfaces' },
   { value: 'PAVED', label: 'Paved Only' },
   { value: 'UNPAVED', label: 'Unpaved Only' },
-] as const;
+];
 
 function AirportsPageContent() {
   const router = useRouter();
@@ -88,6 +89,7 @@ function AirportsPageContent() {
   const [filters, setFilters] = useState<FilterState>(() => parseFiltersFromParams(searchParams));
   const [selectedIcao, setSelectedIcao] = useState<string | null>('KJFK');
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const [filtersExpanded, setFiltersExpanded] = useState(false);
   const [viewMode, setViewMode] = useState<'directory' | 'map'>('directory');
   const listLimitRef = useRef(filters.limit ?? DEFAULT_LIMIT);
 
@@ -212,6 +214,17 @@ function AirportsPageContent() {
     filters.scheduledService
   );
 
+  const activeFilterCount = [
+    filters.country,
+    filters.region,
+    filters.type,
+    filters.minRunwayLength > 0,
+    filters.surfaceType !== 'ALL',
+    filters.requiresILS,
+    filters.requiresLighting,
+    filters.scheduledService,
+  ].filter(Boolean).length;
+
   const handleClearFilters = () => {
     setFilters((prev) => ({
       ...prev,
@@ -321,33 +334,66 @@ function AirportsPageContent() {
         <AirportFilterErrorBoundary>
           <div className="flex flex-1 flex-col overflow-hidden">
             <div className="p-4 border-b border-border">
-              <div className="flex items-center bg-muted/30 border border-border rounded-sm px-4 py-2.5 shadow-[inset_1px_1px_3px_rgba(0,0,0,0.1)] dark:shadow-[inset_1px_1px_3px_rgba(0,0,0,0.3)] focus-within:border-blue/50 transition-colors">
-                <Search size={16} strokeWidth={1.5} className="text-blue/60" />
+              <div className="flex items-center bg-zinc-100 dark:bg-[#1A1A1A] border border-zinc-200 dark:border-[#333] rounded-sm px-4 py-2.5 shadow-[inset_1px_1px_3px_rgba(0,0,0,0.1),inset_-1px_-1px_3px_rgba(255,255,255,0.2)] dark:shadow-[inset_1px_1px_3px_rgba(0,0,0,0.3),inset_-1px_-1px_3px_rgba(255,255,255,0.05)] focus-within:ring-2 focus-within:ring-[#F04E30] focus-within:ring-offset-2 focus-within:ring-offset-background transition-all">
+                <Search size={16} strokeWidth={1.5} className="text-[#2563EB]/60" />
                 <input
                   type="text"
                   value={filters.query}
                   onChange={(e) => handleQueryChange(e.target.value)}
                   placeholder="Search by ICAO, IATA, or Name"
-                  className="w-full bg-transparent pl-3 border-none text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-0"
+                  className="w-full bg-transparent pl-3 border-none text-sm text-zinc-900 dark:text-zinc-200 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none"
                   aria-label="Search airports"
                 />
               </div>
             </div>
 
             <div className="px-4 pt-2 pb-3 border-b border-border">
-              <div className="rounded-sm border border-border bg-muted/20 p-3 space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-muted-foreground">Filters</span>
+              {/* Collapsible Filter Header */}
+              <button
+                type="button"
+                onClick={() => setFiltersExpanded(!filtersExpanded)}
+                className="flex items-center justify-between w-full mb-3 px-1 py-2 hover:bg-zinc-50 dark:hover:bg-[#1A1A1A]/50 rounded-sm transition-colors"
+                aria-expanded={filtersExpanded}
+                aria-label="Toggle filters"
+              >
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-zinc-500 dark:text-zinc-400">Filters</span>
                   {hasFilterSelections && (
-                    <button
-                      type="button"
-                      onClick={handleClearFilters}
-                      className="text-[10px] font-mono uppercase tracking-[0.2em] text-blue hover:text-blue/80 focus:outline-none"
-                    >
-                      Clear
-                    </button>
+                    <span className="bg-[#F04E30] text-white px-2 py-0.5 rounded-sm text-[10px] font-mono tabular-nums">
+                      {activeFilterCount}
+                    </span>
                   )}
                 </div>
+                <ChevronDown
+                  size={16}
+                  strokeWidth={1.5}
+                  className={`text-zinc-400 dark:text-zinc-500 transition-transform duration-200 ${filtersExpanded ? 'rotate-180' : ''}`}
+                />
+              </button>
+
+              {/* Collapsible Filter Content */}
+              <AnimatePresence>
+                {filtersExpanded && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.3, ease: 'easeOut' }}
+                    className="overflow-hidden"
+                  >
+                    <div className="rounded-sm border border-zinc-200 dark:border-[#333] bg-zinc-50 dark:bg-[#2A2A2A]/50 p-4 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-zinc-500 dark:text-zinc-400">Active Filters</span>
+                        {hasFilterSelections && (
+                          <button
+                            type="button"
+                            onClick={handleClearFilters}
+                            className="text-[10px] font-mono uppercase tracking-[0.2em] text-[#2563EB] hover:text-[#2563EB]/80 focus:outline-none transition-colors"
+                          >
+                            Clear All
+                          </button>
+                        )}
+                      </div>
 
                 <div className="space-y-3">
                   <div className="space-y-1">
@@ -482,17 +528,22 @@ function AirportsPageContent() {
                   </div>
                 )}
 
-                <div className="pt-2 border-t border-border text-xs font-mono text-muted-foreground flex items-center justify-between">
-                  <span>Showing {totalShown.toLocaleString()} / {totalAvailable.toLocaleString()}</span>
-                  {queryMeta?.queryTime !== undefined && (
-                    <span className="text-[10px] uppercase tracking-[0.2em]">{queryMeta.queryTime} ms</span>
-                  )}
-                </div>
+                      <div className="pt-3 mt-3 border-t border-zinc-200 dark:border-[#333] flex items-center justify-between text-xs font-mono">
+                        <span className="text-zinc-600 dark:text-zinc-400">
+                          Showing <span className="text-zinc-900 dark:text-zinc-200 font-semibold tabular-nums">{totalShown.toLocaleString()}</span> / <span className="text-zinc-900 dark:text-zinc-200 font-semibold tabular-nums">{totalAvailable.toLocaleString()}</span>
+                        </span>
+                        {queryMeta?.queryTime !== undefined && (
+                          <span className="text-[10px] uppercase tracking-[0.2em] text-zinc-500 dark:text-zinc-400 tabular-nums">{queryMeta.queryTime} ms</span>
+                        )}
+                      </div>
 
-                {isFilterOptionsError && (
-                  <p className="text-[11px] text-amber-600">Unable to load filter options. Using cached values.</p>
+                      {isFilterOptionsError && (
+                        <p className="text-[11px] text-amber-600 dark:text-amber-500">Unable to load filter options. Using cached values.</p>
+                      )}
+                    </div>
+                  </motion.div>
                 )}
-              </div>
+              </AnimatePresence>
             </div>
 
             <div className="flex-1 overflow-y-auto p-4 space-y-3" aria-live="polite" aria-busy={isSidebarLoading}>
@@ -501,17 +552,17 @@ function AirportsPageContent() {
               ) : isSidebarLoading && !filteredAirports.length ? (
                 <div className="space-y-3">
                   {Array.from({ length: 5 }).map((_, idx) => (
-                    <div key={idx} className="animate-pulse rounded-sm border border-border bg-muted/40 p-4 h-16" />
+                    <div key={idx} className="animate-pulse rounded-sm border border-zinc-200 dark:border-[#333] bg-zinc-100 dark:bg-[#2A2A2A]/50 p-4 h-20" />
                   ))}
                 </div>
               ) : filteredAirports.length === 0 ? (
-                <EmptyState onReset={handleClearFilters} />
+                <EmptyState onReset={handleClearFilters} hasFilters={hasFilterSelections} />
               ) : (
                 <>
-                  <div className="flex items-center justify-between mb-2 px-2">
-                    <div className="text-[10px] font-mono uppercase tracking-[0.2em] text-muted-foreground">Results</div>
+                  <div className="flex items-center justify-between mb-3 px-2">
+                    <div className="text-[10px] font-mono uppercase tracking-[0.2em] text-zinc-500 dark:text-zinc-400">Results</div>
                     {hasFilterSelections && (
-                      <div className="text-[10px] font-mono uppercase tracking-[0.16em] text-blue/80">Filtered</div>
+                      <div className="text-[10px] font-mono uppercase tracking-[0.16em] text-[#2563EB]/80">Filtered</div>
                     )}
                   </div>
                   {filteredAirports.map((airport) => (
@@ -526,7 +577,7 @@ function AirportsPageContent() {
                     <button
                       type="button"
                       onClick={handleLoadMore}
-                      className="w-full rounded-sm border border-border bg-muted/30 px-4 py-2 text-[12px] font-mono uppercase tracking-[0.2em] text-muted-foreground hover:bg-muted/50"
+                      className="w-full rounded-sm border border-zinc-200 dark:border-[#333] bg-zinc-50 dark:bg-[#2A2A2A]/50 px-4 py-2.5 text-[11px] font-mono uppercase tracking-[0.2em] text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-[#2A2A2A] transition-colors"
                     >
                       Load more
                     </button>
@@ -606,17 +657,17 @@ function AirportsPageContent() {
 const AirportListItem = ({ airport, isSelected, onSelect }: { airport: FilteredAirport; isSelected: boolean; onSelect: () => void }) => (
   <button
     onClick={onSelect}
-    className={`w-full p-3 text-left rounded-sm transition-colors duration-150 border ${
+    className={`w-full p-4 text-left rounded-sm transition-colors duration-150 border ${
       isSelected 
-        ? 'bg-[color:var(--accent-primary)]/10 border-[color:var(--accent-primary)]/50' 
-        : 'border-transparent hover:bg-muted/40'
+        ? 'bg-[#F04E30]/10 border-[#F04E30]/50' 
+        : 'bg-white dark:bg-[#2A2A2A] border-zinc-200 dark:border-[#333] hover:bg-zinc-50 dark:hover:bg-[#1A1A1A]/50'
     }`}
   >
-    <div className="flex items-center justify-between">
-      <p className="font-mono text-sm font-medium text-foreground tabular-nums">{airport.icao}</p>
-      <p className="text-xs text-muted-foreground">{airport.country}</p>
+    <div className="flex items-center justify-between mb-1">
+      <p className="font-mono text-base font-semibold text-zinc-900 dark:text-zinc-100 tabular-nums">{airport.icao}</p>
+      <p className="text-[10px] font-mono uppercase tracking-widest text-zinc-400 dark:text-zinc-500">{airport.country}</p>
     </div>
-    <p className="text-sm font-semibold text-foreground/90 truncate">{airport.name}</p>
+    <p className="text-sm text-zinc-700 dark:text-zinc-200 truncate">{airport.name}</p>
   </button>
 );
 
@@ -638,16 +689,21 @@ const ErrorState = ({ error, onRetry }: { error: any, onRetry: () => void }) => 
   </div>
 );
 
-const EmptyState = ({ onReset }: { onReset: () => void }) => (
-  <div className="flex flex-col items-center justify-center rounded-sm border border-dashed border-border bg-muted/30 px-4 py-10 text-center text-sm text-muted-foreground">
-    <p>No airports match your filters.</p>
-    <button
-      type="button"
-      onClick={onReset}
-      className="mt-4 rounded-sm border border-border bg-background px-4 py-2 text-[11px] font-mono uppercase tracking-[0.2em] text-blue hover:bg-muted/40"
-    >
-      Clear filters
-    </button>
+const EmptyState = ({ onReset, hasFilters }: { onReset: () => void; hasFilters: boolean }) => (
+  <div className="flex flex-col items-center justify-center rounded-sm border border-dashed border-zinc-300 dark:border-[#333] bg-zinc-50 dark:bg-[#2A2A2A]/30 px-4 py-12 text-center">
+    <Plane className="h-10 w-10 text-zinc-400 dark:text-zinc-500 mb-3" strokeWidth={1.5} />
+    <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-1">
+      {hasFilters ? 'No airports match your filters.' : 'No airports found.'}
+    </p>
+    {hasFilters && (
+      <button
+        type="button"
+        onClick={onReset}
+        className="mt-4 rounded-sm border border-zinc-200 dark:border-[#333] bg-white dark:bg-[#2A2A2A] px-4 py-2 text-[11px] font-mono uppercase tracking-[0.2em] text-[#2563EB] hover:bg-zinc-50 dark:hover:bg-[#1A1A1A]/50 transition-colors"
+      >
+        Clear filters
+      </button>
+    )}
   </div>
 );
 

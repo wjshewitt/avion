@@ -28,6 +28,7 @@ const defaultValues: FlightFormValues = {
   scheduledAt: '',
   arrivalAt: '',
   operator: '',
+  tailNumber: '',
   aircraft: '',
   passengerCount: null,
   crewCount: null,
@@ -96,6 +97,9 @@ export default function FlightCreationWizard() {
       }
       if (values.operator) {
         submitData.append('operator', values.operator);
+      }
+      if (values.tailNumber) {
+        submitData.append('tail_number', values.tailNumber);
       }
       if (values.aircraft) {
         submitData.append('aircraft', values.aircraft);

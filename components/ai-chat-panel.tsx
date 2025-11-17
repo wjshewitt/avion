@@ -44,12 +44,12 @@ export default function AiChatPanel() {
   const { useSimpleChat, currentMode, setMode, showTimestamps, showThinkingProcess } = useChatSettings();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const queryClient = useQueryClient();
-  const { activeConversationId, setActiveConversationId } = useChatSessionStore();
+  const { sidebarConversationId, setConversationId } = useChatSessionStore();
   const [isRecentsOpen, setIsRecentsOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [recentSearch, setRecentSearch] = useState('');
   const { data: conversations = [] } = useGeneralConversations();
-  const conversationId = activeConversationId;
+  const conversationId = sidebarConversationId;
 
   const shouldHidePanel = pathname === '/chat-enhanced';
 
@@ -68,7 +68,7 @@ export default function AiChatPanel() {
     conversationId,
     surface: 'sidebar',
     onConversationCreated: (newConversationId) => {
-      setActiveConversationId(newConversationId);
+      setConversationId('sidebar', newConversationId);
 
       queryClient.invalidateQueries({
         queryKey: ['conversation-messages', newConversationId],
@@ -178,7 +178,7 @@ export default function AiChatPanel() {
             return (
               <li key={item.id}>
                 <button
-                  onClick={() => setActiveConversationId(item.id)}
+                  onClick={() => setConversationId('sidebar', item.id)}
                   onMouseEnter={() => prefetchConversation(item.id)}
                   className={`w-full text-left px-2 py-2 border-l-2 transition-colors text-xs ${
                     isActive ? 'border-blue bg-blue/5 text-text-primary' : 'border-transparent hover:bg-surface hover:border-border'
@@ -199,7 +199,7 @@ export default function AiChatPanel() {
   };
 
   const handleNew = () => {
-    setActiveConversationId(null);
+    setConversationId('sidebar', null);
     setInput('');
     setSearchValue('');
     // Clear cached messages to ensure truly empty state

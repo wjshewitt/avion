@@ -26,6 +26,9 @@ import { WeatherToolUI, FlightSelectorToolUI, AirportInfoToolUI } from '@/compon
 import { GenericToolUI } from '@/components/chat/GenericToolUI';
 import { cn } from '@/lib/utils';
 import { ContextualSuggestions } from '@/components/chat/ContextualSuggestions';
+import { requestConversationTitle } from '@/lib/chat/title-client';
+
+const MIN_MESSAGES_FOR_TITLE = 2;
 
 export default function AiChatDrawer() {
   const pathname = usePathname();
@@ -77,6 +80,41 @@ export default function AiChatDrawer() {
       console.error('Chat error:', error);
     },
   });
+
+  const previousDrawerStateRef = useRef(aiChatOpen);
+  useEffect(() => {
+    if (
+      previousDrawerStateRef.current &&
+      !aiChatOpen &&
+      conversationId &&
+      messages.length >= MIN_MESSAGES_FOR_TITLE
+    ) {
+      requestConversationTitle(conversationId, 'drawer-close');
+    }
+
+    previousDrawerStateRef.current = aiChatOpen;
+  }, [aiChatOpen, conversationId, messages.length]);
+
+  const unloadInfoRef = useRef({ conversationId, messageCount: messages.length });
+  useEffect(() => {
+    unloadInfoRef.current = { conversationId, messageCount: messages.length };
+  }, [conversationId, messages.length]);
+
+  useEffect(() => {
+    const handleUnload = () => {
+      const { conversationId: latestId, messageCount } = unloadInfoRef.current;
+      if (latestId && messageCount >= MIN_MESSAGES_FOR_TITLE) {
+        requestConversationTitle(latestId, 'window-unload');
+      }
+    };
+
+    window.addEventListener('beforeunload', handleUnload);
+    window.addEventListener('pagehide', handleUnload);
+    return () => {
+      window.removeEventListener('beforeunload', handleUnload);
+      window.removeEventListener('pagehide', handleUnload);
+    };
+  }, []);
 
   const isEmpty = messages.length === 0;
   const isLoading = isStreaming;
@@ -161,6 +199,9 @@ export default function AiChatDrawer() {
   const [showHistory, setShowHistory] = useState(false);
 
   const handleNew = () => {
+    if (conversationId && messages.length >= MIN_MESSAGES_FOR_TITLE) {
+      requestConversationTitle(conversationId, 'conversation-switch');
+    }
     setConversationId('sidebar', null);
     setInput('');
     setShowHistory(false);
@@ -276,19 +317,11 @@ export default function AiChatDrawer() {
                   </div>
                 )}
 
-                {/* Messages Area with Scanline Effect */}
+                {/* Messages Area */}
                 <div 
               className="flex-1 overflow-y-auto relative"
               style={{ backgroundColor: 'var(--color-background-primary)' }}
             >
-              {/* Scanline Effect */}
-              <div 
-                className="absolute inset-0 pointer-events-none"
-                style={{
-                  background: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px)',
-                }}
-              />
-
               {missingCredentials ? (
                 <div className="flex h-full flex-col items-center justify-center text-center p-8">
                   <div className="max-w-sm space-y-3">

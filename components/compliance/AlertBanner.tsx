@@ -87,7 +87,7 @@ export function AlertBanner({ alert, onDismiss, persistDismissal = true }: Alert
           </div>
           
           <p className="text-sm text-foreground/80 mb-2">
-            {alert.description}
+            {alert.message}
           </p>
           
           <div className="flex items-center justify-between gap-3">
@@ -96,11 +96,11 @@ export function AlertBanner({ alert, onDismiss, persistDismissal = true }: Alert
               <span className="font-semibold text-foreground">{alert.actionRequired}</span>
             </div>
             
-            {alert.dueDate && (
+            {alert.expiresAt && (
               <div className="text-xs font-mono text-muted-foreground">
-                <span className="uppercase tracking-wider">Due: </span>
+                <span className="uppercase tracking-wider">Expires: </span>
                 <span className="font-semibold tabular-nums text-foreground">
-                  {new Date(alert.dueDate).toLocaleDateString(undefined, {
+                  {new Date(alert.expiresAt).toLocaleDateString(undefined, {
                     month: 'short',
                     day: 'numeric',
                     hour: '2-digit',

@@ -76,6 +76,19 @@ export {
   getClientCacheService,
 } from "./cache-service";
 
+// Store/compatibility layer exports
+export {
+  getAirportByIcao as getAirportDetailByIcao,
+  getAirportByIata as getAirportDetailByIata,
+  getAirportCore,
+  getAirportsByIcaos as getAirportDetailsByIcaos,
+  searchAirports as searchAirportCores,
+  searchAirportDetails,
+  airportExists,
+} from "./store";
+
+export type { AirportCore, AirportDetail } from "./store";
+
 // Database-backed search helpers
 export {
   searchAirports as searchAirportsFromDatabase,

@@ -714,13 +714,19 @@ export function serializeProcessedAirport(
   | "processing_version"
   | "last_verified_at"
 > {
+  const rawTimezone = (rawResponse as any)?.timezone_metadata?.timezone;
+  const location = {
+    ...processedData.location,
+    timezone: processedData.location?.timezone ?? rawTimezone ?? null,
+  };
+
   return {
     core_data: {
       icao: processedData.icao,
       iata: processedData.iata,
       name: processedData.name,
       coordinates: processedData.coordinates,
-      location: processedData.location,
+      location,
       classification: processedData.classification,
       external_links: processedData.external_links,
       weather: processedData.weather,

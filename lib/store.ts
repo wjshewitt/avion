@@ -32,6 +32,12 @@ interface AppState {
  
  recentAirports: string[];
  addRecentAirport: (code: string) => void;
+ 
+ // Weather pins
+ pinnedAirports: string[];
+ pinAirport: (icao: string) => void;
+ unpinAirport: (icao: string) => void;
+ isPinned: (icao: string) => boolean;
 }
 
 export const useAppStore = create<AppState>()(
@@ -72,12 +78,28 @@ export const useAppStore = create<AppState>()(
  addRecentAirport: (code) => set((state) => ({
  recentAirports: [code, ...state.recentAirports.filter(c => c !== code)].slice(0, 10)
  })),
+ 
+ // Weather pins
+ pinnedAirports: [],
+ pinAirport: (icao) => set((state) => ({
+ pinnedAirports: state.pinnedAirports.includes(icao)
+ ? state.pinnedAirports
+ : [...state.pinnedAirports, icao].slice(0, 8) // Max 8 pins
+ })),
+ unpinAirport: (icao) => set((state) => ({
+ pinnedAirports: state.pinnedAirports.filter(code => code !== icao)
+ })),
+ isPinned: (icao) => {
+ const state = useAppStore.getState();
+ return state.pinnedAirports.includes(icao);
+ },
  }),
  {
  name: 'flightops-storage',
  partialize: (state) => ({
  favoriteAirports: state.favoriteAirports,
  recentAirports: state.recentAirports,
+ pinnedAirports: state.pinnedAirports,
  aiChatOpen: state.aiChatOpen,
  mapCollapsed: state.mapCollapsed,
  }),

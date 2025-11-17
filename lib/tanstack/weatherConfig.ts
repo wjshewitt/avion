@@ -18,19 +18,21 @@ export const WEATHER_CACHE_CONFIG = {
   // METAR data - current weather conditions (updates every 30-60 minutes)
   METAR: {
     staleTime: 10 * 60 * 1000, // 10 minutes - consider stale after 10 min
-    gcTime: 15 * 60 * 1000, // 15 minutes - garbage collect after 15 min
+    gcTime: 30 * 60 * 1000, // 30 minutes - garbage collect after 30 min
     refetchInterval: false, // No automatic polling - use manual refresh
-    refetchOnWindowFocus: true, // Refetch when user returns to app
-    refetchOnReconnect: true, // Refetch when network reconnects
+    refetchOnWindowFocus: false, // Don't refetch on navigation - use manual refresh
+    refetchOnReconnect: false, // Don't refetch on reconnect - use manual refresh
+    refetchOnMount: false, // Don't refetch on component mount if data is fresh
   },
 
   // TAF data - terminal forecasts (updates every 6 hours, valid for 24-30 hours)
   TAF: {
-    staleTime: 10 * 60 * 1000, // 10 minutes - same as METAR for consistency
-    gcTime: 15 * 60 * 1000, // 15 minutes - garbage collect after 15 min
+    staleTime: 30 * 60 * 1000, // 30 minutes - forecasts change less frequently
+    gcTime: 60 * 60 * 1000, // 60 minutes - garbage collect after 1 hour
     refetchInterval: false, // No automatic polling
-    refetchOnWindowFocus: true, // Refetch when user returns to app
-    refetchOnReconnect: true, // Refetch when network reconnects
+    refetchOnWindowFocus: false, // Don't refetch on navigation - use manual refresh
+    refetchOnReconnect: false, // Don't refetch on reconnect - use manual refresh
+    refetchOnMount: false, // Don't refetch on component mount if data is fresh
   },
 
   // Station data - airport information (static data, rarely changes)
@@ -45,10 +47,11 @@ export const WEATHER_CACHE_CONFIG = {
   // Area weather searches - METAR data within radius
   AREA_WEATHER: {
     staleTime: 10 * 60 * 1000, // 10 minutes - same as METAR
-    gcTime: 15 * 60 * 1000, // 15 minutes - garbage collect after 15 min
+    gcTime: 30 * 60 * 1000, // 30 minutes - garbage collect after 30 min
     refetchInterval: false, // No automatic polling
-    refetchOnWindowFocus: true, // Refetch when user returns to app
-    refetchOnReconnect: true, // Refetch when network reconnects
+    refetchOnWindowFocus: false, // Don't refetch on navigation - use manual refresh
+    refetchOnReconnect: false, // Don't refetch on reconnect - use manual refresh
+    refetchOnMount: false, // Don't refetch on component mount if data is fresh
   },
 } as const;
 

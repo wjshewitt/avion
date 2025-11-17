@@ -51,6 +51,12 @@ export const flightCreationSchema = z
       .max(120, 'Operator name is too long')
       .optional()
       .default(''),
+    tailNumber: z
+      .string()
+      .trim()
+      .max(12, 'Tail number is too long')
+      .optional()
+      .default(''),
     aircraft: z
       .string()
       .trim()

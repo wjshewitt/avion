@@ -1,6 +1,13 @@
 import { assertServerOnly } from "@/lib/config/airports";
 import { createServerSupabase } from "@/lib/supabase/server";
-import type { AirportRow } from "@/lib/supabase/types";
+import {
+  getAirportByIcao as getAirportDetailByIcao,
+  getAirportByIata as getAirportDetailByIata,
+  getAirportsByIcaos as getAirportDetailsByIcaos,
+  searchAirportDetails as searchAirportDetailRecords,
+  type AirportDetail,
+} from "@/lib/airports/store";
+import { getServerCacheService } from "@/lib/airports/cache-service";
 import type { AirportDBResponse } from "@/types/airportdb";
 
 export interface AirportSearchRecord {
@@ -12,18 +19,14 @@ export interface AirportSearchRecord {
   country: string | null;
   latitude: number | null;
   longitude: number | null;
+  timezone: string | null;
 }
-
-type AirportRowSubset = Pick<
-  AirportRow,
-  "icao" | "iata" | "name" | "city" | "state" | "country" | "latitude" | "longitude"
->;
 
 function normalizeInput(value: string): string {
   return value.trim();
 }
 
-function mapRow(row: AirportRowSubset): AirportSearchRecord {
+function mapRow(row: AirportDetail): AirportSearchRecord {
   return {
     icao: row.icao,
     iata: row.iata ?? null,
@@ -33,6 +36,7 @@ function mapRow(row: AirportRowSubset): AirportSearchRecord {
     country: row.country ?? null,
     latitude: row.latitude ?? null,
     longitude: row.longitude ?? null,
+    timezone: row.timezone ?? null,
   };
 }
 
@@ -46,18 +50,8 @@ export async function getAirportByIcao(
   }
 
   const supabase = await createServerSupabase();
-  const { data, error } = await supabase
-    .from("airports")
-    .select("icao, iata, name, city, state, country, latitude, longitude")
-    .eq("icao", normalized)
-    .maybeSingle();
-
-  if (error) {
-    console.error("Failed to fetch airport by ICAO", error);
-    return null;
-  }
-
-  return data ? mapRow(data as AirportRowSubset) : null;
+  const detail = await getAirportDetailByIcao(normalized, { client: supabase });
+  return detail ? mapRow(detail) : null;
 }
 
 export async function getAirportByIata(
@@ -70,18 +64,8 @@ export async function getAirportByIata(
   }
 
   const supabase = await createServerSupabase();
-  const { data, error } = await supabase
-    .from("airports")
-    .select("icao, iata, name, city, state, country, latitude, longitude")
-    .eq("iata", normalized)
-    .maybeSingle();
-
-  if (error) {
-    console.error("Failed to fetch airport by IATA", error);
-    return null;
-  }
-
-  return data ? mapRow(data as AirportRowSubset) : null;
+  const detail = await getAirportDetailByIata(normalized, { client: supabase });
+  return detail ? mapRow(detail) : null;
 }
 
 export async function getAirportsByIcaos(
@@ -98,21 +82,13 @@ export async function getAirportsByIcaos(
   }
 
   const supabase = await createServerSupabase();
-  const { data, error } = await supabase
-    .from("airports")
-    .select("icao, iata, name, city, state, country, latitude, longitude")
-    .in("icao", normalized);
-
-  if (error) {
-    console.error("Failed to fetch airports by ICAO list", error);
-    return [];
-  }
+  const details = await getAirportDetailsByIcaos(normalized, { client: supabase });
 
   const order = new Map<string, number>();
   normalized.forEach((code, idx) => order.set(code, idx));
 
-  return (data as AirportRowSubset[])
-    .map((row) => mapRow(row))
+  return details
+    .map((detail) => mapRow(detail))
     .sort((a, b) => {
       const indexA = order.get(a.icao) ?? Number.MAX_SAFE_INTEGER;
       const indexB = order.get(b.icao) ?? Number.MAX_SAFE_INTEGER;
@@ -135,9 +111,9 @@ export async function searchAirports(
   const dedupe = new Map<string, AirportSearchRecord>();
 
   if (/^[A-Z]{4}$/.test(upper)) {
-    const byIcao = await getAirportByIcao(upper);
+    const byIcao = await getAirportDetailByIcao(upper, { client: supabase });
     if (byIcao) {
-      dedupe.set(byIcao.icao, byIcao);
+      dedupe.set(byIcao.icao, mapRow(byIcao));
       if (dedupe.size >= limit) {
         return Array.from(dedupe.values());
       }
@@ -145,29 +121,21 @@ export async function searchAirports(
   }
 
   if (/^[A-Z]{3}$/.test(upper)) {
-    const byIata = await getAirportByIata(upper);
+    const byIata = await getAirportDetailByIata(upper, { client: supabase });
     if (byIata) {
-      dedupe.set(byIata.icao, byIata);
+      dedupe.set(byIata.icao, mapRow(byIata));
       if (dedupe.size >= limit) {
         return Array.from(dedupe.values());
       }
     }
   }
 
-  const { data, error } = await (supabase.rpc as any)("search_airports_fuzzy", {
-    search_query: trimmed,
-    result_limit: limit,
-  });
+  const results = await searchAirportDetailRecords(trimmed, limit, { client: supabase });
 
-  if (error) {
-    console.error("search_airports_fuzzy RPC failed", error);
-    return Array.from(dedupe.values());
-  }
-
-  for (const row of data ?? []) {
-    const record = mapRow(row as AirportRowSubset);
-    if (!dedupe.has(record.icao)) {
-      dedupe.set(record.icao, record);
+  for (const record of results) {
+    const mapped = mapRow(record);
+    if (!dedupe.has(mapped.icao)) {
+      dedupe.set(mapped.icao, mapped);
     }
     if (dedupe.size >= limit) {
       break;
@@ -192,6 +160,7 @@ export function convertApiToSearchRecord(
     country: apiResponse.country?.name || null,
     latitude: apiResponse.latitude_deg || null,
     longitude: apiResponse.longitude_deg || null,
+    timezone: (apiResponse as any).timezone || null,
   };
 }
 
@@ -205,60 +174,10 @@ export async function cacheAirportInSearchDB(
   assertServerOnly();
 
   try {
-    const supabase = await createServerSupabase();
     const icao = (apiResponse.icao_code || apiResponse.ident).toUpperCase();
-
-    // Convert API response to airports table format
-    const airportRow: Omit<AirportRow, "updated_at"> = {
-      icao,
-      iata: apiResponse.iata_code || null,
-      name: apiResponse.name,
-      city: apiResponse.municipality || null,
-      state: apiResponse.region?.name || null,
-      country: apiResponse.country?.name || null,
-      latitude: apiResponse.latitude_deg || null,
-      longitude: apiResponse.longitude_deg || null,
-      timezone: null, // AirportDB doesn't provide timezone
-      elevation_ft: apiResponse.elevation_ft
-        ? parseInt(apiResponse.elevation_ft)
-        : null,
-      runways: apiResponse.runways
-        ? apiResponse.runways.reduce((acc, runway) => {
-            acc[runway.le_ident] = {
-              length_ft: parseInt(runway.length_ft || "0"),
-              width_ft: parseInt(runway.width_ft || "0"),
-              surface: runway.surface,
-              lighted: runway.lighted === "1",
-            };
-            return acc;
-          }, {} as Record<string, any>)
-        : null,
-      frequencies: apiResponse.freqs
-        ? apiResponse.freqs.reduce((acc, freq) => {
-            if (!acc[freq.type]) {
-              acc[freq.type] = [];
-            }
-            acc[freq.type].push({
-              description: freq.description,
-              frequency_mhz: parseFloat(freq.frequency_mhz),
-            });
-            return acc;
-          }, {} as Record<string, any>)
-        : null,
-      raw: apiResponse,
-    };
-
-    // Upsert into airports table (insert or update if exists)
-    const { error } = await supabase
-      .from("airports")
-      .upsert(airportRow as any, { onConflict: "icao" });
-
-    if (error) {
-      console.error(`Failed to cache airport ${icao}:`, error);
-      throw error;
-    }
-
-    console.log(`Successfully cached airport ${icao} in search database`);
+    const cacheService = getServerCacheService();
+    await cacheService.setCachedAirport(icao, apiResponse);
+    console.log(`Successfully cached airport ${icao} in airport_cache`);
   } catch (error) {
     console.error("Failed to cache airport in search DB:", error);
     // Don't throw - we don't want caching failures to break the search

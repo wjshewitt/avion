@@ -166,6 +166,7 @@ export interface ProcessedAirportData {
     region: string;
     country: string;
     continent: string;
+    timezone?: string;
   };
 
   // Airport classification

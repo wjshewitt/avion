@@ -4,12 +4,14 @@ import { useState, useEffect, useRef } from 'react';
 import { User, LogOut, Settings, ChevronDown } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { logout } from '@/app/actions/auth';
+import { useProfile } from '@/hooks/useProfile';
 
 export default function UserMenu() {
   const [isOpen, setIsOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
+  const { data: profile, isLoading } = useProfile();
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -42,6 +44,30 @@ export default function UserMenu() {
     router.push('/settings');
   };
 
+  const getUserInitials = () => {
+    if (isLoading || !profile || !profile.display_name) {
+      return '...';
+    }
+    
+    const names = profile.display_name.split(' ');
+    if (names.length >= 2) {
+      return (names[0][0] + names[names.length - 1][0]).toUpperCase();
+    }
+    return names[0].substring(0, 2).toUpperCase();
+  };
+
+  const getUserDisplayName = () => {
+    if (isLoading) return 'Loading...';
+    if (!profile || !profile.display_name) return 'User';
+    return profile.display_name;
+  };
+
+  const getUserEmail = () => {
+    if (isLoading) return '';
+    if (!profile || !profile.username) return '';
+    return profile.username;
+  };
+
   return (
     <div ref={menuRef} className="relative">
       <button
@@ -51,7 +77,7 @@ export default function UserMenu() {
         aria-haspopup="true"
       >
         <User size={14} className="text-muted-foreground" />
-        <span className="truncate max-w-[7rem]">W. Shewitt</span>
+        <span className="truncate max-w-[7rem]">{getUserDisplayName()}</span>
         <ChevronDown size={14} className={`transition-transform ${isOpen ? 'rotate-180' : ''}`} />
       </button>
 
@@ -63,11 +89,11 @@ export default function UserMenu() {
           {/* Identity block */}
           <div className="px-3 py-2.5 flex items-center gap-3 bg-muted/40">
             <div className="w-7 h-7 rounded-sm border border-border flex items-center justify-center text-[11px] font-semibold text-muted-foreground">
-              WS
+              {getUserInitials()}
             </div>
             <div className="min-w-0 flex-1">
-              <div className="text-xs font-semibold text-foreground truncate">W. Shewitt</div>
-              <div className="text-[10px] font-mono text-muted-foreground truncate">ops@avion.ai</div>
+              <div className="text-xs font-semibold text-foreground truncate">{getUserDisplayName()}</div>
+              <div className="text-[10px] font-mono text-muted-foreground truncate">{getUserEmail()}</div>
             </div>
           </div>
 

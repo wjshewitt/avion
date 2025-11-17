@@ -784,6 +784,155 @@ const Dashboard = () => {
   );
 };
 
+// Capabilities section
+const Capabilities = () => {
+  const capabilities = [
+    {
+      label: "AI FLIGHT ASSISTANT",
+      title: "Operator-grade answers in natural language.",
+      description: "Deep briefings with tools that talk to real flight data.",
+      chip: "Streaming",
+      meta: "Chat Console",
+      code: "AVN-01",
+    },
+    {
+      label: "WEATHER INTEL",
+      title: "Professional briefings from METAR, TAF, and radar.",
+      description: "Readable summaries tuned for operators, not hobbyists.",
+      chip: "METAR / TAF",
+      meta: "Weather Briefing",
+      code: "AVN-02",
+    },
+    {
+      label: "GLOBAL AIRPORTS",
+      title: "Clean runway data, FBO intel, and NOTAM context.",
+      description: "10k+ fields with operational details at a glance.",
+      chip: "10k+ fields",
+      meta: "Airport Search",
+      code: "AVN-03",
+    },
+    {
+      label: "COMPLIANCE TOOLS",
+      title: "Crew duty and regulatory checks built in.",
+      description: "Part 117-aware calculators that keep limits in the loop.",
+      chip: "Part 117",
+      meta: "Compliance",
+      code: "AVN-04",
+    },
+    {
+      label: "FLIGHT WIZARD",
+      title: "Create, review, and monitor every leg in one place.",
+      description: "Adaptive wizard for single mission control surface.",
+      chip: "Multi-leg",
+      meta: "Flight Mission",
+      code: "AVN-05",
+    },
+    {
+      label: "INTEL & BRIEFINGS",
+      title: "Structured briefings on routes, operators, and risks.",
+      description: "Research endpoints for operator-grade briefing blocks.",
+      chip: "Research",
+      meta: "Intel Research",
+      code: "AVN-06",
+    },
+  ] as const;
+
+  return (
+    <section className="py-20 md:py-32 bg-[#f4f4f4] dark:bg-zinc-950 relative overflow-hidden">
+      <div className="absolute inset-0 grid-bg opacity-30 pointer-events-none" aria-hidden />
+      <div className="relative max-w-6xl mx-auto px-6">
+        <CornerBrackets active={true}>
+          <div className="space-y-16">
+            <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
+              <div>
+                <p className="text-[10px] font-mono text-zinc-500 dark:text-zinc-400 uppercase tracking-[0.3em] mb-3">
+                  System Capabilities
+                </p>
+                <h2 className="text-3xl md:text-4xl font-light tracking-tight text-zinc-900 dark:text-zinc-50">
+                  One console for the whole flight.
+                </h2>
+              </div>
+              <div className="max-w-sm text-xs md:text-sm text-zinc-500 dark:text-zinc-400 font-light">
+                From first weather look to post-flight intel, Avion keeps chat, airports, compliance,
+                and missions inside a single, operator-grade surface.
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+              {capabilities.map((capability, index) => (
+                <motion.div
+                  key={capability.label}
+                  className="space-y-6"
+                  initial={{ opacity: 0, y: 16, scale: 0.98 }}
+                  whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                  viewport={{ once: true, margin: "-20%" }}
+                  whileHover={{ scale: 1.01, y: -2 }}
+                  transition={{ duration: 0.7, delay: index * 0.03, ease: [0.22, 1, 0.36, 1] }}
+                >
+                  {/* Accent line that grows on scroll */}
+                  <div className="h-px w-12 bg-zinc-300 dark:bg-zinc-700/60 overflow-hidden">
+                    <motion.div
+                      className="h-full bg-blue-500"
+                      initial={{ width: 0 }}
+                      whileInView={{ width: "100%" }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 0.8, delay: 0.1 + index * 0.03 }}
+                    />
+                  </div>
+
+                  {/* Label + Chip */}
+                  <div className="flex items-start justify-between gap-3">
+                    <span className="text-[10px] font-mono text-zinc-500 dark:text-zinc-400 uppercase tracking-[0.3em]">
+                      {capability.label}
+                    </span>
+                    {capability.chip && (
+                      <span className="text-[9px] font-mono px-2 py-1 rounded-full border border-zinc-300 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 bg-zinc-100/60 dark:bg-zinc-800/40 whitespace-nowrap">
+                        {capability.chip}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Title - Large and prominent */}
+                  <h3 className="text-xl md:text-2xl font-light leading-tight text-zinc-900 dark:text-zinc-50">
+                    {capability.title}
+                  </h3>
+
+                  {/* Supporting text */}
+                  <p className="text-sm text-zinc-500 dark:text-zinc-400 font-light leading-relaxed">
+                    {capability.description}
+                  </p>
+
+                  {/* Bottom meta row */}
+                  <div className="pt-6 border-t border-zinc-200/80 dark:border-zinc-800/60 flex items-center justify-between text-[10px] font-mono text-zinc-400 dark:text-zinc-500">
+                    <span className="uppercase tracking-[0.2em]">{capability.meta}</span>
+                    <span>{capability.code}</span>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+
+            <div className="pt-12 mt-8 border-t border-zinc-200/80 dark:border-zinc-800/90 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+              <p className="text-[10px] font-mono text-zinc-500 dark:text-zinc-400 uppercase tracking-[0.3em]">
+                Ready to fly
+              </p>
+              <div className="flex flex-wrap items-center gap-3">
+                <Link href="/signup">
+                  <button className="px-4 py-2 text-[11px] uppercase tracking-[0.22em] border border-zinc-900 dark:border-zinc-100 bg-transparent text-zinc-900 dark:text-zinc-50 hover:bg-zinc-900 hover:text-white dark:hover:bg-zinc-100 dark:hover:text-zinc-900 transition-colors tactile-btn">
+                    Create operator account
+                  </button>
+                </Link>
+                <Link href="/login" className="text-[11px] font-mono text-zinc-500 dark:text-zinc-400 hover:text-blue-600 dark:hover:text-blue-400 uppercase tracking-[0.22em]">
+                  Already flying? Sign in
+                </Link>
+              </div>
+            </div>
+          </div>
+        </CornerBrackets>
+      </div>
+    </section>
+  );
+};
+
 // Manifesto section
 const Manifesto = () => (
   <section className="bg-zinc-900 text-zinc-300 py-32 px-6 md:px-12 relative overflow-hidden">
@@ -1010,6 +1159,7 @@ export default function Landing() {
           <div className="absolute left-1/2 top-0 bottom-0 w-[1px] bg-zinc-300 -translate-x-1/2 hidden md:block z-0"></div>
           <Dashboard />
         </div>
+        <Capabilities />
         <LiveFleetView />
         <Manifesto />
         <Footer />

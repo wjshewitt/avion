@@ -32,7 +32,7 @@ async function applyAirportsMigration() {
   const migrationFile = path.join(
     __dirname,
     "migrations",
-    "20251107120000_create_airports_table.sql"
+    "20251117120000_airport_cache_single_source.sql"
   );
   
   if (!fs.existsSync(migrationFile)) {
@@ -42,7 +42,7 @@ async function applyAirportsMigration() {
   
   const sql = fs.readFileSync(migrationFile, "utf8");
 
-  console.log("📦 Executing airports table migration SQL...\n");
+  console.log("📦 Executing airport-cache single-source migration SQL...\n");
   console.log(sql);
   console.log("\n" + "━".repeat(50) + "\n");
 
@@ -91,10 +91,11 @@ async function applyAirportsMigration() {
   console.log("\n" + "━".repeat(50));
 
   if (!airportsError) {
-    console.log("✨ Airports table migration completed successfully!");
-    console.log("\n📝 Table created:");
-    console.log("   ✅ airports");
-    console.log("\n💡 The table is ready to cache airport data from AirportDB API");
+    console.log("✨ Airport compatibility view migration completed successfully!");
+    console.log("\n📝 Objects ensured:");
+    console.log("   ✅ airport_cache generated columns/indexes");
+    console.log("   ✅ airports compatibility view");
+    console.log("\n💡 Legacy callers now read from airport_cache via the view");
   } else {
     console.log("❌ Verification failed:", airportsError.message);
     console.log("\n⚠️  Please apply the migration manually:");

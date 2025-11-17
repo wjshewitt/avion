@@ -74,7 +74,7 @@ export function InitializationStep({ onComplete }: InitializationStepProps) {
             cy="60"
             r="54"
             fill="none"
-            stroke="#F04E30"
+            stroke="var(--accent-primary)"
             strokeWidth="3"
             strokeLinecap="round"
             strokeDasharray={339.292}
@@ -118,7 +118,7 @@ export function InitializationStep({ onComplete }: InitializationStepProps) {
               key={index}
               className={`w-2 h-2 rounded-full transition-colors ${
                 index <= currentPhase
-                  ? "bg-[#F04E30] shadow-[0_0_8px_rgba(240,78,48,0.6)]"
+                  ? "bg-[var(--accent-primary)] shadow-[0_0_8px_var(--accent-primary)]"
                   : "bg-zinc-200 dark:bg-zinc-700"
               }`}
               initial={{ scale: 0.8 }}

@@ -111,6 +111,7 @@ function getFlightMatchType(flight: Flight, query: string): FlightSearchMatch['m
  */
 export function searchFlights(flights: Flight[], query: string): FlightSearchMatch[] {
   if (!query.trim() || query.length < 2) return [];
+  if (!flights || !Array.isArray(flights)) return [];
 
   const matches: FlightSearchMatch[] = [];
 
@@ -255,7 +256,7 @@ async function prefetchWeather(
  */
 export async function unifiedSearch(
   query: string,
-  flights: Flight[],
+  flights: Flight[] = [],
   signal?: AbortSignal
 ): Promise<SearchResults> {
   const trimmedQuery = query.trim();

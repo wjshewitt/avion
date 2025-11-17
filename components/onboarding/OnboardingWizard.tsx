@@ -78,18 +78,18 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
 
     try {
       const raw = window.localStorage.getItem(LOCAL_STORAGE_KEY);
-      if (!raw) return;
+      if (raw) {
+        const parsed = JSON.parse(raw) as {
+          step?: number;
+          data?: Partial<OnboardingData>;
+        };
 
-      const parsed = JSON.parse(raw) as {
-        step?: number;
-        data?: Partial<OnboardingData>;
-      };
-
-      if (parsed.data) {
-        setData((prev) => ({ ...prev, ...parsed.data }));
-      }
-      if (typeof parsed.step === "number" && parsed.step >= 1 && parsed.step <= totalSteps) {
-        setStep(parsed.step);
+        if (parsed.data) {
+          setData((prev) => ({ ...prev, ...parsed.data }));
+        }
+        if (typeof parsed.step === "number" && parsed.step >= 1 && parsed.step <= totalSteps) {
+          setStep(parsed.step);
+        }
       }
     } catch {
       // Ignore malformed cache
@@ -205,22 +205,19 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
 
   const isCalibrationStep = step === 4;
 
-  if (!isHydrated && typeof window !== "undefined") {
-    // Avoid flicker before we've had a chance to load cached state
-    return null;
-  }
-
   return (
-    <div className={`w-full px-4 ${isCalibrationStep ? "max-w-4xl" : "max-w-md"}`}>
+    <div 
+      className={`w-full px-4 ${isCalibrationStep ? "max-w-4xl" : "max-w-md"} transition-opacity duration-200 ${!isHydrated ? "opacity-0" : "opacity-100"}`}
+    >
       {/* Logo Header */}
       <div className="flex flex-col items-center mb-8">
-        <div className="w-10 h-10 bg-zinc-900 dark:bg-zinc-50 text-white dark:text-zinc-900 flex items-center justify-center font-bold tracking-tighter shadow-md mb-3 transition-colors border border-blue">
+        <div className="w-10 h-10 bg-zinc-900 dark:bg-zinc-50 text-white dark:text-zinc-900 flex items-center justify-center font-bold tracking-tighter shadow-md mb-3 transition-colors border border-[var(--accent-primary)]">
           Av
         </div>
         {step < 6 && (
           <div className="text-xs font-mono tracking-widest flex items-center gap-2">
             <span className="text-zinc-500 dark:text-zinc-400">ONBOARDING</span>
-            <span className="h-px w-6 bg-[#F04E30]" />
+            <span className="h-px w-6 bg-[var(--accent-primary)]" />
           </div>
         )}
       </div>
@@ -233,7 +230,7 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
             {[...Array(5)].map((_, i) => (
               <div key={i} className="flex-1 relative">
                 <motion.div
-                  className="absolute inset-0 bg-[#F04E30]"
+                  className="absolute inset-0 bg-[var(--accent-primary)]"
                   initial={{ scaleX: 0 }}
                   animate={{
                     scaleX: step > i + 1 ? 1 : step === i + 1 ? 1 : 0,

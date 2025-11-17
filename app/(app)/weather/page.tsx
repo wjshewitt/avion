@@ -1,149 +1,24 @@
-"use client";
+'use client';
 
-import { useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
-import {
-  ArrowLeftRight,
-  Cloud,
-  Eye,
-  Thermometer,
-  Wind,
-  Droplets,
-  AlertTriangle,
-  ExternalLink,
-  MapPin,
-  Navigation,
-  Plane,
-  Loader2,
-} from "lucide-react";
-import { ScannerLoader } from "@/components/kokonutui/minimal-loaders";
-import { useMetar, useCompleteWeather } from "@/lib/tanstack/hooks/useWeather";
+import { useState, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
+import { Cloud, Wind, Eye, Thermometer, AlertTriangle, Loader2, ArrowLeftRight, MapPin } from 'lucide-react';
+import { useCompleteWeather, useMetar } from "@/lib/tanstack/hooks/useWeather";
 import { useFlights } from "@/lib/tanstack/hooks/useFlights";
 import { useWeatherRisk } from "@/lib/tanstack/hooks/useWeatherRisk";
 import type { DecodedMetar, DecodedTaf, TafForecastPeriod, WindData, VisibilityData, CloudLayer } from "@/types/checkwx";
-import { getUserFriendlyErrorMessage } from "@/lib/utils/errors";
-import SmoothTab from "@/components/kokonutui/smooth-tab";
-import StatusBadge from "@/components/kokonutui/status-badge";
-import CopyButton from "@/components/kokonutui/copy-button";
-import { useStore } from "@/store/index";
+import { getUserFriendlyErrorMessage } from '@/lib/utils/errors';
+import { AvionTabs } from '@/components/ui/avion-tabs';
+import { WeatherAirportSearchInput } from '@/components/weather/WeatherAirportSearchInput';
+import { PinnedAtmosphereCard } from '@/components/weather/PinnedAtmosphereCard';
+import { useAppStore } from '@/lib/store';
 
+// --- Helper Functions ---
 const normalizeIcao = (value: string) => value.trim().replace(/[^a-z0-9]/gi, "").toUpperCase().slice(0, 4);
-
-const formatObservationTime = (metar?: DecodedMetar) => {
-  if (!metar?.observed) return "—";
-  const observedDate = new Date(metar.observed);
-  if (Number.isNaN(observedDate.getTime())) return metar.observed;
-  return observedDate.toLocaleString(undefined, {
-    month: "short",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-};
-
-const formatWind = (metar?: DecodedMetar) => {
-  if (!metar?.wind) return "Calm";
-  const direction = metar.wind.degrees !== undefined ? `${metar.wind.degrees.toString().padStart(3, "0")}°` : "VRB";
-  const speed = metar.wind.speed_kts !== undefined ? `${metar.wind.speed_kts} kt` : "0 kt";
-  const gust = metar.wind.gust_kts ? ` gusting ${metar.wind.gust_kts} kt` : "";
-  return `${direction} • ${speed}${gust}`;
-};
-
-const formatVisibility = (metar?: DecodedMetar) => {
-  if (!metar?.visibility) return "—";
-  if (metar.visibility.miles_float !== undefined) {
-    return `${metar.visibility.miles_float.toFixed(1)} SM`;
-  }
-  if (typeof metar.visibility.miles === "number") {
-    return `${metar.visibility.miles.toFixed(1)} SM`;
-  }
-  return metar.visibility.miles_text ?? "—";
-};
-
-const getFlightCategory = (metar?: DecodedMetar) => metar?.flight_category ?? "VFR";
-
-const formatClouds = (metar?: DecodedMetar) => {
-  if (!metar?.clouds || metar.clouds.length === 0) return "Clear";
-  return metar.clouds
-    .map((cloud) => {
-      const coverage = cloud.code || "—";
-      const altitude = cloud.base_feet_agl ? `${cloud.base_feet_agl} ft` : "—";
-      return `${coverage} ${altitude}`;
-    })
-    .join(", ");
-};
-
-const formatPressure = (metar?: DecodedMetar) => {
-  if (!metar?.barometer) return "—";
-  const hg = metar.barometer.hg ? `${metar.barometer.hg.toFixed(2)} inHg` : "";
-  const mb = metar.barometer.mb ? ` (${metar.barometer.mb.toFixed(0)} mb)` : "";
-  return hg + mb || "—";
-};
-
-const getStatusBadgeType = (status: string): "LOW" | "MODERATE" | "HIGH" | "CRITICAL" | "SCHEDULED" | "EN_ROUTE" | "DELAYED" | "CANCELLED" => {
-  if (status === "On Time") return "LOW";
-  if (status === "Delayed") return "DELAYED";
-  if (status === "Cancelled") return "CANCELLED";
-  return "SCHEDULED";
-};
-
-const normalizeRiskTier = (tier?: string | null): "LOW" | "MODERATE" | "HIGH" | "CRITICAL" | undefined => {
-  if (!tier) return undefined;
-
-  // Map engine tiers to display tiers
-  if (tier === "on_track") return "LOW";
-  if (tier === "monitor") return "MODERATE";
-  if (tier === "high_disruption") return "HIGH";
-
-  // Pass-through for already-normalized tiers
-  if (tier === "LOW" || tier === "MODERATE" || tier === "HIGH" || tier === "CRITICAL") {
-    return tier;
-  }
-
-  return undefined;
-};
-
-const getRiskColor = (tier?: string | null) => {
-  const normalized = normalizeRiskTier(tier);
-  if (!normalized) return "bg-gray";
-  if (normalized === "LOW") return "bg-green";
-  if (normalized === "MODERATE") return "bg-blue";
-  if (normalized === "HIGH") return "bg-amber";
-  if (normalized === "CRITICAL") return "bg-red";
-  return "bg-gray";
-};
-
-// ----- Helper functions for wide layout -----
-function minutesBetween(now: Date, then: Date) {
-  return Math.max(0, Math.floor((now.getTime() - then.getTime()) / 60000));
-}
-
-function getDataAge(ts?: string | null): number | null {
-  if (!ts) return null;
-  const d = new Date(ts);
-  if (Number.isNaN(d.getTime())) return null;
-  return minutesBetween(new Date(), d);
-}
-
-function getNextMetarUpdate(observed?: string | null): number | null {
-  if (!observed) return null;
-  const obs = new Date(observed);
-  if (Number.isNaN(obs.getTime())) return null;
-  // Next hour boundary after observation
-  const nextHour = new Date(obs);
-  nextHour.setMinutes(0, 0, 0);
-  nextHour.setHours(nextHour.getHours() + 1);
-  const mins = Math.max(0, Math.ceil((nextHour.getTime() - Date.now()) / 60000));
-  return mins;
-}
-
-function toThreeDeg(dir?: number) {
-  return dir !== undefined ? dir.toString().padStart(3, "0") : undefined;
-}
 
 function formatWindCompact(w?: WindData): string {
   if (!w) return "Calm";
-  const dir = w.degrees !== undefined ? `${toThreeDeg(w.degrees)}°` : "VRB";
+  const dir = w.degrees !== undefined ? `${w.degrees.toString().padStart(3, "0")}°` : "VRB";
   const spd = w.speed_kts !== undefined ? `${w.speed_kts} kt` : "0 kt";
   const gst = w.gust_kts ? ` (G${w.gust_kts})` : "";
   return `${dir} @ ${spd}${gst}`;
@@ -152,661 +27,308 @@ function formatWindCompact(w?: WindData): string {
 function formatVisibilityCompact(v?: VisibilityData): string {
   if (!v) return "—";
   const miles = v.miles_float ?? (typeof v.miles === "number" ? v.miles : undefined);
-  if (miles !== undefined) {
-    const km = miles * 1.609344;
-    return `${miles.toFixed(1)} SM (${km.toFixed(0)} km)`;
-  }
+  if (miles !== undefined) return `${miles.toFixed(1)} SM`;
   return v.miles_text || v.meters_text || "—";
 }
 
 function formatCloudsCompact(clouds?: CloudLayer[]): string {
   if (!clouds || clouds.length === 0) return "Clear";
-  return clouds
-    .map((c) => {
-      const base = c.base_feet_agl ?? c.feet;
-      return `${c.code}${base ? ` ${base} ft` : ""}`;
-    })
-    .join(", ");
+  return clouds.map(c => `${c.code}${c.base_feet_agl ? ` ${c.base_feet_agl.toLocaleString()}` : ""}`).join(" / ");
 }
 
-function cToF(c?: number | null): number | null {
-  if (c === undefined || c === null) return null;
-  return c * 9/5 + 32;
-}
+const getFlightCategoryClass = (category?: string) => {
+  switch (category) {
+    case 'VFR': return 'bg-emerald-100 dark:bg-emerald-600/20 text-emerald-700 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-600/30';
+    case 'MVFR': return 'bg-blue-100 dark:bg-blue-600/20 text-blue-700 dark:text-blue-300 border border-blue-300 dark:border-blue-600/30';
+    case 'IFR': return 'bg-amber-100 dark:bg-amber-600/20 text-amber-700 dark:text-amber-300 border border-amber-300 dark:border-amber-600/30';
+    case 'LIFR': return 'bg-red-100 dark:bg-red-600/20 text-red-700 dark:text-red-300 border border-red-300 dark:border-red-600/30';
+    default: return 'bg-gray-100 dark:bg-zinc-700 text-gray-700 dark:text-zinc-300 border border-gray-300 dark:border-zinc-600';
+  }
+};
 
-function calculateWindChill(tempC?: number | null, windKts?: number | null): number | null {
-  if (tempC === undefined || tempC === null || windKts === undefined || windKts === null) return null;
-  const vKmh = windKts * 1.852; // kts -> km/h
-  if (vKmh < 4.8 || tempC > 10) return null; // outside typical domain
-  return 13.12 + 0.6215 * tempC - 11.37 * Math.pow(vKmh, 0.16) + 0.3965 * tempC * Math.pow(vKmh, 0.16);
-}
+const normalizeRiskTier = (tier?: string | null): "LOW" | "MODERATE" | "HIGH" | "CRITICAL" | undefined => {
+  if (!tier) return undefined;
+  if (tier === "on_track") return "LOW";
+  if (tier === "monitor") return "MODERATE";
+  if (tier === "high_disruption") return "HIGH";
+  if (tier === "LOW" || tier === "MODERATE" || tier === "HIGH" || tier === "CRITICAL") {
+    return tier;
+  }
+  return undefined;
+};
 
-function calculateDensityAltitude(altimeterHg?: number | null, tempC?: number | null, elevFt?: number | null): number | null {
-  if (altimeterHg == null || tempC == null || elevFt == null) return null;
-  // Pressure altitude approximation
-  const pressureAlt = elevFt + (29.92 - altimeterHg) * 1000;
-  const isaTemp = 15 - 2 * (elevFt / 1000); // approx lapse rate
-  const densityAlt = pressureAlt + 120 * (tempC - isaTemp);
-  return Math.round(densityAlt);
-}
+const getRiskColor = (tier?: string | null) => {
+  const normalized = normalizeRiskTier(tier);
+  if (!normalized) return "bg-zinc-700";
+  if (normalized === "LOW") return "bg-emerald-600";
+  if (normalized === "MODERATE") return "bg-blue-600";
+  if (normalized === "HIGH") return "bg-amber-600";
+  if (normalized === "CRITICAL") return "bg-red-600";
+  return "bg-zinc-700";
+};
 
-function deriveWeatherPhenomena(raw?: string | null): Array<{ code: string; text: string }> {
-  if (!raw) return [];
-  const map: Record<string, string> = {
-    TS: "Thunderstorm",
-    RA: "Rain",
-    DZ: "Drizzle",
-    SN: "Snow",
-    SG: "Snow grains",
-    PL: "Ice pellets",
-    GR: "Hail",
-    GS: "Small hail",
-    FG: "Fog",
-    BR: "Mist",
-    HZ: "Haze",
-    DU: "Dust",
-    SA: "Sand",
-  };
-  const codes = Object.keys(map).filter((c) => new RegExp(`(^|\s)${c}`).test(raw));
-  return codes.map((code) => ({ code, text: map[code] }));
-}
+// --- Main Page Component ---
+export default function WeatherPage() {
+  const [selectedTab, setSelectedTab] = useState('airport');
+  const { pinnedAirports } = useAppStore();
 
-// Route Weather Tab Component
-function RouteWeatherTab() {
-  const router = useRouter();
-  const [departureInput, setDepartureInput] = useState("KJFK");
-  const [arrivalInput, setArrivalInput] = useState("KLAX");
-
-  const departureCode = normalizeIcao(departureInput);
-  const arrivalCode = normalizeIcao(arrivalInput);
-
-  const requestedIcaos = useMemo(() => {
-    const codes = [departureCode, arrivalCode].filter((code) => code.length === 4);
-    return Array.from(new Set(codes));
-  }, [arrivalCode, departureCode]);
-
-  const {
-    data: metars,
-    isLoading,
-    isError,
-    error,
-    refetch,
-  } = useMetar({
-    icaos: requestedIcaos,
-    staleTime: 5 * 60 * 1000,
-    retry: 1,
-  });
-
-  const departureMetar = useMemo(
-    () => metars?.find((metar) => metar.icao?.toUpperCase() === departureCode) ?? null,
-    [departureCode, metars]
-  );
-  const arrivalMetar = useMemo(
-    () => metars?.find((metar) => metar.icao?.toUpperCase() === arrivalCode) ?? null,
-    [arrivalCode, metars]
-  );
-
-  const handleSwap = () => {
-    setDepartureInput(arrivalCode);
-    setArrivalInput(departureCode);
-  };
-
-  const renderMetarCard = (label: string, code: string, metar: DecodedMetar | null) => {
-    return (
-      <div>
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <Cloud className="h-4 w-4 text-text-secondary" />
-            <h3 className="text-xs font-semibold uppercase text-text-secondary">
-              {label}
-            </h3>
-            <span className="font-mono text-base font-semibold text-text-primary">{code || "—"}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            {metar && (() => {
-              const category = getFlightCategory(metar) as NonNullable<DecodedMetar["flight_category"]>;
-              const statusMap = { VFR: "LOW", MVFR: "MODERATE", IFR: "HIGH", LIFR: "CRITICAL" } as const;
-              return <StatusBadge status={statusMap[category]}>{category}</StatusBadge>;
-            })()}
-            {code && code.length === 4 && (
-              <button
-                type="button"
-                onClick={() => router.push(`/weather/${code}`)}
-                className="inline-flex items-center gap-1 border border-border px-2 py-1 text-xs hover:bg-surface"
-                title={`View detailed weather for ${code}`}
-              >
-                <ExternalLink className="h-3 w-3" />
-                Details
-              </button>
-            )}
-          </div>
-        </div>
-
-        {!code || code.length !== 4 ? (
-          <div className="border border-dashed border-border p-6 text-center text-sm text-text-secondary">
-            Enter a valid 4-letter ICAO code
-          </div>
-        ) : !metar ? (
-          <div className="border border-dashed border-border p-6 text-center text-sm text-text-secondary">
-            No METAR available for {code}
-          </div>
-        ) : (
-          <div className="space-y-4 border border-border p-6">
-            <div className="flex items-center justify-between border-b border-border pb-3">
-              <span className="text-xs uppercase font-semibold text-text-secondary">Observed</span>
-              <span className="font-mono text-sm text-text-primary">{formatObservationTime(metar)}</span>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="border border-border p-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <Thermometer className="h-4 w-4 text-text-secondary" />
-                  <span className="text-xs uppercase font-semibold text-text-secondary">Temperature</span>
-                </div>
-                <div className="font-mono text-base font-semibold text-text-primary">
-                  {metar.temperature ? `${metar.temperature.celsius.toFixed(0)}°C` : "—"}
-                  {metar.dewpoint ? ` / ${metar.dewpoint.celsius.toFixed(0)}°C` : ""}
-                </div>
-              </div>
-
-              <div className="border border-border p-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <Wind className="h-4 w-4 text-text-secondary" />
-                  <span className="text-xs uppercase font-semibold text-text-secondary">Wind</span>
-                </div>
-                <div className="font-mono text-sm font-semibold text-text-primary">{formatWind(metar)}</div>
-              </div>
-
-              <div className="border border-border p-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <Eye className="h-4 w-4 text-text-secondary" />
-                  <span className="text-xs uppercase font-semibold text-text-secondary">Visibility</span>
-                </div>
-                <div className="font-mono text-base font-semibold text-text-primary">{formatVisibility(metar)}</div>
-              </div>
-
-              <div className="border border-border p-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <Droplets className="h-4 w-4 text-text-secondary" />
-                  <span className="text-xs uppercase font-semibold text-text-secondary">Humidity</span>
-                </div>
-                <div className="font-mono text-base font-semibold text-text-primary">
-                  {metar.humidity ? `${metar.humidity.percent}%` : "—"}
-                </div>
-              </div>
-            </div>
-
-            <div className="border border-border p-4 bg-surface">
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-xs font-semibold uppercase text-text-secondary">Raw METAR</span>
-                <CopyButton text={metar.raw_text} size="sm" />
-              </div>
-              <div className="font-mono text-xs text-text-primary whitespace-pre-wrap leading-relaxed">{metar.raw_text}</div>
-            </div>
-          </div>
-        )}
-      </div>
-    );
-  };
+  const tabs = [
+    { id: 'airport', label: 'Airport' },
+    { id: 'route', label: 'Route' },
+    { id: 'location', label: 'Location' },
+  ];
 
   return (
-    <div>
-      <div className="flex flex-col gap-4 md:flex-row md:items-center mb-6">
-        <input
-          type="text"
-          value={departureInput}
-          onChange={(event) => setDepartureInput(event.target.value.toUpperCase())}
-          placeholder="DEPARTURE"
-          maxLength={4}
-          className="w-full border border-border px-4 py-3 text-center font-mono text-base uppercase focus:border-blue focus:outline-none bg-white"
-        />
-        <button
-          type="button"
-          onClick={handleSwap}
-          className="inline-flex h-11 w-11 items-center justify-center border border-border transition-colors hover:bg-surface"
-          title="Swap airports"
-        >
-          <ArrowLeftRight className="h-4 w-4" />
-        </button>
-        <input
-          type="text"
-          value={arrivalInput}
-          onChange={(event) => setArrivalInput(event.target.value.toUpperCase())}
-          placeholder="ARRIVAL"
-          maxLength={4}
-          className="w-full border border-border px-4 py-3 text-center font-mono text-base uppercase focus:border-blue focus:outline-none bg-white"
-        />
+    <div className="flex-1 overflow-auto p-4 sm:p-8 bg-background text-foreground">
+      <div className="mb-6 flex items-center justify-between">
+        <div>
+          <div className="text-[10px] font-mono uppercase tracking-[0.2em] text-muted-foreground mb-2">
+            METEOROLOGY
+          </div>
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground">
+            Weather Intelligence
+          </h1>
+        </div>
       </div>
 
-      {isError && (
-        <div className="border border-red-500 bg-red-50 p-4 text-sm mb-6">
-          <div className="flex items-start gap-2">
-            <AlertTriangle className="h-4 w-4 text-red-500" />
-            <div>
-              <p className="font-semibold text-red-700">Unable to retrieve weather data</p>
-              <p className="mt-1 text-red-600">{getUserFriendlyErrorMessage(error)}</p>
-              <button
-                type="button"
-                className="mt-3 text-xs font-semibold text-blue hover:underline uppercase"
-                onClick={() => refetch()}
-              >
-                Try again
-              </button>
+      {/* Pinned Locations Section */}
+      {pinnedAirports.length > 0 && (
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-4">
+            <div className="text-[10px] font-mono uppercase tracking-[0.2em] text-muted-foreground">
+              PINNED LOCATIONS
             </div>
+            <div className="text-[10px] font-mono text-muted-foreground">
+              {pinnedAirports.length} / 8
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            {pinnedAirports.map((icao: string) => (
+              <PinnedAtmosphereCard key={icao} icao={icao} />
+            ))}
           </div>
         </div>
       )}
 
-      {isLoading ? (
-        <div className="flex items-center justify-center gap-3 py-16">
-          <ScannerLoader size="md" color="text-amber" />
-          <span className="text-sm font-mono text-text-secondary">Scanning weather data...</span>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-          {renderMetarCard("Departure", departureCode, departureMetar)}
-          {renderMetarCard("Arrival", arrivalCode, arrivalMetar)}
-        </div>
-      )}
+      <AvionTabs tabs={tabs} selectedTab={selectedTab} onSelectTab={setSelectedTab} />
+
+      <div className="mt-8">
+        {selectedTab === 'airport' && <AirportWeatherTab />}
+        {selectedTab === 'route' && <RouteWeatherTab />}
+        {selectedTab === 'location' && <LocationWeatherTab />}
+      </div>
     </div>
   );
 }
 
-// Airport Weather Tab Component
+// --- Airport Weather Tab ---
 function AirportWeatherTab() {
   const router = useRouter();
-  const [airportInput, setAirportInput] = useState("KJFK");
-  const airportCode = normalizeIcao(airportInput);
-  const [activeAirportCode, setActiveAirportCode] = useState(() => normalizeIcao("KJFK"));
+  const [activeAirportCode, setActiveAirportCode] = useState("KJFK");
 
   const { metar, taf, station, loading, error, refetch } = useCompleteWeather({
     icao: activeAirportCode.length === 4 ? activeAirportCode : "",
-    metarOptions: { staleTime: 5 * 60 * 1000, retry: 1 },
-    tafOptions: { staleTime: 5 * 60 * 1000, retry: 1 },
-    stationOptions: { staleTime: 24 * 60 * 60 * 1000 },
   });
 
-  // Fetch all user flights
   const { data: allFlights } = useFlights();
 
   const departingFlights = useMemo(() => {
-    if (!allFlights || !airportCode || airportCode.length !== 4) return [] as any[];
+    if (!allFlights || !activeAirportCode || activeAirportCode.length !== 4) return [] as any[];
     const now = new Date();
     return allFlights
       .filter(
         (flight) =>
-          (flight.origin_icao === airportCode || flight.origin === airportCode) &&
+          (flight.origin_icao === activeAirportCode || flight.origin === activeAirportCode) &&
           new Date(flight.scheduled_at) >= now
       )
       .slice(0, 5);
-  }, [allFlights, airportCode]);
+  }, [allFlights, activeAirportCode]);
 
-  // Risk assessment
   const { data: riskData, isLoading: riskLoading } = useWeatherRisk(
     { airport: activeAirportCode, mode: "full" },
     { enabled: activeAirportCode.length === 4 }
   );
 
-  const metarAge = getDataAge(metar?.observed);
-  const tafAge = getDataAge((taf as DecodedTaf | undefined)?.issued || (taf as DecodedTaf | undefined)?.valid_time_from);
-  const nextUpdate = getNextMetarUpdate(metar?.observed);
-
-  const statusMap = { VFR: "LOW", MVFR: "MODERATE", IFR: "HIGH", LIFR: "CRITICAL" } as const;
-
   return (
-    <div className="w-full">
-      {/* Header */}
-      <div className="mb-4 flex items-center justify-between">
-        <input
-          type="text"
-          value={airportInput}
-          onChange={(event) => setAirportInput(event.target.value.toUpperCase())}
-          onKeyDown={(event) => {
-            if (event.key === "Enter") {
-              const code = normalizeIcao(airportInput);
-              if (code.length === 4) {
-                setActiveAirportCode(code);
-              }
-            }
-          }}
-          placeholder="ICAO"
-          maxLength={4}
-          className="w-32 border border-border px-3 py-2 text-center font-mono text-lg uppercase focus:border-blue focus:outline-none bg-white"
+    <div className="animate-in fade-in duration-300">
+      <div className="bg-card border border-border rounded-sm p-6 mb-8">
+        <div className="text-[10px] font-mono uppercase tracking-[0.2em] text-muted-foreground mb-4">AIRPORT SEARCH</div>
+        <WeatherAirportSearchInput
+          onAirportSelect={(icao) => setActiveAirportCode(icao)}
+          placeholder="Search airports by code, city, or name..."
+          autoFocus
         />
-        <div className="flex items-center gap-2">
-          {metar?.flight_category && (
-            <StatusBadge status={statusMap[(metar.flight_category as NonNullable<DecodedMetar["flight_category"]>)]}>
-              {metar.flight_category}
-            </StatusBadge>
-          )}
-          <button
-            type="button"
-            onClick={() => activeAirportCode.length === 4 && router.push(`/weather/${activeAirportCode}`)}
-            className="border border-border px-3 py-2 text-xs"
-          >
-            Full Details
-          </button>
-          {metar?.raw_text && <CopyButton text={metar.raw_text} size="sm" />}
-        </div>
       </div>
 
-      {/* Errors */}
-      {error.any && (
-        <div className="border border-red-500 bg-red-50 p-4 text-sm mb-6">
-          <div className="flex items-start gap-2">
-            <AlertTriangle className="h-4 w-4 text-red-500" />
-            <div>
-              <p className="font-semibold text-red-700">Unable to retrieve weather data</p>
-              <p className="mt-1 text-red-600">{getUserFriendlyErrorMessage(error.metar || error.taf || error.station)}</p>
-              <button
-                type="button"
-                className="mt-3 text-xs font-semibold text-blue hover:underline uppercase"
-                onClick={() => refetch.all()}
-              >
-                Try again
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {loading.any && <LoadingState airportCode={activeAirportCode} />}
+      {error.any && !loading.any && <ErrorState error={error} onRetry={() => refetch.all()} />}
 
-      {loading.any ? (
-        <div className="flex items-center justify-center gap-3 py-16">
-          <ScannerLoader size="md" color="text-amber" />
-          <span className="text-sm font-mono text-text-secondary">Scanning weather data...</span>
-        </div>
-      ) : !airportCode || airportCode.length !== 4 ? (
-        <div className="border border-dashed border-border p-12 text-center">
-          <Cloud className="h-12 w-12 mx-auto mb-4 text-text-secondary" />
-          <p className="text-sm text-text-secondary">Enter a valid ICAO code to view weather</p>
-        </div>
-      ) : !metar ? (
-        <div className="border border-dashed border-border p-12 text-center">
-          <Cloud className="h-12 w-12 mx-auto mb-4 text-text-secondary" />
-          <p className="text-sm text-text-secondary">No METAR available for {airportCode}</p>
-        </div>
-      ) : (
-        <div className="w-full">
-          {/* Raw METAR */}
-          <div className="border-b border-border p-3 bg-surface">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-xs uppercase font-semibold">RAW METAR</span>
-              {metar?.raw_text && <CopyButton text={metar.raw_text} size="sm" />}
-            </div>
-            <div className="font-mono text-xs leading-relaxed">{metar?.raw_text}</div>
-          </div>
-
-          {/* Main metrics */}
-          <div className="grid grid-cols-6 border-b border-border">
-            <MetricCell
-              label="Observation"
-              value={formatObservationTime(metar)}
-              detail={metarAge != null ? `${metarAge} min ago` : undefined}
-            />
-            <MetricCell
-              label="Wind"
-              value={formatWindCompact(metar.wind)}
-              detail={(() => {
-                const wc = calculateWindChill(metar.temperature?.celsius, metar.wind?.speed_kts);
-                return wc != null ? `Wind chill ${wc.toFixed(0)}°C` : undefined;
-              })()}
-            />
-            <MetricCell
-              label="Visibility"
-              value={formatVisibilityCompact(metar.visibility)}
-              detail={metar.visibility?.miles_text ? metar.visibility.miles_text : undefined}
-            />
-            <MetricCell
-              label="Temperature"
-              value={(() => {
-                const tC = metar.temperature?.celsius ?? null;
-                const dC = metar.dewpoint?.celsius ?? null;
-                const tF = cToF(tC);
-                const dF = cToF(dC);
-                return [tC != null ? `${tC.toFixed(0)}°C` : "—", dC != null ? `${dC.toFixed(0)}°C` : ""].filter(Boolean).join(" / ") +
-                  (tF != null ? ` (${tF.toFixed(0)}°F${dF != null ? ` / ${dF.toFixed(0)}°F` : ""})` : "");
-              })()}
-              detail={(() => {
-                const t = metar.temperature?.celsius ?? null;
-                const d = metar.dewpoint?.celsius ?? null;
-                if (t == null || d == null) return undefined;
-                return `Spread: ${(t - d).toFixed(0)}°C`;
-              })()}
-            />
-            <MetricCell
-              label="Pressure"
-              value={formatPressure(metar)}
-              detail={metar.barometer?.mb ? `QNH ${metar.barometer.mb.toFixed(0)}` : undefined}
-            />
-            <MetricCell
-              label="Clouds"
-              value={formatCloudsCompact(metar.clouds)}
-              detail={metar.ceiling?.feet ? `Ceiling: ${metar.ceiling.feet} ft` : undefined}
-            />
-          </div>
-
-          {/* Secondary info */}
-          <div className="grid grid-cols-3 p-4">
-            <div className="border-r border-border p-3">
-              <div className="text-xs uppercase font-semibold text-text-secondary mb-1">Conditions</div>
-              <div className="text-xs text-text-secondary space-y-0.5">
-                <div>Humidity: {metar.humidity?.percent != null ? `${metar.humidity.percent}%` : "—"}</div>
-                <div>
-                  Density Altitude:{" "}
-                  {(() => {
-                    const elevFt = metar.elevation?.feet ?? station?.elevation?.feet ?? null;
-                    const da = calculateDensityAltitude(metar.barometer?.hg, metar.temperature?.celsius, elevFt ?? null);
-                    return da != null ? `${da.toLocaleString()} ft` : "—";
-                  })()}
-                </div>
-              </div>
-            </div>
-            <div className="border-r border-border p-3">
-              <div className="text-xs uppercase font-semibold text-text-secondary mb-1">Flight Category</div>
-              <div className="mt-1">
-                {metar.flight_category && (
-                  <StatusBadge status={statusMap[metar.flight_category] as any}>{metar.flight_category}</StatusBadge>
-                )}
-              </div>
-            </div>
-            <div className="p-3">
-              <div className="text-xs uppercase font-semibold text-text-secondary mb-1">Data Age</div>
-              <div className="text-xs text-text-secondary">
-                <div>METAR: {metarAge != null ? `${metarAge} min old` : "—"}</div>
-                <div>TAF: {tafAge != null ? `${tafAge} min old` : "—"}</div>
-                <div>Next Update: {nextUpdate != null ? `${nextUpdate} min` : "—"}</div>
-              </div>
-            </div>
-          </div>
-
-          {/* Active Weather Phenomena */}
-          {(() => {
-            const wx = deriveWeatherPhenomena(metar.raw_text);
-            if (!wx.length) return null;
-            return (
-              <div className="flex items-center gap-2 px-4 py-2 border-t border-border bg-amber-50">
-                <AlertTriangle className="h-4 w-4 text-amber-600" />
-                <span className="text-xs font-semibold uppercase">Active Weather:</span>
-                {wx.map((w) => (
-                  <span key={w.code} className="text-xs font-mono">{w.code} ({w.text})</span>
-                ))}
-              </div>
-            );
-          })()}
-
-          {/* TAF */}
-          {taf && (
-            <TafDisplayWide taf={taf} />
-          )}
-
-          {/* Departing Flights */}
-          {departingFlights.length > 0 && (
-            <DepartingFlightsWide flights={departingFlights} />)
-          }
-
-          {/* Risk Assessment */}
-          {riskData && (
-            <RiskAssessmentWide riskData={riskData} riskLoading={riskLoading} />
-          )}
+      {!loading.any && !error.any && metar && (
+        <div className="space-y-8 animate-in fade-in duration-500">
+          <MetarDisplay metar={metar} station={station} />
+          {taf && <TafDisplay taf={taf} />}
+          {departingFlights.length > 0 && <DepartingFlightsDisplay flights={departingFlights} router={router} />}
+          {riskData && <RiskAssessmentDisplay riskData={riskData} riskLoading={riskLoading} />}
         </div>
       )}
     </div>
   );
 }
 
-// Standard, more approachable view
-function AirportWeatherStandard() {
+// --- Route Weather Tab ---
+function RouteWeatherTab() {
   const router = useRouter();
-  const [airportInput, setAirportInput] = useState("KJFK");
-  const airportCode = normalizeIcao(airportInput);
-  const [activeAirportCode, setActiveAirportCode] = useState(() => normalizeIcao("KJFK"));
+  const [departureInput, setDepartureInput] = useState("KJFK");
+  const [arrivalInput, setArrivalInput] = useState("KLAX");
 
-  const { metar, taf, loading, error, refetch } = useCompleteWeather({
-    icao: activeAirportCode.length === 4 ? activeAirportCode : "",
-    metarOptions: { staleTime: 5 * 60 * 1000, retry: 1 },
-    tafOptions: { staleTime: 5 * 60 * 1000, retry: 1 },
-  });
+  const requestedIcaos = useMemo(() => {
+    const codes = [normalizeIcao(departureInput), normalizeIcao(arrivalInput)].filter(code => code.length === 4);
+    return Array.from(new Set(codes));
+  }, [departureInput, arrivalInput]);
 
-  const metarPresent = Boolean(metar);
+  const { data: metars, isLoading, isError, error, refetch } = useMetar({ icaos: requestedIcaos });
+
+  const departureMetar = useMemo(() => metars?.find(m => m.icao === normalizeIcao(departureInput)) || null, [metars, departureInput]);
+  const arrivalMetar = useMemo(() => metars?.find(m => m.icao === normalizeIcao(arrivalInput)) || null, [metars, arrivalInput]);
+
+  const handleSwap = () => {
+    const oldDep = departureInput;
+    setDepartureInput(arrivalInput);
+    setArrivalInput(oldDep);
+  };
 
   return (
-    <div>
-      <div className="max-w-md mx-auto mb-8">
-        <input
-          type="text"
-          value={airportInput}
-          onChange={(event) => setAirportInput(event.target.value.toUpperCase())}
-          onKeyDown={(event) => {
-            if (event.key === "Enter") {
-              const code = normalizeIcao(airportInput);
-              if (code.length === 4) {
-                setActiveAirportCode(code);
-              }
-            }
-          }}
-          placeholder="ICAO CODE"
-          maxLength={4}
-          className="w-full border border-border px-6 py-4 text-center font-mono text-2xl uppercase focus:border-blue focus:outline-none bg-white"
-        />
-        <p className="text-center text-xs uppercase text-text-secondary mt-2">Enter 4-letter ICAO code</p>
+    <div className="animate-in fade-in duration-300">
+      <div className="bg-card border border-border rounded-sm p-6 mb-8">
+        <div className="text-[10px] font-mono uppercase tracking-[0.2em] text-muted-foreground mb-4">ROUTE SEARCH</div>
+        <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] gap-4 items-start">
+          <div>
+            <div className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground mb-2">Departure</div>
+            <WeatherAirportSearchInput
+              onAirportSelect={(icao) => setDepartureInput(icao)}
+              placeholder="Search departure airport..."
+            />
+          </div>
+          <button 
+            onClick={handleSwap} 
+            className="mt-7 p-2.5 border border-border rounded-sm hover:bg-accent transition-colors self-start"
+            title="Swap departure and arrival"
+          >
+            <ArrowLeftRight size={16} className="text-muted-foreground" />
+          </button>
+          <div>
+            <div className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground mb-2">Arrival</div>
+            <WeatherAirportSearchInput
+              onAirportSelect={(icao) => setArrivalInput(icao)}
+              placeholder="Search arrival airport..."
+            />
+          </div>
+        </div>
       </div>
 
-      {error.any && (
-        <div className="border border-red-500 bg-red-50 p-4 text-sm mb-6">
-          <div className="flex items-start gap-2">
-            <AlertTriangle className="h-4 w-4 text-red-500" />
-            <div>
-              <p className="font-semibold text-red-700">Unable to retrieve weather data</p>
-              <p className="mt-1 text-red-600">{getUserFriendlyErrorMessage(error.metar || error.taf || error.station)}</p>
-              <button
-                type="button"
-                className="mt-3 text-xs font-semibold text-blue hover:underline uppercase"
-                onClick={() => refetch.all?.()}
-              >
-                Try again
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {loading.any ? (
-        <div className="flex items-center justify-center gap-3 py-16">
-          <ScannerLoader size="md" color="text-amber" />
-          <span className="text-sm font-mono text-text-secondary">Scanning weather data...</span>
-        </div>
-      ) : !airportCode || airportCode.length !== 4 ? (
-        // Prompt when no valid ICAO has been entered or committed yet
-        <div className="border border-dashed border-border p-12 text-center">
-          <Cloud className="h-12 w-12 mx-auto mb-4 text-text-secondary" />
-          <p className="text-sm text-text-secondary">Enter a valid ICAO code to view weather</p>
-        </div>
-      ) : !metarPresent ? (
-        <div className="border border-dashed border-border p-12 text-center">
-          <Cloud className="h-12 w-12 mx-auto mb-4 text-text-secondary" />
-          <p className="text-sm text-text-secondary">No METAR available for {airportCode}</p>
-        </div>
-      ) : (
-        <div className="max-w-4xl mx-auto">
-          <div className="border border-border p-6 mb-6 bg-white">
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-3">
-                <Cloud className="h-6 w-6 text-text-secondary" />
-                <h2 className="font-mono text-3xl font-bold text-text-primary">{activeAirportCode}</h2>
-              </div>
-              <div className="flex items-center gap-2">
-                {metarPresent && (() => {
-                  const category = getFlightCategory(metar!) as NonNullable<DecodedMetar["flight_category"]>;
-                  const statusMap = { VFR: "LOW", MVFR: "MODERATE", IFR: "HIGH", LIFR: "CRITICAL" } as const;
-                  return <StatusBadge status={statusMap[category]}>{category}</StatusBadge>;
-                })()}
-                <button
-                  type="button"
-                  onClick={() => router.push(`/weather/${activeAirportCode}`)}
-                  className="inline-flex items-center gap-1 border border-border px-3 py-2 text-xs hover:bg-surface"
-                >
-                  <ExternalLink className="h-3 w-3" />
-                  Full Details
-                </button>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4 mb-4">
-              <div className="border border-border p-4">
-                <div className="text-xs uppercase font-semibold text-text-secondary">Observation Time</div>
-                <div className="font-mono text-sm text-text-primary mt-1">{formatObservationTime(metar!)}</div>
-              </div>
-              <div className="border border-border p-4">
-                <div className="text-xs uppercase font-semibold text-text-secondary">Wind</div>
-                <div className="font-mono text-sm font-bold text-text-primary">{formatWind(metar!)}</div>
-              </div>
-              <div className="border border-border p-4">
-                <div className="text-xs uppercase font-semibold text-text-secondary">Temperature</div>
-                <div className="font-mono text-base font-bold text-text-primary">
-                  {metar!.temperature ? `${metar!.temperature.celsius.toFixed(0)}°C` : "—"}
-                  {metar!.dewpoint ? ` / ${metar!.dewpoint.celsius.toFixed(0)}°C` : ""}
-                </div>
-              </div>
-              <div className="border border-border p-4">
-                <div className="text-xs uppercase font-semibold text-text-secondary">Visibility</div>
-                <div className="font-mono text-base font-bold text-text-primary">{formatVisibility(metar!)}</div>
-              </div>
-              <div className="border border-border p-4">
-                <div className="text-xs uppercase font-semibold text-text-secondary">Clouds</div>
-                <div className="font-mono text-sm font-bold text-text-primary">{formatClouds(metar!)}</div>
-              </div>
-              <div className="border border-border p-4">
-                <div className="text-xs uppercase font-semibold text-text-secondary">Pressure</div>
-                <div className="font-mono text-sm font-bold text-text-primary">{formatPressure(metar!)}</div>
-              </div>
-            </div>
-          </div>
-
-          <div className="border border-border p-4 bg-surface mb-6">
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-xs font-semibold uppercase text-text-secondary">Raw METAR</span>
-              {metar?.raw_text && <CopyButton text={metar.raw_text} size="sm" />}
-            </div>
-            <div className="font-mono text-sm text-text-primary whitespace-pre-wrap leading-relaxed">{metar?.raw_text}</div>
-          </div>
+      {isLoading && <LoadingState />}
+      {isError && !isLoading && <ErrorState error={error} onRetry={refetch} />}
+      
+      {!isLoading && !isError && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 animate-in fade-in duration-500">
+          <RouteMetarCard label="Departure" icao={normalizeIcao(departureInput)} metar={departureMetar} router={router} />
+          <RouteMetarCard label="Arrival" icao={normalizeIcao(arrivalInput)} metar={arrivalMetar} router={router} />
         </div>
       )}
     </div>
   );
 }
 
-// ---- Wide layout building blocks ----
-function MetricCell({ label, value, detail }: { label: string; value: React.ReactNode; detail?: React.ReactNode }) {
-  return (
-    <div className="border-r border-border p-3 last:border-r-0">
-      <div className="text-xs uppercase font-semibold text-text-secondary mb-1">{label}</div>
-      <div className="font-mono text-sm font-bold text-text-primary">{value}</div>
-      {detail ? <div className="text-xs text-text-secondary mt-0.5">{detail}</div> : null}
-    </div>
-  );
+// --- Location Weather Tab ---
+function LocationWeatherTab() {
+    return (
+        <div className="bg-card border border-dashed border-border rounded-sm p-12 text-center animate-in fade-in duration-300">
+            <MapPin className="h-10 w-10 mx-auto mb-4 text-muted-foreground" />
+            <h3 className="font-medium text-foreground">Location-Based Search</h3>
+            <p className="text-sm text-muted-foreground mt-2">This feature is currently under development.</p>
+        </div>
+    );
 }
 
-function ForecastPeriodCell({ period }: { period: TafForecastPeriod }) {
+// --- UI Components ---
+const LoadingState = ({ airportCode }: { airportCode?: string }) => (
+  <div className="flex items-center justify-center gap-3 py-16">
+    <Loader2 className="h-8 w-8 animate-spin text-[--accent-primary]" />
+    <span className="text-sm font-mono text-muted-foreground">Scanning weather data{airportCode ? ` for ${airportCode}` : ''}...</span>
+  </div>
+);
+
+const ErrorState = ({ error, onRetry }: { error: any, onRetry: () => void }) => (
+  <div className="bg-card border border-red-900/40 rounded-sm p-6 text-red-400 dark:text-red-300">
+    <div className="flex items-center gap-3">
+      <AlertTriangle className="h-5 w-5" />
+      <div>
+        <h3 className="font-semibold">Unable to retrieve weather data</h3>
+        <p className="text-sm">{getUserFriendlyErrorMessage(error.metar || error.taf || error.station || error)}</p>
+      </div>
+      <button 
+        onClick={onRetry} 
+        className="ml-auto bg-red-500/20 text-red-700 dark:text-red-200 px-4 py-2 rounded-sm text-xs font-bold uppercase tracking-wide hover:bg-red-500/40 transition-colors"
+      >
+        Retry
+      </button>
+    </div>
+  </div>
+);
+
+const MetarDisplay = ({ metar, station }: { metar: DecodedMetar, station: any }) => (
+  <div className="bg-card border border-border rounded-sm p-6 relative overflow-hidden">
+    <div className="relative z-10">
+      <div className="flex justify-between items-start">
+        <div>
+          <div className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">LIVE WEATHER AT {metar.icao}</div>
+          <h2 className="text-xl font-medium text-foreground">{station?.name || '---'}</h2>
+        </div>
+        <div className={`font-mono text-sm px-2 py-1 rounded-sm ${getFlightCategoryClass(metar.flight_category)}`}>
+          {metar.flight_category || '---'}
+        </div>
+      </div>
+      <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+        <MetricDisplay icon={Thermometer} label="Temperature" value={`${metar.temperature?.celsius.toFixed(0) ?? '--'}°C`} detail={`Dewpoint: ${metar.dewpoint?.celsius.toFixed(0) ?? '--'}°C`} />
+        <MetricDisplay icon={Wind} label="Wind" value={formatWindCompact(metar.wind)} />
+        <MetricDisplay icon={Eye} label="Visibility" value={formatVisibilityCompact(metar.visibility)} />
+        <MetricDisplay icon={Cloud} label="Clouds" value={formatCloudsCompact(metar.clouds)} />
+      </div>
+      <div className="mt-8 pt-4 border-t border-border">
+        <div className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground mb-2">RAW METAR</div>
+        <p className="font-mono text-sm text-muted-foreground">{metar.raw_text}</p>
+      </div>
+    </div>
+  </div>
+);
+
+const TafDisplay = ({ taf }: { taf: DecodedTaf }) => (
+  <div className="bg-card border border-border rounded-sm p-6">
+    <div className="text-[10px] font-mono uppercase tracking-[0.2em] text-muted-foreground mb-1">TERMINAL AERODROME FORECAST</div>
+    <div className="font-mono text-xs text-muted-foreground mb-4">Issued: {taf.issued ? new Date(taf.issued).toLocaleString() : 'N/A'}</div>
+    <div className="space-y-4">
+      {taf.forecast?.map((period, index) => <TafPeriod key={index} period={period} />) ?? <p className="text-sm text-muted-foreground">No forecast periods available</p>}
+    </div>
+    <div className="mt-6 pt-4 border-t border-border">
+      <div className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground mb-2">RAW TAF</div>
+      <p className="font-mono text-sm text-muted-foreground">{taf.raw_text}</p>
+    </div>
+  </div>
+);
+
+const MetricDisplay = ({ icon: Icon, label, value, detail }: { icon: React.ElementType, label: string, value: string, detail?: string }) => (
+  <div className="flex items-start gap-4">
+    <Icon className="h-5 w-5 text-muted-foreground mt-1" strokeWidth={1.5} />
+    <div>
+      <div className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">{label}</div>
+      <div className="text-xl font-mono font-medium text-foreground tabular-nums">{value}</div>
+      {detail && <div className="text-xs text-muted-foreground">{detail}</div>}
+    </div>
+  </div>
+);
+
+const TafPeriod = ({ period }: { period: TafForecastPeriod }) => {
   const timeRange = (() => {
     if (typeof period.timestamp === "string") return new Date(period.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
     if (period.timestamp?.from && period.timestamp?.to) {
@@ -816,249 +338,187 @@ function ForecastPeriodCell({ period }: { period: TafForecastPeriod }) {
     }
     return "Forecast Period";
   })();
+
   return (
-    <div className="p-3">
-      <div className="text-xs font-semibold text-text-primary mb-2">{timeRange}</div>
-      <div className="space-y-1 text-xs">
-        <div>Wind: {formatWindCompact(period.wind)}</div>
-        {period.visibility && <div>Vis: {formatVisibilityCompact(period.visibility)}</div>}
-        {period.clouds && period.clouds.length > 0 && <div>Clouds: {formatCloudsCompact(period.clouds)}</div>}
-        {period.flight_category && (
-          <div className="mt-2">
-            <StatusBadge status={{ VFR: "LOW", MVFR: "MODERATE", IFR: "HIGH", LIFR: "CRITICAL" }[period.flight_category] as any}>
-              {period.flight_category}
-            </StatusBadge>
-          </div>
-        )}
+    <div className="border-l-2 pl-4 border-border hover:border-[--accent-primary] transition-colors">
+      <div className="flex items-center justify-between">
+        <div className="text-sm font-mono font-medium text-foreground">{timeRange}</div>
+        <div className={`font-mono text-xs px-2 py-0.5 rounded ${getFlightCategoryClass(period.flight_category)}`}>
+          {period.flight_category}
+        </div>
+      </div>
+      <div className="mt-2 grid grid-cols-2 md:grid-cols-3 gap-x-4 gap-y-1 text-sm font-mono text-muted-foreground">
+        <div><span className="text-muted-foreground">Wind:</span> {formatWindCompact(period.wind)}</div>
+        {period.visibility && <div><span className="text-muted-foreground">Vis:</span> {formatVisibilityCompact(period.visibility)}</div>}
+        {period.clouds && period.clouds.length > 0 && <div className="col-span-2 md:col-span-1"><span className="text-muted-foreground">Clouds:</span> {formatCloudsCompact(period.clouds)}</div>}
       </div>
     </div>
   );
-}
+};
 
-function TafDisplayWide({ taf }: { taf: DecodedTaf }) {
-  return (
-    <div className="border-t border-border">
-      <div className="border-b border-border p-3 bg-surface">
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-xs uppercase font-semibold">TAF FORECAST</span>
-          <span className="text-xs text-text-secondary">
-            {taf.valid_time_from && taf.valid_time_to ? (
-              <>Valid {new Date(taf.valid_time_from).toLocaleString()} to {new Date(taf.valid_time_to).toLocaleString()}</>
-            ) : null}
-          </span>
-        </div>
-        <div className="font-mono text-xs leading-relaxed">{taf.raw_text}</div>
-      </div>
-      {taf.forecast && taf.forecast.length > 0 && (
-        <div className="grid grid-cols-4 divide-x divide-border">
-          {taf.forecast.slice(0, 4).map((period, i) => (
-            <ForecastPeriodCell key={i} period={period} />
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
-
-function DepartingFlightsWide({ flights }: { flights: any[] }) {
-  const router = useRouter();
-  return (
-    <div className="border-t border-border">
-      <div className="flex items-center gap-2 p-3">
-        <Plane className="h-4 w-4 text-text-secondary" />
-        <h3 className="text-xs uppercase font-semibold text-text-secondary">Departing Flights</h3>
-      </div>
-      <div className="divide-y divide-border">
-        {flights.map((flight) => (
-          <div key={flight.id} className="flex items-center justify-between p-3">
-            <div className="flex items-center gap-6">
-              <div className="font-mono text-sm font-bold text-text-primary">
-                {flight.code} → {flight.destination_icao || flight.destination}
-              </div>
-              <div className="text-xs text-text-secondary">
-                Sched: {new Date(flight.scheduled_at).toLocaleString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })} UTC
-              </div>
-              <StatusBadge status={getStatusBadgeType(flight.status)}>{flight.status}</StatusBadge>
-            </div>
-            <button onClick={() => router.push(`/flights/${flight.id}`)} className="border border-border px-3 py-2 text-xs hover:bg-surface">
-              View Flight
-            </button>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function RiskAssessmentWide({ riskData, riskLoading }: { riskData: any; riskLoading?: boolean }) {
-  const score = riskData?.score ?? riskData?.result?.score ?? 0;
-  const tier = riskData?.tier ?? riskData?.result?.tier ?? null;
-
-  return (
-    <div className="border-t border-border p-3">
-      <div className="flex items-center gap-2 mb-2">
-        <AlertTriangle className="h-4 w-4 text-text-secondary" />
-        <h3 className="text-xs uppercase font-semibold text-text-secondary">Risk Assessment</h3>
-      </div>
-      <div className="mb-3">
-        <div className="flex items-center justify-between mb-1">
-          <span className="text-xs uppercase font-semibold text-text-secondary">Overall Risk</span>
-          <span className="font-mono text-sm font-bold text-text-primary">{score}/100</span>
-        </div>
-        <div className="h-2 bg-surface border border-border overflow-hidden">
-          <div className={`${getRiskColor(tier)} h-full`} style={{ width: `${score}%` }} />
+const RouteMetarCard = ({ label, icao, metar, router }: { label: string, icao: string, metar: DecodedMetar | null, router: any }) => {
+  if (icao.length !== 4) {
+    return (
+      <div>
+        <h3 className="text-base font-medium text-foreground mb-2">{label}</h3>
+        <div className="bg-card border border-dashed border-border rounded-sm p-12 text-center">
+          <p className="text-sm text-muted-foreground">Enter a valid 4-letter ICAO code.</p>
         </div>
       </div>
-      {tier && (
-        <div className="mb-3">
-          <StatusBadge status={normalizeRiskTier(tier) as any}>{normalizeRiskTier(tier)}</StatusBadge>
+    );
+  }
+  
+  if (!metar) {
+     return (
+      <div>
+        <h3 className="text-base font-medium text-foreground mb-2">{label}: <span className="font-mono">{icao}</span></h3>
+        <div className="bg-card border border-dashed border-border rounded-sm p-12 text-center">
+          <p className="text-sm text-muted-foreground">No METAR available for {icao}.</p>
         </div>
-      )}
-      {riskData.result?.factorBreakdown && riskData.result.factorBreakdown.length > 0 && (
-        <div className="grid grid-cols-3 gap-3 border-t border-border pt-3">
-          {riskData.result.factorBreakdown.map((factor: any, index: number) => (
-            <div key={index} className="p-2 border border-border">
-              <div className="flex items-center justify-between mb-1">
-                <span className="text-xs font-semibold text-text-primary">{factor.factor}</span>
-                <span className="font-mono text-xs text-text-secondary">{factor.score.toFixed(1)}</span>
-              </div>
-              <div className="text-xs text-text-secondary">{factor.message}</div>
-            </div>
-          ))}
-        </div>
-      )}
-      {riskData.messaging?.recommendations && riskData.messaging.recommendations.length > 0 && (
-        <div className="mt-3">
-          <span className="text-xs uppercase font-semibold text-text-secondary mb-2 block">Recommendations</span>
-          <ul className="space-y-1">
-            {riskData.messaging.recommendations.map((rec: string, i: number) => (
-              <li key={i} className="text-xs text-text-secondary">• {rec}</li>
-            ))}
-          </ul>
-        </div>
-      )}
-      {riskLoading && (
-        <div className="flex items-center justify-center py-4">
-          <Loader2 className="h-5 w-5 animate-spin text-blue" />
-        </div>
-      )}
-    </div>
-  );
-}
-
-// Location Weather Tab Component
-function LocationWeatherTab() {
-  const [searchMode, setSearchMode] = useState<"coords" | "city">("coords");
-  const [latInput, setLatInput] = useState("40.6413");
-  const [lonInput, setLonInput] = useState("-73.7781");
-  const [cityInput, setCityInput] = useState("New York");
+      </div>
+    );
+  }
 
   return (
     <div>
-      <div className="max-w-2xl mx-auto">
-        <div className="flex gap-0 mb-6 border border-border">
-          <button
-            onClick={() => setSearchMode("coords")}
-            className={`flex-1 px-4 py-3 text-xs uppercase font-semibold border-r border-border ${
-              searchMode === "coords" ? "bg-blue text-white" : "bg-white text-text-secondary hover:bg-surface"
-            }`}
-          >
-            <Navigation className="h-4 w-4 mx-auto mb-1" />
-            Coordinates
-          </button>
-          <button
-            onClick={() => setSearchMode("city")}
-            className={`flex-1 px-4 py-3 text-xs uppercase font-semibold ${
-              searchMode === "city" ? "bg-blue text-white" : "bg-white text-text-secondary hover:bg-surface"
-            }`}
-          >
-            <MapPin className="h-4 w-4 mx-auto mb-1" />
-            City/Location
-          </button>
+      <div className="flex justify-between items-center mb-2">
+        <h3 className="text-base font-medium text-foreground">{label}: <span className="font-mono">{icao}</span></h3>
+        <div className={`font-mono text-xs px-2 py-0.5 rounded ${getFlightCategoryClass(metar.flight_category)}`}>
+          {metar.flight_category || '---'}
         </div>
-
-        {searchMode === "coords" ? (
-          <div>
-            <div className="grid grid-cols-2 gap-4 mb-6">
-              <div>
-                <label className="block text-xs uppercase font-semibold text-text-secondary mb-2">Latitude</label>
-                <input
-                  type="text"
-                  value={latInput}
-                  onChange={(e) => setLatInput(e.target.value)}
-                  placeholder="40.6413"
-                  className="w-full border border-border px-4 py-3 font-mono text-base focus:border-blue focus:outline-none bg-white"
-                />
-              </div>
-              <div>
-                <label className="block text-xs uppercase font-semibold text-text-secondary mb-2">Longitude</label>
-                <input
-                  type="text"
-                  value={lonInput}
-                  onChange={(e) => setLonInput(e.target.value)}
-                  placeholder="-73.7781"
-                  className="w-full border border-border px-4 py-3 font-mono text-base focus:border-blue focus:outline-none bg-white"
-                />
-              </div>
-            </div>
-            <button className="w-full border border-border px-4 py-3 text-sm font-semibold uppercase hover:bg-blue hover:text-white transition-colors">
-              Find Nearest Weather Station
-            </button>
-          </div>
-        ) : (
-          <div>
-            <label className="block text-xs uppercase font-semibold text-text-secondary mb-2">City or Location Name</label>
-            <input
-              type="text"
-              value={cityInput}
-              onChange={(e) => setCityInput(e.target.value)}
-              placeholder="New York"
-              className="w-full border border-border px-4 py-3 text-base focus:border-blue focus:outline-none bg-white mb-4"
-            />
-            <button className="w-full border border-border px-4 py-3 text-sm font-semibold uppercase hover:bg-blue hover:text-white transition-colors">
-              Search Weather Stations
-            </button>
-          </div>
-        )}
-
-        <div className="mt-8 border border-dashed border-border p-12 text-center">
-          <MapPin className="h-12 w-12 mx-auto mb-4 text-text-secondary" />
-          <p className="text-sm text-text-secondary uppercase">Feature coming soon</p>
-          <p className="text-xs text-text-secondary mt-2">Location-based weather station lookup will be available in the next update</p>
+      </div>
+      <div className="bg-card border border-border rounded-sm p-4 space-y-4">
+        <div className="grid grid-cols-2 gap-4">
+          <MiniMetric label="Temp" value={`${metar.temperature?.celsius.toFixed(0) ?? '--'}°C`} />
+          <MiniMetric label="Wind" value={formatWindCompact(metar.wind)} />
+          <MiniMetric label="Vis" value={formatVisibilityCompact(metar.visibility)} />
+          <MiniMetric label="Clouds" value={formatCloudsCompact(metar.clouds)} />
         </div>
+        <div className="border-t border-border pt-3">
+          <p className="font-mono text-xs text-muted-foreground">{metar.raw_text}</p>
+        </div>
+        <button
+          onClick={() => router.push(`/weather/${icao}`)}
+          className="w-full border border-border px-3 py-2 text-xs text-foreground hover:bg-accent transition-colors rounded-sm"
+        >
+          View Details
+        </button>
       </div>
     </div>
   );
-}
+};
 
-// Main Weather Page Component
-export default function WeatherPage() {
-  const weatherViewMode = useStore((s) => s.weatherViewMode);
-  const tabs = [
-    {
-      id: "route",
-      label: "Route Weather",
-      content: <RouteWeatherTab />,
-    },
-    {
-      id: "airport",
-      label: "Airport Weather",
-      content: weatherViewMode === 'advanced' ? <AirportWeatherTab /> : <AirportWeatherStandard />,
-    },
-    {
-      id: "location",
-      label: "Location Weather",
-      content: <LocationWeatherTab />,
-    },
-  ];
+const MiniMetric = ({ label, value }: { label: string, value: string }) => (
+  <div>
+    <div className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">{label}</div>
+    <div className="text-sm font-mono font-medium text-foreground tabular-nums">{value}</div>
+  </div>
+);
+
+const DepartingFlightsDisplay = ({ flights, router }: { flights: any[], router: any }) => (
+  <div className="bg-card border border-border rounded-sm p-6">
+    <div className="text-[10px] font-mono uppercase tracking-[0.2em] text-muted-foreground mb-4">DEPARTING FLIGHTS</div>
+    <div className="space-y-3">
+      {flights.map((flight) => (
+        <div key={flight.id} className="flex items-center justify-between p-3 border border-border rounded-sm hover:border-[--accent-primary] transition-colors">
+          <div className="flex items-center gap-6">
+            <div className="font-mono text-sm font-bold text-foreground">
+              {flight.code} → {flight.destination_icao || flight.destination}
+            </div>
+            <div className="text-xs text-muted-foreground">
+              {new Date(flight.scheduled_at).toLocaleString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })} UTC
+            </div>
+            <LEDIndicator status={flight.status} />
+          </div>
+          <button 
+            onClick={() => router.push(`/flights/${flight.id}`)} 
+            className="border border-border px-3 py-1 text-xs text-foreground hover:bg-accent transition-colors rounded-sm"
+          >
+            View
+          </button>
+        </div>
+      ))}
+    </div>
+  </div>
+);
+
+const RiskAssessmentDisplay = ({ riskData, riskLoading }: { riskData: any, riskLoading?: boolean }) => {
+  const score = riskData?.score ?? riskData?.result?.score ?? 0;
+  const tier = riskData?.tier ?? riskData?.result?.tier ?? null;
+  const normalizedTier = normalizeRiskTier(tier);
 
   return (
-    <div className="flex-1 overflow-auto p-8">
-      <div className="mb-6">
-        <h1 className="text-lg font-semibold text-text-primary">Weather Intelligence</h1>
-      </div>
+    <div className="bg-card border border-border rounded-sm p-6">
+      <div className="text-[10px] font-mono uppercase tracking-[0.2em] text-muted-foreground mb-4">RISK ASSESSMENT</div>
+      
+      {riskLoading ? (
+        <div className="flex items-center justify-center py-8">
+          <Loader2 className="h-6 w-6 animate-spin text-[--accent-primary]" />
+        </div>
+      ) : (
+        <>
+          <div className="mb-6">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm font-medium text-foreground">Overall Risk Score</span>
+              <span className="font-mono text-lg font-bold text-foreground tabular-nums">{score}/100</span>
+            </div>
+            <div className="h-3 bg-muted border border-border overflow-hidden rounded-sm">
+              <div className={`${getRiskColor(tier)} h-full transition-all duration-500`} style={{ width: `${score}%` }} />
+            </div>
+            {normalizedTier && (
+              <div className="mt-2 flex items-center gap-2">
+                <div className={`w-2 h-2 rounded-full ${getRiskColor(tier)}`} />
+                <span className="text-xs font-mono uppercase text-muted-foreground">{normalizedTier}</span>
+              </div>
+            )}
+          </div>
 
-      <SmoothTab tabs={tabs} />
+          {riskData.result?.factorBreakdown && riskData.result.factorBreakdown.length > 0 && (
+            <div className="space-y-3">
+              <div className="text-xs font-mono uppercase text-muted-foreground">Factor Breakdown</div>
+              {riskData.result.factorBreakdown.map((factor: any, index: number) => (
+                <div key={index} className="p-3 border border-border rounded-sm">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-sm font-medium text-foreground">{factor.factor}</span>
+                    <span className="font-mono text-xs text-muted-foreground tabular-nums">{factor.score.toFixed(1)}</span>
+                  </div>
+                  <div className="text-xs text-muted-foreground">{factor.message}</div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {riskData.messaging?.recommendations && riskData.messaging.recommendations.length > 0 && (
+            <div className="mt-6 pt-6 border-t border-border">
+              <div className="text-xs font-mono uppercase text-muted-foreground mb-3">Recommendations</div>
+              <ul className="space-y-2">
+                {riskData.messaging.recommendations.map((rec: string, i: number) => (
+                  <li key={i} className="text-sm text-muted-foreground flex items-start gap-2">
+                    <span className="text-[--accent-primary] mt-1">•</span>
+                    <span>{rec}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </>
+      )}
     </div>
   );
-}
+};
+
+const LEDIndicator = ({ status }: { status: string }) => {
+  const getStatusColor = () => {
+    if (status === "On Time") return "bg-emerald-500";
+    if (status === "Delayed") return "bg-amber-500";
+    if (status === "Cancelled") return "bg-red-500";
+    return "bg-muted-foreground";
+  };
+
+  return (
+    <div className="flex items-center gap-2">
+      <div className={`w-2 h-2 rounded-full ${getStatusColor()}`} />
+      <span className="text-xs font-mono text-muted-foreground">{status}</span>
+    </div>
+  );
+};

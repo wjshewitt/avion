@@ -23,8 +23,8 @@ export default function FlightStatusSelector({ value, onChange }: FlightStatusSe
           onClick={() => onChange(status)}
           className={`p-3 rounded-sm border cursor-pointer transition-all flex items-center justify-between ${
             value === status
-              ? colors[status as keyof typeof colors] + ' bg-white/50'
-              : 'border-zinc-200 text-zinc-600 hover:border-zinc-400'
+              ? colors[status as keyof typeof colors] + ' bg-white/5 dark:bg-white/10'
+              : 'border-border text-foreground/70 hover:border-foreground/30 hover:text-foreground'
           }`}
         >
           <span className="font-medium text-sm">{status}</span>

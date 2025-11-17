@@ -15,6 +15,7 @@ export default function SignupPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showConfirmation, setShowConfirmation] = useState(false);
+  const [confirmedEmail, setConfirmedEmail] = useState<string>("");
   const router = useRouter();
 
   const {
@@ -43,6 +44,7 @@ export default function SignupPage() {
 
       if (result.success) {
         if (result.requiresEmailConfirmation) {
+          setConfirmedEmail(email);
           setShowConfirmation(true);
         } else {
           // Redirect to onboarding for new users
@@ -102,7 +104,7 @@ export default function SignupPage() {
               <div className="border-l-4 border-blue-600 bg-blue-600/10 p-3 text-sm text-zinc-700 dark:border-blue-400 dark:bg-blue-500/10 dark:text-zinc-100">
                 <p className="font-medium mb-1">Check your inbox</p>
                 <p>
-                  We sent a confirmation link to <span className="font-semibold">{email}</span>. Click the link to activate your
+                  We sent a confirmation link to <span className="font-semibold">{confirmedEmail}</span>. Click the link to activate your
                   account, then sign in.
                 </p>
               </div>

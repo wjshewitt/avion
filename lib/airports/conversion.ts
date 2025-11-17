@@ -1,5 +1,6 @@
 import { assertServerOnly } from "@/lib/config/airports";
 import { createServerSupabase } from "@/lib/supabase/server";
+import { getAirportByIata } from "@/lib/airports/store";
 import { getAirportDBClient } from "./airportdb-client";
 import { getOrRefreshAirport } from "./airportdb";
 
@@ -26,21 +27,9 @@ export async function convertToIcao(code: string): Promise<string> {
   }
 
   const supabase = await createServerSupabase();
-
-  const { data, error } = await supabase
-    .from("airports")
-    .select("icao")
-    .eq("iata", normalized)
-    .not("icao", "is", null)
-    .limit(1)
-    .maybeSingle() as { data: { icao: string } | null; error: any };
-
-  if (error && error.code !== "PGRST116") {
-    console.error("Failed to convert IATA to ICAO via database", error);
-  }
-
-  if (data?.icao) {
-    return data.icao;
+  const detail = await getAirportByIata(normalized, { client: supabase });
+  if (detail?.icao) {
+    return detail.icao;
   }
 
   try {

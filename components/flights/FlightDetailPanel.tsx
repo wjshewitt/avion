@@ -138,6 +138,9 @@ export function FlightDetailPanel({ flight, riskLevel }: FlightDetailPanelProps)
           </div>
           <div className="space-y-3">
             {flight.operator && <DataRow label="Operator" value={flight.operator} />}
+            {flight.aircraft_tail_number && (
+              <DataRow label="Tail" value={flight.aircraft_tail_number} />
+            )}
             {flight.aircraft && <DataRow label="Aircraft" value={flight.aircraft} />}
             {flight.passenger_count !== null && (
               <DataRow label="Passengers" value={flight.passenger_count.toString()} mono />

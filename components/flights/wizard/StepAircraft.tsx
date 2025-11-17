@@ -9,6 +9,7 @@ import OperatorAutocomplete from '@/components/ui/OperatorAutocomplete';
 export default function StepAircraft() {
   const { setValue, watch } = useFormContext<FlightFormValues>();
   const operator = watch('operator') || '';
+  const tailNumber = watch('tailNumber') || '';
   const aircraft = watch('aircraft') || '';
 
   return (
@@ -45,6 +46,34 @@ export default function StepAircraft() {
           />
           <p className="mt-2 text-xs text-muted-foreground">
             The operating company or charter service
+          </p>
+        </div>
+
+        {/* Tail Number */}
+        <div>
+          <label className="block text-[11px] font-mono uppercase tracking-[0.14em] text-muted-foreground mb-2">
+            Tail Number
+          </label>
+          <div className="relative">
+            <Plane
+              size={16}
+              className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground"
+              strokeWidth={1.5}
+            />
+            <div className="groove-input rounded-sm pl-12 pr-4 py-3 flex items-center">
+              <input
+                type="text"
+                value={tailNumber}
+                onChange={(event) =>
+                  setValue('tailNumber', event.target.value, { shouldDirty: true, shouldValidate: true })
+                }
+                placeholder="e.g., N123GZ, 9H-VJA"
+                className="w-full bg-transparent text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
+              />
+            </div>
+          </div>
+          <p className="mt-2 text-xs text-muted-foreground">
+            Used to determine registry obligations tied to the State of Registry scope
           </p>
         </div>
 

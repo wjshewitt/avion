@@ -8,6 +8,8 @@ import { AirportService } from '@/lib/airports/airport-service';
 import { analyzeRunways } from '@/lib/airports/runway-analyzer';
 import { AIRCRAFT_REQUIREMENTS } from '@/lib/airports/runway-analyzer';
 import type { Flight } from '@/lib/supabase/types';
+import { fetchAirportIntel } from '@/lib/intel/fetch-intel';
+import { getAirportTemporalProfile } from '@/lib/time/authority';
 
 interface ToolCallArgs {
   [key: string]: any;
@@ -126,7 +128,11 @@ async function executeGetFlightDetails(userId: string, args: ToolCallArgs) {
     throw new Error(`Flight not found or access denied`);
   }
   
-  // Return full flight details
+  const [originTemporal, destinationTemporal] = await Promise.all([
+    flight.origin_icao ? getAirportTemporalProfile(flight.origin_icao) : Promise.resolve(null),
+    flight.destination_icao ? getAirportTemporalProfile(flight.destination_icao) : Promise.resolve(null),
+  ]);
+
   return {
     flight: {
       id: flight.id,
@@ -146,9 +152,25 @@ async function executeGetFlightDetails(userId: string, args: ToolCallArgs) {
       weather_risk_score: flight.weather_risk_score,
       weather_alert_level: flight.weather_alert_level,
       weather_focus: flight.weather_focus,
-      weather_updated_at: flight.weather_updated_at
-    }
+      weather_updated_at: flight.weather_updated_at,
+    },
+    temporal: {
+      origin: originTemporal,
+      destination: destinationTemporal,
+    },
   };
+}
+
+async function executeGetAirportTemporalProfile(args: ToolCallArgs) {
+  const { icao } = args;
+  if (!icao || typeof icao !== 'string' || icao.length !== 4) {
+    throw new Error('icao (4-letter code) is required');
+  }
+  const profile = await getAirportTemporalProfile(icao.toUpperCase());
+  if (!profile) {
+    throw new Error(`Temporal data unavailable for ${icao}`);
+  }
+  return profile;
 }
 
 /**
@@ -156,6 +178,7 @@ async function executeGetFlightDetails(userId: string, args: ToolCallArgs) {
  */
 async function executeGetAirportCapabilities(args: ToolCallArgs) {
   const { icao, aircraft_type, check_type = 'all' } = args;
+  const supabase = await createClient();
   
   console.log('🛫 Executing get_airport_capabilities:', { icao, aircraft_type, check_type });
   
@@ -180,6 +203,7 @@ async function executeGetAirportCapabilities(args: ToolCallArgs) {
   }
   
   const airport = airportResult.data;
+  const airportIntel = await fetchAirportIntel(supabase, normalizedIcao);
   
   // Build response based on check_type
   const response: any = {
@@ -268,6 +292,10 @@ async function executeGetAirportCapabilities(args: ToolCallArgs) {
   
   response.data_source = airportResult.source;
   response.cached = airportResult.cached;
+
+  if (airportIntel.length > 0) {
+    response.intel = airportIntel;
+  }
   
   // Add note about incomplete data if applicable
   if (response.runways?.data_incomplete) {
@@ -390,6 +418,9 @@ export async function executeFlightTool(
       
       case 'get_airport_capabilities':
         return await executeGetAirportCapabilities(args);
+      
+      case 'get_airport_temporal_profile':
+        return await executeGetAirportTemporalProfile(args);
       
       default:
         throw new Error(`Unknown tool: ${toolName}`);

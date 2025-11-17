@@ -9,6 +9,7 @@ import {
 export interface AtmosphereContext {
   metar?: DecodedMetar | null;
   taf?: DecodedTaf | null;
+  isNightOverride?: boolean;
 }
 
 export interface AtmosphereSelection {
@@ -37,7 +38,7 @@ function isNightFromObserved(metar?: DecodedMetar | null): boolean {
   return hour < 6 || hour >= 18;
 }
 
-export function selectAtmosphereCard({ metar, taf }: AtmosphereContext): AtmosphereSelection | null {
+export function selectAtmosphereCard({ metar, taf, isNightOverride }: AtmosphereContext): AtmosphereSelection | null {
   if (!metar && !taf) return null;
 
   const concerns = [
@@ -48,7 +49,7 @@ export function selectAtmosphereCard({ metar, taf }: AtmosphereContext): Atmosph
   const tempC = metar?.temperature?.celsius ?? null;
   const visibilitySm = getVisibilitySm(metar);
   const qnhInHg = metar?.barometer?.hg ?? null;
-  const isNight = isNightFromObserved(metar);
+  const isNight = typeof isNightOverride === "boolean" ? isNightOverride : isNightFromObserved(metar);
 
   const metarRaw = metar?.raw_text ?? "";
   const tafRaw = taf?.raw_text ?? "";

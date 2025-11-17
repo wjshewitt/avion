@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { Plane, MapPin, Calendar, Users, Edit2 } from 'lucide-react';
 import { useFormContext, useWatch } from 'react-hook-form';
 import type { FlightFormValues } from '@/lib/validation/flight';
+import CompliancePreviewPanel from './CompliancePreviewPanel';
 
 interface StepReviewProps {
   onEdit: (step: number) => void;
@@ -159,7 +160,7 @@ export default function StepReview({ onEdit }: StepReviewProps) {
         </div>
 
         {/* Aircraft (if provided) */}
-        {(data.operator || data.aircraft) && (
+        {(data.operator || data.tailNumber || data.aircraft) && (
           <div className="ceramic p-4 rounded-sm border border-border">
             <div className="flex items-start justify-between mb-3">
               <div className="flex items-center gap-2">
@@ -181,6 +182,12 @@ export default function StepReview({ onEdit }: StepReviewProps) {
                 <div>
                   <div className="text-xs text-muted-foreground mb-1">Operator</div>
                   <div className="text-sm text-foreground">{data.operator}</div>
+                </div>
+              )}
+              {data.tailNumber && (
+                <div>
+                  <div className="text-xs text-muted-foreground mb-1">Tail Number</div>
+                  <div className="text-sm text-foreground">{data.tailNumber}</div>
                 </div>
               )}
               {data.aircraft && (
@@ -244,6 +251,13 @@ export default function StepReview({ onEdit }: StepReviewProps) {
           </div>
         )}
       </div>
+
+      <CompliancePreviewPanel
+        operator={data.operator || undefined}
+        tailNumber={data.tailNumber || undefined}
+        originIcao={data.origin?.icao ?? null}
+        destinationIcao={data.destination?.icao ?? null}
+      />
     </motion.div>
   );
 }

@@ -5,6 +5,63 @@ export type RegulationCategory = 'crew-duty' | 'passenger-briefing' | 'country-r
 
 export type ComplianceStatus = 'legal' | 'marginal' | 'illegal';
 
+// Compliance Health Score (for dashboard widgets)
+export interface ComplianceHealthScore {
+  overall: number;
+  crew: number;
+  aircraft: number;
+  documentation: number;
+  authorization: number;
+}
+
+// Compliance Document (for document tracking)
+export interface ComplianceDocument {
+  id: string;
+  name: string;
+  type: string;
+  uploadDate: string;
+  expiryDate: string | null;
+  status: 'compliant' | 'current' | 'expiring' | 'expired' | 'due_soon' | 'overdue';
+}
+
+// Crew Duty Status (for monitoring)
+export interface CrewDutyStatus {
+  crewId: string;
+  name: string;
+  role: string;
+  currentDutyHours: number;
+  maxDutyHours: number;
+  restRequired: boolean;
+  restUntil: string | null;
+  upcomingFlights: string[];
+}
+
+// Country Authorization (for permit tracking)
+export interface CountryAuthorization {
+  id: string;
+  country: string;
+  countryCode: string;
+  regulationType: string;
+  status: 'compliant' | 'expiring' | 'expired';
+  expiryDate: string;
+  limitations: string[];
+  documents: ComplianceDocument[];
+  region: string;
+}
+
+// Compliance Alert System
+export interface ComplianceAlert {
+  id: string;
+  severity: 'critical' | 'warning' | 'info';
+  title: string;
+  message: string;
+  category?: RegulationCategory;
+  regulationRef?: string;
+  actionRequired?: boolean;
+  expiresAt?: string;
+  createdAt: string;
+}
+
 // Crew Duty Regulations
 export interface CrewDutyLimits {
   singlePilot24Hour: number; // 8 hours
@@ -68,6 +125,43 @@ export interface CountryRequirement {
   noiseRestrictions: string[];
   specialRequirements: string[];
   handlingAgents?: string[];
+  /** Environmental regulations including emissions standards, SAF requirements, and sustainability mandates. */
+  environmentalRequirements?: {
+    emissionsStandards?: string[];
+    sustainableFuelRequirements?: string[];
+    carbonOffsetSchemes?: string[];
+    noiseStandards?: string[];
+  };
+  /** Security protocols and crew vetting requirements. */
+  securityRequirements?: {
+    crewVetting?: string[];
+    passengerScreening?: string[];
+    securityBriefings?: string[];
+    prohibitedItems?: string[];
+  };
+  /** Crew licensing and medical requirements specific to the country. */
+  crewRequirements?: {
+    licenseRecognition?: string[];
+    medicalCertificateRequirements?: string[];
+    languageRequirements?: string[];
+    typeRatingRequirements?: string[];
+    trainingRequirements?: string[];
+  };
+  /** Documentation and data management requirements. */
+  documentationRequirements?: {
+    requiredDocuments?: string[];
+    dataProtectionRules?: string[];
+    recordKeepingRequirements?: string[];
+    reportingObligations?: string[];
+  };
+  /** Recent regulatory updates and enforcement trends. */
+  recentUpdates?: {
+    date: string;
+    description: string;
+  }[];
+  /** Data source and last updated timestamp for transparency. */
+  dataSource?: string;
+  lastUpdated?: string;
   regulatoryAuthority: {
     name: string;
     website: string;
@@ -158,6 +252,38 @@ export interface OperationalScenario {
   prevention: string;
   tags: string[];
 }
+
+
+// New Restructured types for the redesigned compliance page
+export type ComplianceSiloCategory = 'landing' | 'takeoff' | 'operator' | 'aircraft';
+
+export interface ComplianceSilo {
+  category: ComplianceSiloCategory;
+  items: ComplianceSiloItem[];
+}
+
+export interface ComplianceSiloItem {
+  id: string;
+  title: string;
+  content: string | string[];
+  type: 'text' | 'list' | 'kv';
+  data?: { [key: string]: string | boolean | number };
+}
+
+export interface RestructuredCountryRequirement {
+  id: string;
+  countryName: string;
+  countryCode: string;
+  region: 'Americas' | 'Europe' | 'Middle East' | 'Asia-Pacific' | 'Africa';
+  summary: string;
+  silos: ComplianceSilo[];
+  regulatoryAuthority: {
+    name: string;
+    website: string;
+    contactEmail?: string;
+  };
+}
+
 
 // Search & Bookmarks
 export interface SearchResult {

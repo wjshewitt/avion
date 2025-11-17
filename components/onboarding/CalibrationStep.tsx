@@ -44,14 +44,14 @@ export function CalibrationStep({ timezone, hqLocation, hqTimezoneSameAsMain, up
                 onClick={() => handleSelectRegion(region)}
                 className={`w-full px-3.5 py-3 rounded-sm flex items-center justify-between text-xs font-mono transition-all border ${
                   isActive
-                    ? "bg-zinc-900 text-zinc-50 border-zinc-700 shadow-[0_0_0_1px_rgba(240,78,48,0.5)]"
+                    ? "bg-zinc-900 text-zinc-50 border-zinc-700 shadow-[0_0_0_1px_var(--accent-primary)]"
                     : "bg-white dark:bg-zinc-900/40 text-zinc-600 dark:text-zinc-300 border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-900 hover:border-zinc-300 dark:hover:border-zinc-700"
                 }`}
               >
                 <div className="flex items-center gap-3">
                   <div
                     className={`h-6 w-[3px] ${
-                      isActive ? "bg-[#F04E30]" : "bg-zinc-300 dark:bg-zinc-700"
+                      isActive ? "bg-[var(--accent-primary)]" : "bg-zinc-300 dark:bg-zinc-700"
                     }`}
                   />
                   <span>{region.label}</span>
@@ -76,7 +76,7 @@ export function CalibrationStep({ timezone, hqLocation, hqTimezoneSameAsMain, up
             value={hqLocation}
             onChange={(e) => updateData({ hqLocation: e.target.value })}
             placeholder="e.g. London, UK"
-            className="mt-2 w-full rounded-sm border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/60 px-3 py-2 text-xs font-mono text-zinc-900 dark:text-zinc-50 focus:outline-none focus:ring-1 focus:ring-[#F04E30] focus:border-[#F04E30]"
+            className="mt-2 w-full rounded-sm border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/60 px-3 py-2 text-xs font-mono text-zinc-900 dark:text-zinc-50 focus:outline-none focus:ring-1 focus:ring-[var(--accent-primary)] focus:border-[var(--accent-primary)]"
           />
 
           <div className="mt-3 flex items-start gap-3 rounded-sm border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/40 px-3 py-2">
@@ -88,7 +88,7 @@ export function CalibrationStep({ timezone, hqLocation, hqTimezoneSameAsMain, up
               aria-label="Toggle whether operations timezone matches HQ local time"
             >
               {hqTimezoneSameAsMain && (
-                <div className="h-2 w-2 bg-[#F04E30]" />
+                <div className="h-2 w-2 bg-[var(--accent-primary)]" />
               )}
             </button>
             <div className="space-y-0.5">

@@ -34,6 +34,7 @@ import { selectAtmosphereCard } from "@/lib/weather/avionAtmosphereMapping";
 import type { DecodedMetar, TafForecastPeriod } from "@/types/checkwx";
 import { getUserFriendlyErrorMessage } from "@/lib/utils/errors";
 import { toast } from "sonner";
+import { useAirportTemporalProfile } from "@/lib/tanstack/hooks/useTemporalProfile";
 
 const categoryClasses: Record<NonNullable<DecodedMetar["flight_category"]>, string> = {
   VFR: "bg-green-100 text-green-700 dark:bg-green-500/10 dark:text-green-200",
@@ -125,6 +126,11 @@ export default function IndividualWeatherPage() {
   const metar = weatherData?.metar;
   const taf = weatherData?.taf;
 
+  const { data: temporalProfile } = useAirportTemporalProfile(icao, {
+    enabled: Boolean(icao && icao.length === 4),
+    staleTime: 5 * 60 * 1000,
+  });
+
   // Analyze weather concerns
   const concerns = useMemo(() => {
     const allConcerns: WeatherConcern[] = [];
@@ -145,8 +151,12 @@ export default function IndividualWeatherPage() {
   const weatherSummary = generateWeatherSummary(concerns);
 
   const atmosphere = useMemo(
-    () => selectAtmosphereCard({ metar: metar ?? undefined, taf: taf ?? undefined }),
-    [metar, taf],
+    () => selectAtmosphereCard({
+      metar: metar ?? undefined,
+      taf: taf ?? undefined,
+      isNightOverride: temporalProfile ? !temporalProfile.sun.isDaylight : undefined,
+    }),
+    [metar, taf, temporalProfile],
   );
 
   // Sort concerns by severity
@@ -308,6 +318,17 @@ export default function IndividualWeatherPage() {
             </span>
           )}
         </div>
+        {temporalProfile && (
+          <div className="mt-2 text-xs text-muted-foreground flex flex-wrap gap-2">
+            <span>
+              Local time: {temporalProfile.clock.localTime}
+            </span>
+            <span className="hidden sm:inline">•</span>
+            <span>
+              Sunrise {temporalProfile.sun.sunriseLocal} / Sunset {temporalProfile.sun.sunsetLocal}
+            </span>
+          </div>
+        )}
       </div>
 
       {isError && (
@@ -332,6 +353,9 @@ export default function IndividualWeatherPage() {
       {atmosphere && (
         <div className="mb-6 max-w-[720px]">
           <AvionAtmosphereCard
+            icao={icao}
+            stationName={null}
+            flightCategory={metar?.flight_category}
             variant={atmosphere.variant}
             isNight={atmosphere.isNight}
             tempC={atmosphere.tempC ?? undefined}

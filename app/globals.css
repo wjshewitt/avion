@@ -1,4 +1,5 @@
 @import"tailwindcss";
+@plugin "@tailwindcss/typography";
 @import"tw-animate-css";
 
 /* 
@@ -126,12 +127,12 @@
  --color-surface-subtle: #F8F8F8;
  --color-text-primary: #1A1A1A; /* Tungsten text */
  --color-text-secondary: #525252;
- --color-text-muted: #A0A0A0;
+ --color-text-muted: #71717a;
  --color-text-inverse: #ffffff;
- --color-border: #E0E0E0;
- --color-border-subtle: #E0E0E0;
+ --color-border: #d4d4d8;
+ --color-border-subtle: #e4e4e7;
  --color-foreground: #1A1A1A;
- --color-muted-foreground: #737373;
+ --color-muted-foreground: #52525b;
  --background: #F4F4F4;
  --foreground: #1A1A1A;
  --card: #FFFFFF;
@@ -141,11 +142,11 @@
  --secondary: #F4F4F4;
  --secondary-foreground: #1A1A1A;
  --muted: #F8F8F8;
- --muted-foreground: #737373;
+ --muted-foreground: #52525b;
  --accent: #F4F4F4;
  --accent-foreground: #1A1A1A;
- --border: #E0E0E0;
- --input: #E0E0E0;
+ --border: #d4d4d8;
+ --input: #d4d4d8;
  
  /* Ceramic: Blue primary, Orange secondary */
  --primary: #2563EB; /* Info Blue */
@@ -635,7 +636,7 @@ body {
 [data-theme="tungsten"] .groove-input {
  background: #2a2a2a !important;
  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3);
- border: 1px solid rgba(255, 255, 255, 0.05);
+ border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 [data-theme="dark"] .groove-input:focus-within,
@@ -647,16 +648,16 @@ body {
   0 0 0 2px rgba(240, 78, 48, 0.2);
 }
 
-/* Primary Button - Tungsten style */
+/* Primary Button - Theme-aware */
 .btn-primary {
- background: #1a1a1a;
+ background: var(--accent-primary);
  color: white;
  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
  transition: all 0.1s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .btn-primary:hover:not(:disabled) {
- background: #2a2a2a;
+ filter: brightness(1.1);
 }
 
 .btn-primary:active {
@@ -671,12 +672,12 @@ body {
 }
 
 [data-theme="dark"] .btn-primary {
- background: #F04E30;
+ background: var(--accent-primary);
  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
 }
 
 [data-theme="dark"] .btn-primary:hover:not(:disabled) {
- background: #d33f24;
+ filter: brightness(0.9);
 }
 
 /* Tactile Option - Role selection cards */
@@ -690,8 +691,8 @@ body {
 }
 
 .tactile-option.selected {
- border-color: #1a1a1a;
- background-color: #1a1a1a;
+ border-color: var(--accent-primary);
+ background-color: var(--accent-primary);
  color: white;
  box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.2);
 }
@@ -715,8 +716,8 @@ body {
 }
 
 [data-theme="dark"] .tactile-option.selected {
- border-color: #F04E30;
- background-color: #F04E30;
+ border-color: var(--accent-primary);
+ background-color: var(--accent-primary);
  color: white;
  box-shadow: 0 10px 20px -5px rgba(240, 78, 48, 0.3);
 }

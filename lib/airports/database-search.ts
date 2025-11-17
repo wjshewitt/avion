@@ -7,6 +7,11 @@
 // Use searchAirportCache() from lib/airports/cache-search.ts instead.
 
 import { createAdminClient } from "@/lib/supabase/admin";
+import {
+  searchAirportDetails,
+  airportExists as airportExistsInStore,
+  type AirportDetail,
+} from "@/lib/airports/store";
 import { AirportSearchResult } from "@/types/airports";
 
 /**
@@ -62,64 +67,14 @@ export async function searchAirportsInDB(
   limit: number = 20
 ): Promise<AirportSearchResult[]> {
   const supabase = createAdminClient();
-  const q = query.trim().toUpperCase();
-  
-  // Search with OR condition on multiple fields - select ALL fields for detailed info
-  const { data, error } = await supabase
-    .from("airports")
-    .select("*")
-    .or(`icao.ilike.${q}%,iata.ilike.${q}%,name.ilike.%${q}%,city.ilike.%${q}%`)
-    .limit(limit);
-  
-  if (error) {
-    console.error("Database search error:", error);
-    throw error;
-  }
-  
-  if (!data || data.length === 0) {
+  const q = query.trim();
+  if (!q) {
     return [];
   }
-  
-  // Map database results to AirportSearchResult format with full data
-  const results = data.map((row: any) => {
-    // Calculate runway info from the runways data
-    const runways = row.runways || [];
-    const runwayCount = Array.isArray(runways) ? runways.length : 0;
-    const longestRunway = Array.isArray(runways) && runways.length > 0
-      ? Math.max(...runways.map((r: any) => parseInt(r.length_ft) || 0))
-      : 5000;
 
-    return {
-      airport: {
-        icao: row.icao,
-        iata: row.iata || undefined,
-        name: row.name,
-        city: row.city || "",
-        state: row.state || undefined,
-        country: row.country || "",
-        latitude: row.latitude || 0,
-        longitude: row.longitude || 0,
-        timezone: row.timezone || "UTC",
-        is_corporate_hub: false,
-        popularity_score: 50,
-        aircraft_types: [],
-        facilities: [],
-        runway_count: runwayCount,
-        longest_runway_ft: longestRunway,
-        // Include detailed data from database
-        runways: row.runways,
-        frequencies: row.frequencies,
-        elevation_ft: row.elevation_ft,
-        raw: row.raw, // Full API response
-      },
-      score: calculateMatchScore(query, row),
-      matchType: getMatchType(query, row),
-    };
-  });
-  
-  // Sort by score descending
+  const details = await searchAirportDetails(q, limit, { client: supabase });
+  const results = details.map((row) => mapDetailToResult(q, row));
   results.sort((a, b) => b.score - a.score);
-  
   return results;
 }
 
@@ -128,17 +83,48 @@ export async function searchAirportsInDB(
  */
 export async function airportExistsInDB(icao: string): Promise<boolean> {
   const supabase = createAdminClient();
-  const normalizedIcao = icao.trim().toUpperCase();
-  
-  const { data, error } = await supabase
-    .from("airports")
-    .select("icao")
-    .eq("icao", normalizedIcao)
-    .single();
-  
-  if (error) {
-    return false;
-  }
-  
-  return !!data;
+  return airportExistsInStore(icao, { client: supabase });
+}
+
+function mapDetailToResult(query: string, row: AirportDetail): AirportSearchResult {
+  const runways = row.runways || [];
+  const runwayList = Array.isArray(runways)
+    ? runways
+    : Object.values((runways ?? {}) as Record<string, any>);
+  const runwayCount = runwayList.length;
+  const longestRunway = runwayList.length
+    ? Math.max(
+        ...runwayList.map((r: any) =>
+          typeof r?.length_ft === "number"
+            ? r.length_ft
+            : parseInt(`${r?.length_ft ?? 0}`, 10)
+        )
+      )
+    : 5000;
+
+  return {
+    airport: {
+      icao: row.icao,
+      iata: row.iata || undefined,
+      name: row.name,
+      city: row.city || "",
+      state: row.state || undefined,
+      country: row.country || "",
+      latitude: row.latitude || 0,
+      longitude: row.longitude || 0,
+      timezone: row.timezone || "UTC",
+      is_corporate_hub: false,
+      popularity_score: 50,
+      aircraft_types: [],
+      facilities: [],
+      runway_count: runwayCount,
+      longest_runway_ft: longestRunway,
+      runways: row.runways,
+      frequencies: row.frequencies,
+      elevation_ft: row.elevation_ft ?? undefined,
+      raw: row.raw,
+    },
+    score: calculateMatchScore(query, row),
+    matchType: getMatchType(query, row),
+  };
 }

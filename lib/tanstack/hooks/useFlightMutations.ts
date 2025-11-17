@@ -32,6 +32,9 @@ export function useCreateFlight() {
       // Add optional fields if present
       const operator = formData.get("operator");
       if (operator) data.operator = operator as string;
+
+      const tailNumber = formData.get("tail_number");
+      if (tailNumber) data.tail_number = tailNumber as string;
       
       const aircraft = formData.get("aircraft");
       if (aircraft) data.aircraft = aircraft as string;
@@ -71,7 +74,7 @@ export function useUpdateFlight() {
 
   return useMutation({
     mutationFn: async (formData: FormData) => {
-      const data = {
+      const data: Parameters<typeof updateFlight>[0] = {
         id: formData.get("id") as string,
         code: formData.get("code") as string,
         origin: formData.get("origin") as string,
@@ -80,6 +83,24 @@ export function useUpdateFlight() {
         scheduled_at: formData.get("scheduled_at") as string,
         arrival_at: formData.get("arrival_at") as string | null,
       };
+
+      const operator = formData.get("operator");
+      if (operator) data.operator = operator as string;
+
+      const tailNumber = formData.get("tail_number");
+      if (tailNumber) data.tail_number = tailNumber as string;
+
+      const aircraft = formData.get("aircraft");
+      if (aircraft) data.aircraft = aircraft as string;
+
+      const notes = formData.get("notes");
+      if (notes) data.notes = notes as string;
+
+      const passengerCount = formData.get("passenger_count");
+      if (passengerCount) data.passenger_count = parseInt(passengerCount as string, 10);
+
+      const crewCount = formData.get("crew_count");
+      if (crewCount) data.crew_count = parseInt(crewCount as string, 10);
 
       return updateFlight(data);
     },
@@ -107,6 +128,24 @@ export function useUpdateFlight() {
           scheduled_at: formData.get("scheduled_at") as string,
           arrival_at: (formData.get("arrival_at") as string) || null,
         };
+
+        const operator = formData.get("operator");
+        if (operator) updatedFlight.operator = operator as string;
+
+        const tailNumber = formData.get("tail_number");
+        if (tailNumber) updatedFlight.aircraft_tail_number = tailNumber as string;
+
+        const aircraft = formData.get("aircraft");
+        if (aircraft) updatedFlight.aircraft = aircraft as string;
+
+        const notes = formData.get("notes");
+        if (notes) updatedFlight.notes = notes as string;
+
+        const passengerCount = formData.get("passenger_count");
+        if (passengerCount) updatedFlight.passenger_count = parseInt(passengerCount as string, 10);
+
+        const crewCount = formData.get("crew_count");
+        if (crewCount) updatedFlight.crew_count = parseInt(crewCount as string, 10);
 
         queryClient.setQueryData(queryKeys.flights.detail(id), updatedFlight);
       }

@@ -15,7 +15,7 @@ interface BreadcrumbProps {
 
 export function Breadcrumb({ items, className = "" }: BreadcrumbProps) {
   return (
-    <div className={`relative h-9 ${className}`}>
+    <div className={`relative h-9 overflow-visible ${className}`}>
       <div
         className="h-full px-8 flex items-center relative bg-surface border-b border-border"
         style={{
