@@ -118,7 +118,7 @@ export default function FlightTrackerMap() {
   if (!mounted) return null;
 
   return (
-    <div className="relative w-full h-screen bg-gray-900">
+    <div className="relative w-full h-full bg-gray-900">
       <DeckGL
         initialViewState={INITIAL_VIEW_STATE}
         controller={true}
