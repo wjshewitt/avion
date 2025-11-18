@@ -11,9 +11,9 @@ import { useLiveTraffic } from '@/hooks/useLiveTraffic';
 import { TrackedAircraft, AdsbDbAircraft } from '@/lib/adsb/types';
 import { SelectedAircraftCard } from './SelectedAircraftCard';
 
-// Aircraft icon mapping (could be sprite sheet in production)
-// For now using a simple SVGs or Deck.gl's default icon support
-const AIRPLANE_ICON_ATLAS = 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/icon-atlas.png';
+// Aircraft icon mapping
+// Using a simple SVG icon for now, loaded directly
+const AIRPLANE_ICON_ATLAS = '/plane-icon.svg';
 const AIRPLANE_ICON_MAPPING = {
   marker: {x: 0, y: 0, width: 128, height: 128, mask: true}
 };
@@ -96,11 +96,11 @@ export default function FlightTrackerMap() {
       iconAtlas: AIRPLANE_ICON_ATLAS,
       iconMapping: AIRPLANE_ICON_MAPPING,
       getIcon: d => 'marker',
-      sizeScale: 15,
+      sizeScale: 1,
+      getSize: d => 32,
       getPosition: d => [d.lon, d.lat, d.altitude],
-      getAngle: d => 360 - d.heading, // Deck.gl rotates counter-clockwise
+      getAngle: d => -d.heading, // Correct rotation for nose-up icon
       getColor: d => [255, 140, 0], // Safety Orange
-      getSize: d => 3,
       transitions: {
         getPosition: 1000, // Smooth transition over 1 second
         getAngle: 1000
@@ -125,7 +125,6 @@ export default function FlightTrackerMap() {
         layers={layers}
         onViewStateChange={onViewStateChange}
         viewState={viewState}
-        glOptions={{ preserveDrawingBuffer: true }}
       >
         <Map
           mapStyle="https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json"
