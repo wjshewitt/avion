@@ -5,6 +5,7 @@ import DeckGL from '@deck.gl/react';
 import { MapViewState } from '@deck.gl/core';
 import { IconLayer } from '@deck.gl/layers';
 import Map, { MapRef } from 'react-map-gl/maplibre';
+import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { useLiveTraffic } from '@/hooks/useLiveTraffic';
 import { TrackedAircraft } from '@/lib/adsb/types';
@@ -94,12 +95,14 @@ export default function FlightTrackerMap() {
       >
         <Map
           mapStyle="https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json"
-          mapLib={import('maplibre-gl')}
+          mapLib={maplibregl}
+          reuseMaps
+          attributionControl={false}
         />
       </DeckGL>
       
       {/* Status Overlay */}
-      <div className="absolute top-4 left-4 bg-black/80 text-white p-4 rounded-lg backdrop-blur">
+      <div className="absolute top-4 left-4 bg-black/80 text-white p-4 rounded-lg backdrop-blur z-10">
         <h3 className="font-bold text-sm uppercase tracking-wider text-orange-500">Live Traffic</h3>
         <div className="text-xs mt-1">
           <p>Aircraft Visible: {traffic.length}</p>
