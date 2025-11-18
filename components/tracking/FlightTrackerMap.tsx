@@ -22,7 +22,7 @@ const INITIAL_VIEW_STATE: MapViewState = {
   longitude: -0.1278,
   latitude: 51.5074,
   zoom: 6,
-  pitch: 0,
+  pitch: 45,
   bearing: 0
 };
 
@@ -125,12 +125,14 @@ export default function FlightTrackerMap() {
         layers={layers}
         onViewStateChange={onViewStateChange}
         viewState={viewState}
+        glOptions={{ preserveDrawingBuffer: true }}
       >
         <Map
           mapStyle="https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json"
           mapLib={maplibregl}
           reuseMaps
           attributionControl={false}
+          terrain={{ source: 'terrain', exaggeration: 1.5 }}
         />
       </DeckGL>
       
