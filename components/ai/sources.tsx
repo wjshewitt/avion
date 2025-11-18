@@ -1,152 +1,67 @@
 'use client';
 
 import * as React from 'react';
-import * as CollapsiblePrimitive from '@radix-ui/react-collapsible';
-import { ChevronDown, BookOpen, ExternalLink } from 'lucide-react';
+import { ExternalLink } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { motion } from 'framer-motion';
 
-// Context for sources state
-const SourcesContext = React.createContext<{
-  isOpen: boolean;
-  setIsOpen: (open: boolean) => void;
-}>({
-  isOpen: false,
-  setIsOpen: () => {},
-});
-
-/**
- * Main Sources wrapper - Perplexity-style collapsible source citations
- */
-export function Sources({ 
-  children,
-  className,
-  ...props 
-}: React.ComponentProps<typeof CollapsiblePrimitive.Root>) {
-  const [isOpen, setIsOpen] = React.useState(false);
-  
-  return (
-    <SourcesContext.Provider value={{ isOpen, setIsOpen }}>
-      <CollapsiblePrimitive.Root
-        open={isOpen}
-        onOpenChange={setIsOpen}
-        className={cn("mb-2", className)}
-        {...props}
-      >
-        {children}
-      </CollapsiblePrimitive.Root>
-    </SourcesContext.Provider>
-  );
-}
-
-/**
- * Trigger button showing source count - Avion style (minimal)
- */
-export function SourcesTrigger({
-  count,
-  children,
-  className,
-  ...props
-}: React.ComponentProps<typeof CollapsiblePrimitive.Trigger> & {
-  count?: number;
-}) {
-  const { isOpen } = React.useContext(SourcesContext);
-  
-  return (
-    <CollapsiblePrimitive.Trigger
-      className={cn(
-        "flex items-center gap-2 px-2 py-1 text-left",
-        "hover:bg-muted/30 transition-colors rounded-sm",
-        className
-      )}
-      {...props}
-    >
-      <BookOpen className="h-2.5 w-2.5 text-muted-foreground" />
-      {children || (
-        <span className="text-[9px] font-mono uppercase tracking-widest text-muted-foreground">
-          Sources · {count || 0}
-        </span>
-      )}
-      <motion.div
-        animate={{ rotate: isOpen ? 180 : 0 }}
-        transition={{ duration: 0.2 }}
-      >
-        <ChevronDown className="h-2.5 w-2.5 text-muted-foreground" />
-      </motion.div>
-    </CollapsiblePrimitive.Trigger>
-  );
-}
-
-/**
- * Content area for sources - Avion style minimal
- */
-export function SourcesContent({
-  children,
-  className,
-  ...props
-}: React.ComponentProps<typeof CollapsiblePrimitive.Content>) {
-  return (
-    <CollapsiblePrimitive.Content
-      className={cn(
-        "overflow-hidden",
-        "data-[state=open]:animate-in data-[state=open]:fade-in-0",
-        "data-[state=closed]:animate-out data-[state=closed]:fade-out-0",
-        className
-      )}
-      {...props}
-    >
-      <div className="pl-5 pr-2 py-1 space-y-1">
-        {children}
-      </div>
-    </CollapsiblePrimitive.Content>
-  );
-}
-
-/**
- * Individual source link - Avion style minimal
- */
-let sourceCounter = 0;
-export function Source({
-  href,
-  title,
-  children,
-  className,
-  ...props
-}: React.ComponentProps<'a'> & {
+export interface SourceItem {
+  category?: string;
+  description: string;
   title?: string;
-}) {
-  const [index] = React.useState(() => ++sourceCounter);
-  
-  // Reset counter when component unmounts (start of new list)
-  React.useEffect(() => {
-    return () => {
-      sourceCounter = 0;
-    };
-  }, []);
+  url?: string;
+}
+
+interface VerifiedSourcesProps {
+  sources: SourceItem[];
+  className?: string;
+}
+
+/**
+ * Verified Sources Grid - Avion Flight Deck Style
+ * Displays sources as technical data tiles in a grid
+ */
+export function VerifiedSources({ sources, className }: VerifiedSourcesProps) {
+  if (!sources || sources.length === 0) return null;
 
   return (
-    <a
-      href={href}
-      target="_blank"
-      rel="noopener noreferrer"
-      className={cn(
-        "flex items-start gap-1.5 px-1 py-0.5 text-xs rounded-sm",
-        "hover:bg-muted/30 transition-colors group",
-        className
-      )}
-      {...props}
-    >
-      {children || (
-        <>
-          <span className="font-mono text-[9px] text-muted-foreground flex-shrink-0">
-            [{index}]
-          </span>
-          <div className="flex-1 min-w-0 text-[10px] text-muted-foreground line-clamp-1">
-            {title || 'Source'}
-          </div>
-          <ExternalLink className="h-2.5 w-2.5 flex-shrink-0 opacity-0 group-hover:opacity-50 transition-opacity text-muted-foreground" />
-        </>
-      )}
-    </a>
+    <div className={cn("border-t border-white/10 bg-black/20 p-4 relative z-10", className)}>
+      <div className="flex items-center gap-2 mb-3">
+         <span className="text-[9px] font-mono uppercase tracking-widest text-zinc-500">
+           VERIFIED DATA SOURCES
+         </span>
+         <div className="h-px flex-1 bg-white/10" />
+      </div>
+      
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+        {sources.map((source, i) => (
+          <a 
+            key={i}
+            href={source.url || "#"} 
+            className="group/source flex items-start gap-3 p-3 rounded-sm border border-white/5 bg-white/5 hover:bg-white/10 hover:border-primary/50 transition-all"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <div className="mt-0.5 text-primary opacity-70 group-hover/source:opacity-100">
+              <ExternalLink size={12} strokeWidth={1.5} />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="text-[11px] font-medium text-zinc-300 truncate group-hover/source:text-white">
+                {source.title || source.description}
+              </div>
+              <div className="text-[9px] font-mono text-zinc-500 uppercase mt-0.5 line-clamp-1">
+                {source.category ? `[${source.category}]` : ''} {source.description}
+              </div>
+            </div>
+          </a>
+        ))}
+      </div>
+    </div>
   );
 }
+
+// Deprecated components kept for compatibility during refactor if needed,
+// but should be phased out.
+export const Sources = ({ children }: { children: React.ReactNode }) => <>{children}</>;
+export const SourcesTrigger = () => null;
+export const SourcesContent = () => null;
+export const Source = () => null;

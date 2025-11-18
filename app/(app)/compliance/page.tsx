@@ -2,43 +2,60 @@
 
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
-import { Search, FileText, ChevronRight, Check, AlertCircle, Globe } from 'lucide-react';
+import { Search, FileText, ChevronRight, Globe, Shield, Briefcase, Plane, ArrowRight, Database } from 'lucide-react';
 import { regulations, briefingItems, operationalScenarios } from '@/lib/compliance/regulations';
 import { countryRequirements } from '@/lib/compliance/countries';
 import { AvionCard } from '@/components/ui/avion-card';
 import { GrooveInput } from '@/components/ui/groove-input';
-import { DutyTimeline } from '@/components/compliance/DutyTimeline';
-import { ComplianceHealthGauge } from '@/components/compliance/ComplianceHealthGauge';
+import { ComplianceStatusMatrix, type ComplianceCheckItem } from '@/components/compliance/ComplianceStatusMatrix';
 
-// Mock Data for Dashboard
-const crewStatus = {
-  crewId: "C-1244",
-  name: "Capt. J. Reynolds",
-  role: "PIC",
-  currentDutyHours: 8.2,
-  maxDutyHours: 10,
-  restRequired: false,
-  restUntil: null,
-  upcomingFlights: ["F-1992"]
-};
-
-const complianceScore = {
-  overall: 92,
-  crew: 25,
-  aircraft: 25,
-  documentation: 22, // Slightly lower
-  authorization: 20  // Lower
-};
-
-const activeRegions = [
-  { code: 'EU', name: 'EASA Zone', status: 'compliant' },
-  { code: 'US', name: 'FAA Zone', status: 'compliant' },
-  { code: 'MA', name: 'Morocco', status: 'warning' }, // Permit needed
+// Mock Mission Data for Initial State
+const defaultChecks: ComplianceCheckItem[] = [
+  {
+    id: 'chk-001',
+    category: 'CABOTAGE',
+    label: 'Domestic Point-to-Point Check',
+    status: 'REVIEW',
+    detail: 'Proposed itinerary includes internal legs within France (LFPB -> LFMN). Verify Operator (VistaJet) has valid cabotage rights or EU AOC.',
+    reference: 'EU REG 1008/2008'
+  },
+  {
+    id: 'chk-002',
+    category: 'PERMITS',
+    label: 'Landing Permit Requirements',
+    status: 'OK',
+    detail: 'France (FR) requires prior notification but no specific landing permit for EU-registered aircraft. Slot coordination mandatory at LFMN.',
+    reference: 'FR AIP GEN 1.2'
+  },
+  {
+    id: 'chk-003',
+    category: 'CREW DUTY',
+    label: 'Projected Duty Time',
+    status: 'OK',
+    detail: 'Estimated mission time (2h 15m) is well within 10h single-pilot / 14h multi-pilot duty limits. Rest period verified.',
+    reference: '14 CFR § 135.267'
+  },
+  {
+    id: 'chk-004',
+    category: 'RESTRICTIONS',
+    label: 'Noise Abatement (LFMN)',
+    status: 'WARNING',
+    detail: 'Strict night curfew 23:30 - 06:00 local. Stage 3 aircraft restrictions apply. Ensure aircraft meets noise quota.',
+    reference: 'LFMN AD 2.21'
+  }
 ];
 
 export default function CompliancePage() {
   const [searchQuery, setSearchQuery] = useState('');
+  const [missionData, setMissionData] = useState({
+    origin: 'EGLL',
+    destination: 'LFMN',
+    operator: 'VistaJet',
+    registry: '9H-VIS',
+    date: new Date().toISOString().split('T')[0]
+  });
 
+  // Search Logic for Reference Library
   const searchResults = useMemo(() => {
     if (!searchQuery || searchQuery.length < 2) return [];
     
@@ -64,224 +81,196 @@ export default function CompliancePage() {
       }
     });
 
-    operationalScenarios.forEach(scenario => {
-      if (
-        scenario.title.toLowerCase().includes(query) ||
-        scenario.question.toLowerCase().includes(query) ||
-        scenario.tags.some(tag => tag.toLowerCase().includes(query))
-      ) {
-        results.push({ type: 'scenario', item: scenario });
-      }
-    });
-
     return results;
   }, [searchQuery]);
 
   const showSearchResults = searchQuery.length >= 2;
 
   return (
-    <div className="flex-1 overflow-auto p-6 sm:p-8 bg-[#F4F4F4] dark:bg-[#1A1A1A] min-h-screen">
-      {/* Page Header */}
-      <div className="mb-8">
-        <div className="text-[10px] font-mono uppercase tracking-[0.2em] text-zinc-400 mb-2">
-          REGULATORY REFERENCE
+    <div className="flex-1 overflow-auto p-6 sm:p-8 bg-[#F4F4F4] dark:bg-[#1A1A1A] min-h-screen font-sans">
+      
+      {/* Header */}
+      <div className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div>
+          <div className="text-[10px] font-mono uppercase tracking-[0.2em] text-zinc-400 mb-2">
+            OPERATIONAL COMPLIANCE
+          </div>
+          <h1 className="text-3xl font-semibold text-zinc-900 dark:text-zinc-100 tracking-tight">
+            Mission Feasibility
+          </h1>
         </div>
-        <h1 className="text-3xl font-semibold text-zinc-900 dark:text-zinc-100 tracking-tight">
-          Compliance Intelligence
-        </h1>
-        <p className="text-zinc-500 dark:text-zinc-400 mt-1 max-w-2xl">
-          Real-time regulatory monitoring and operational feasibility assessment.
-        </p>
+        <div className="text-right hidden md:block">
+           <div className="text-[10px] font-mono text-zinc-400 uppercase tracking-wider">Current Cycle</div>
+           <div className="text-sm font-mono font-medium text-zinc-700 dark:text-zinc-300">AIRAC 2403 • EFFECTIVE 21 MAR</div>
+        </div>
       </div>
 
-      {/* Control Panel Search */}
-      <div className="mb-10 max-w-4xl">
-        <GrooveInput
-          variant="tungsten"
-          icon={<Search size={18} strokeWidth={1.5} />}
-          placeholder="SEARCH REGULATIONS, COUNTRIES (e.g., 'UK landing'), OR SCENARIOS..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          autoFocus
-          className="font-mono text-sm tracking-wide"
-        />
-        {!showSearchResults && (
-          <div className="flex items-center gap-3 mt-3 px-1">
-            <span className="font-mono text-[10px] uppercase tracking-wider text-zinc-400">Quick Access:</span>
-            {['CREW DUTY', 'MOROCCO PERMITS', 'PAX BRIEFING', 'EAPIS'].map((suggestion) => (
-              <button
-                key={suggestion}
-                onClick={() => setSearchQuery(suggestion)}
-                className="px-2 py-1 bg-zinc-200 dark:bg-[#2A2A2A] border border-zinc-300 dark:border-[#333] rounded-[2px] text-[10px] font-mono text-zinc-600 dark:text-zinc-400 hover:bg-zinc-300 dark:hover:bg-[#323232] transition-colors uppercase"
-              >
-                {suggestion}
-              </button>
-            ))}
+      {/* Mission Input Panel (Control Surface) */}
+      <AvionCard variant="tungsten" className="mb-8 p-0 overflow-hidden">
+        <div className="border-b border-[#333] px-6 py-4 bg-[#252525]">
+          <div className="flex items-center gap-2 text-zinc-200">
+            <Briefcase size={16} strokeWidth={1.5} />
+            <span className="text-xs font-semibold tracking-wide uppercase">Mission Parameters</span>
           </div>
+        </div>
+        
+        <div className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+            {/* Origin */}
+            <div className="space-y-2">
+                <label className="text-[10px] font-mono uppercase tracking-wider text-zinc-500">Origin (ICAO)</label>
+                <GrooveInput 
+                    variant="tungsten" 
+                    value={missionData.origin}
+                    onChange={(e) => setMissionData({...missionData, origin: e.target.value.toUpperCase()})}
+                    className="font-mono uppercase"
+                />
+            </div>
+
+             {/* Destination */}
+             <div className="space-y-2">
+                <label className="text-[10px] font-mono uppercase tracking-wider text-zinc-500">Dest (ICAO)</label>
+                <GrooveInput 
+                    variant="tungsten" 
+                    value={missionData.destination}
+                    onChange={(e) => setMissionData({...missionData, destination: e.target.value.toUpperCase()})}
+                    className="font-mono uppercase"
+                />
+            </div>
+
+             {/* Operator */}
+             <div className="space-y-2">
+                <label className="text-[10px] font-mono uppercase tracking-wider text-zinc-500">Operator</label>
+                <GrooveInput 
+                    variant="tungsten" 
+                    value={missionData.operator}
+                    onChange={(e) => setMissionData({...missionData, operator: e.target.value})}
+                />
+            </div>
+
+             {/* Registry */}
+             <div className="space-y-2">
+                <label className="text-[10px] font-mono uppercase tracking-wider text-zinc-500">Aircraft Reg</label>
+                <GrooveInput 
+                    variant="tungsten" 
+                    value={missionData.registry}
+                    onChange={(e) => setMissionData({...missionData, registry: e.target.value.toUpperCase()})}
+                    className="font-mono uppercase"
+                />
+            </div>
+
+             {/* Date */}
+             <div className="space-y-2">
+                <label className="text-[10px] font-mono uppercase tracking-wider text-zinc-500">Date</label>
+                <GrooveInput 
+                    variant="tungsten" 
+                    type="date"
+                    value={missionData.date}
+                    onChange={(e) => setMissionData({...missionData, date: e.target.value})}
+                    className="font-mono"
+                />
+            </div>
+        </div>
+      </AvionCard>
+
+      {/* Compliance Report (Data Grid) */}
+      <div className="mb-12">
+         <ComplianceStatusMatrix checks={defaultChecks} />
+      </div>
+
+      {/* Reference Library (Secondary) */}
+      <div className="border-t border-zinc-200 dark:border-[#333] pt-10">
+        <div className="flex items-center justify-between mb-6">
+            <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
+                <Database size={18} strokeWidth={1.5} className="text-zinc-400" />
+                Regulatory Reference Library
+            </h2>
+        </div>
+
+        <div className="max-w-2xl mb-8">
+             <GrooveInput
+                variant="ceramic"
+                icon={<Search size={16} strokeWidth={1.5} />}
+                placeholder="SEARCH REGULATIONS, COUNTRIES (e.g. 'UK Cabotage'), OR PERMITS..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="font-mono text-sm"
+            />
+        </div>
+
+        {showSearchResults ? (
+            <div className="grid gap-3 max-w-4xl animate-in fade-in slide-in-from-bottom-2 duration-300">
+                {searchResults.slice(0, 8).map((result, idx) => (
+                     <Link 
+                        key={idx} 
+                        href={
+                        result.type === 'regulation' ? `/compliance/regulations/${result.item.id}` :
+                        result.type === 'country' ? `/compliance/countries?q=${result.item.countryCode}` :
+                        '#'
+                        }
+                    >
+                        <div className="group flex items-center gap-4 p-4 bg-white dark:bg-[#2A2A2A] border border-zinc-200 dark:border-[#333] rounded-sm hover:border-[#2563EB] transition-all">
+                            <div className="text-zinc-400 group-hover:text-[#2563EB]">
+                                {result.type === 'country' ? <Globe size={18} /> : <FileText size={18} />}
+                            </div>
+                            <div className="flex-1">
+                                <div className="flex items-center justify-between mb-1">
+                                    <div className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+                                        {result.item.title || result.item.countryName}
+                                    </div>
+                                    <div className="text-[10px] font-mono uppercase tracking-widest text-zinc-400">
+                                        {result.type}
+                                    </div>
+                                </div>
+                                <div className="text-xs text-zinc-500 dark:text-zinc-400 line-clamp-1">
+                                     {result.item.summary || result.item.overview}
+                                </div>
+                            </div>
+                            <ArrowRight size={14} className="text-zinc-300 group-hover:text-[#2563EB]" />
+                        </div>
+                    </Link>
+                ))}
+            </div>
+        ) : (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                 <Link href="/compliance/countries" className="group block">
+                    <AvionCard variant="ceramic" className="h-full hover:border-zinc-300 dark:hover:border-zinc-600 transition-colors">
+                        <div className="flex items-center gap-3 mb-4 text-zinc-500 group-hover:text-zinc-900 dark:group-hover:text-zinc-200 transition-colors">
+                            <Globe size={20} strokeWidth={1.5} />
+                            <span className="text-sm font-semibold">Global Country Database</span>
+                        </div>
+                        <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">
+                            Permit requirements, cabotage rules, and customs procedures for 190+ countries.
+                        </p>
+                    </AvionCard>
+                 </Link>
+
+                  <Link href="/compliance/regulations/crew-duty" className="group block">
+                    <AvionCard variant="ceramic" className="h-full hover:border-zinc-300 dark:hover:border-zinc-600 transition-colors">
+                        <div className="flex items-center gap-3 mb-4 text-zinc-500 group-hover:text-zinc-900 dark:group-hover:text-zinc-200 transition-colors">
+                            <Shield size={20} strokeWidth={1.5} />
+                            <span className="text-sm font-semibold">Crew Duty Limitations</span>
+                        </div>
+                        <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">
+                            FAR 135, EASA ORO.FTL, and CAP 371 flight time and rest requirement calculators.
+                        </p>
+                    </AvionCard>
+                 </Link>
+
+                 <Link href="/compliance/briefings/passenger" className="group block">
+                    <AvionCard variant="ceramic" className="h-full hover:border-zinc-300 dark:hover:border-zinc-600 transition-colors">
+                        <div className="flex items-center gap-3 mb-4 text-zinc-500 group-hover:text-zinc-900 dark:group-hover:text-zinc-200 transition-colors">
+                            <Plane size={20} strokeWidth={1.5} />
+                            <span className="text-sm font-semibold">Passenger Briefings</span>
+                        </div>
+                        <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">
+                            Mandatory pre-flight safety scripts and checklists for various aircraft types.
+                        </p>
+                    </AvionCard>
+                 </Link>
+            </div>
         )}
       </div>
 
-      {/* Search Results Overlay */}
-      {showSearchResults ? (
-        <div className="mt-6 animate-in fade-in slide-in-from-bottom-4 duration-300 max-w-4xl">
-          <h2 className="text-xs font-mono uppercase tracking-widest text-zinc-400 mb-4">
-            {searchResults.length} RESULT{searchResults.length !== 1 ? 'S' : ''} FOUND
-          </h2>
-          <div className="space-y-3">
-            {searchResults.slice(0, 10).map((result, idx) => (
-              <Link 
-                key={idx} 
-                href={
-                  result.type === 'regulation' ? `/compliance/regulations/${result.item.id}` :
-                  result.type === 'country' ? `/compliance/countries?q=${result.item.countryCode}` :
-                  `/compliance/scenarios#${result.item.id}`
-                }
-              >
-                <AvionCard variant="ceramic" className="hover:border-[#2563EB] group transition-colors cursor-pointer">
-                  <div className="flex items-start gap-4">
-                     <div className="mt-0.5 text-zinc-400 group-hover:text-[#2563EB] transition-colors">
-                        {result.type === 'regulation' && <FileText size={18} strokeWidth={1.5} />}
-                        {result.type === 'country' && <Globe size={18} strokeWidth={1.5} />}
-                        {result.type === 'scenario' && <AlertCircle size={18} strokeWidth={1.5} />}
-                     </div>
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between">
-                        <div className="font-semibold text-zinc-900 dark:text-zinc-100 text-sm">
-                            {result.item.title || result.item.countryName}
-                        </div>
-                        <span className="text-[10px] font-mono uppercase text-zinc-400 tracking-widest">
-                            {result.type}
-                        </span>
-                      </div>
-                      <div className="text-xs text-zinc-500 dark:text-zinc-400 mt-1 line-clamp-1 font-normal">
-                        {result.item.summary || result.item.overview || result.item.question}
-                      </div>
-                    </div>
-                    <ChevronRight size={16} strokeWidth={1.5} className="text-zinc-300 group-hover:text-[#2563EB] self-center transition-colors" />
-                  </div>
-                </AvionCard>
-              </Link>
-            ))}
-          </div>
-        </div>
-      ) : (
-        /* Flight Deck Modules Grid */
-        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6 animate-in fade-in duration-500">
-          
-          {/* 1. Compliance Health Prism */}
-          <AvionCard variant="ceramic" className="relative overflow-hidden">
-            <div className="absolute top-6 left-6 text-[10px] font-mono uppercase tracking-widest text-zinc-400">
-              SYSTEM STATUS
-            </div>
-            <div className="mt-8">
-               <ComplianceHealthGauge score={complianceScore} />
-            </div>
-            <div className="mt-6 border-t border-zinc-200 dark:border-[#333] pt-4 flex justify-between items-center">
-               <span className="text-xs text-zinc-500">Last Audit: Today 08:00Z</span>
-               <button className="text-xs font-mono text-[#2563EB] hover:text-[#1e40af] uppercase tracking-wider">View Report →</button>
-            </div>
-          </AvionCard>
-
-          {/* 2. Crew Status Panel */}
-          <AvionCard variant="tungsten">
-             <div className="flex items-center justify-between mb-6">
-                <div className="text-[10px] font-mono uppercase tracking-widest text-zinc-500">
-                  CREW READINESS
-                </div>
-                <div className="h-2 w-2 rounded-full bg-[#10b981] shadow-[0_0_8px_rgba(16,185,129,0.6)] animate-pulse" />
-             </div>
-             
-             <div className="space-y-6">
-                <DutyTimeline crew={crewStatus} />
-                
-                <div className="p-4 bg-[#323232] rounded-sm border border-[#3a3a3a]">
-                    <div className="flex justify-between items-center mb-2">
-                        <span className="text-xs font-semibold text-zinc-300">Rest Period</span>
-                        <span className="text-[10px] font-mono text-zinc-500">REQUIRED</span>
-                    </div>
-                    <div className="flex items-center gap-3">
-                        <div className="text-2xl font-mono font-bold text-zinc-200">10:00</div>
-                        <div className="text-xs text-zinc-500">consecutive hours<br/>pre-duty</div>
-                    </div>
-                </div>
-             </div>
-
-             <div className="mt-6 pt-4 border-t border-[#333] grid grid-cols-2 gap-4">
-                <Link href="/compliance/calculators/crew-duty" className="flex items-center justify-center px-4 py-2 bg-[#F04E30] hover:bg-[#d93e2b] text-white text-xs font-medium uppercase tracking-wider rounded-sm transition-colors">
-                   Calculator
-                </Link>
-                <Link href="/compliance/regulations/crew-duty" className="flex items-center justify-center px-4 py-2 border border-[#333] hover:border-[#555] text-zinc-300 text-xs font-medium uppercase tracking-wider rounded-sm transition-colors">
-                   Regulation
-                </Link>
-             </div>
-          </AvionCard>
-
-          {/* 3. Country Requirements / Active Regions */}
-          <AvionCard variant="ceramic">
-            <div className="flex items-start justify-between mb-6">
-                 <div className="text-[10px] font-mono uppercase tracking-widest text-zinc-400">
-                  ACTIVE REGIONS
-                </div>
-                <Globe size={16} strokeWidth={1.5} className="text-zinc-400" />
-            </div>
-            
-            <div className="space-y-3">
-                {activeRegions.map((region) => (
-                    <div key={region.code} className="flex items-center justify-between p-3 border border-zinc-200 dark:border-[#333] rounded-sm bg-white dark:bg-[#2A2A2A]">
-                        <div className="flex items-center gap-3">
-                            <span className="font-mono text-sm font-bold text-zinc-900 dark:text-zinc-200 w-8">{region.code}</span>
-                            <span className="text-sm text-zinc-600 dark:text-zinc-400">{region.name}</span>
-                        </div>
-                        {region.status === 'compliant' ? (
-                            <div className="px-2 py-0.5 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 text-[10px] font-mono uppercase tracking-wide rounded-sm border border-emerald-200 dark:border-emerald-800/50">
-                                Compliant
-                            </div>
-                        ) : (
-                             <div className="px-2 py-0.5 bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 text-[10px] font-mono uppercase tracking-wide rounded-sm border border-amber-200 dark:border-amber-800/50">
-                                Check
-                            </div>
-                        )}
-                    </div>
-                ))}
-                <div className="p-3 border border-dashed border-zinc-300 dark:border-zinc-700 rounded-sm flex items-center justify-center gap-2 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 cursor-pointer transition-colors">
-                    <span className="text-xs">+ Add Region</span>
-                </div>
-            </div>
-
-             <Link href="/compliance/countries" className="mt-6 block w-full text-center text-xs font-mono text-[#2563EB] hover:text-[#1e40af] uppercase tracking-wider border-t border-zinc-200 dark:border-[#333] pt-4">
-              Global Database →
-            </Link>
-          </AvionCard>
-
-           {/* 4. Passenger Briefing Checklist */}
-           <AvionCard variant="ceramic" className="lg:col-span-2 xl:col-span-1">
-             <div className="flex items-start justify-between mb-6">
-                 <div className="text-[10px] font-mono uppercase tracking-widest text-zinc-400">
-                  PRE-FLIGHT BRIEFING
-                </div>
-                <div className="text-xs font-mono text-zinc-400">FAR 135.117</div>
-            </div>
-
-            <div className="space-y-1">
-                {briefingItems.slice(0, 5).map((item, idx) => (
-                    <div key={item.id} className="group flex items-start gap-3 p-2 hover:bg-zinc-100 dark:hover:bg-[#323232] rounded-sm transition-colors cursor-pointer">
-                         <div className="mt-0.5 h-4 w-4 border border-zinc-300 dark:border-zinc-600 rounded-[2px] flex items-center justify-center group-hover:border-[#2563EB] transition-colors">
-                            {idx < 2 && <Check size={12} className="text-[#2563EB]" />}
-                         </div>
-                         <div className="flex-1">
-                            <div className="text-sm text-zinc-700 dark:text-zinc-300 font-medium group-hover:text-zinc-900 dark:group-hover:text-zinc-100">{item.title}</div>
-                            <div className="text-[11px] text-zinc-400 line-clamp-1">{item.description}</div>
-                         </div>
-                    </div>
-                ))}
-            </div>
-             <Link href="/compliance/briefings/passenger" className="mt-6 block w-full text-center text-xs font-mono text-[#2563EB] hover:text-[#1e40af] uppercase tracking-wider border-t border-zinc-200 dark:border-[#333] pt-4">
-              Launch Checklist Mode →
-            </Link>
-           </AvionCard>
-
-        </div>
-      )}
     </div>
   );
 }

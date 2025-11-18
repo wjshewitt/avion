@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useAppStore } from '@/lib/store';
 import { useFlights } from '@/lib/tanstack/hooks/useFlights';
 import { useFlightAlerts } from '@/lib/tanstack/hooks/useFlightAlerts';
-import { AtmosphereCard } from '@/components/weather/atmospheric/AtmosphereCard';
+import { DashboardAtmosphereCard } from '@/components/weather/DashboardAtmosphereCard';
 import type { WeatherCondition } from '@/components/weather/atmospheric/SkyEngine';
 import { adaptMetarToWeather } from '@/lib/weather/weather-adapter';
 import { RouteMap } from '@/components/map';
@@ -270,19 +270,11 @@ export default function DashboardPage() {
                   onClick={() => router.push(`/weather?icao=${location.code}`)}
                   className="cursor-pointer"
                 >
-                  <AtmosphereCard
+                  <DashboardAtmosphereCard
                     icao={location.code}
                     stationName={location.name}
-                    flightCategory={location.weather.condition} // Using the VFR/IFR string as category
-                    condition={mapWeatherToCondition(location.weather)}
-                    tempC={location.weather.tempCelsius}
-                    windSpeed={location.weather.wind.speed}
-                    windDirection={location.weather.wind.direction.toString()}
-                    visibilitySm={location.weather.visibility}
-                    qnhInHg={location.weather.qnh}
-                    // Fallback hour calculation
-                    hour={new Date().getUTCHours()}
-                    localTime="UTC" 
+                    weather={location.weather}
+                    mapCondition={mapWeatherToCondition}
                   />
                 </div>
               ))}

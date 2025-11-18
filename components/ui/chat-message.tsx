@@ -3,6 +3,7 @@
 import React, { useMemo } from "react"
 import { cva, type VariantProps } from "class-variance-authority"
 import type { ToolUIPart } from "ai"
+import { Terminal, Cpu, ExternalLink } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 import { FilePreview } from "@/components/ui/file-preview"
@@ -12,7 +13,7 @@ import { GenericToolUI } from "@/components/chat/GenericToolUI"
 import { useChatSettings } from "@/lib/chat-settings-store"
 import { ThinkingBlock } from "@/components/chat/ThinkingBlock"
 import { BriefingRenderer } from "@/components/chat/BriefingRenderer"
-import { Sources, SourcesTrigger, SourcesContent, Source } from "@/components/ai/sources"
+import { VerifiedSources } from "@/components/ai/sources"
 import {
   getFileParts,
   getMessageText,
@@ -66,12 +67,12 @@ function removeSources(content: string): string {
 export type { Message }
 
 const chatBubbleVariants = cva(
-"group/message relative break-words p-3 text-sm sm:max-w-[70%]",
+"group/message relative break-words px-5 py-4 text-sm sm:max-w-[85%] rounded-sm",
  {
  variants: {
  isUser: {
- true:"bg-primary text-primary-foreground",
- false:"bg-muted text-foreground",
+ true:"groove bg-background border border-border/50 text-foreground",
+ false:"", // Handled by tungsten-panel
  },
  animation: {
  none:"",
@@ -182,7 +183,18 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
  // User messages are simple
  if (isUser) {
  return (
- <div className={cn("flex flex-col items-end")}>
+ <div className={cn("flex flex-col items-end mb-8 group")}>
+   <div className="flex items-center gap-2 mb-1 opacity-70">
+     <span className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
+       COMMAND INPUT
+     </span>
+     {showTimeStamp && timestamp && (
+       <span className="text-[10px] font-mono text-muted-foreground tabular-nums">
+         {formattedTime}
+       </span>
+     )}
+   </div>
+ 
  {files && files.length > 0 ? (
  <div className="mb-1 flex flex-wrap gap-2">
  {files.map((file: any, index: number) => (
@@ -192,20 +204,12 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
  ) : null}
 
  <div className={cn(chatBubbleVariants({ isUser, animation }))}>
- <MarkdownRenderer>{content}</MarkdownRenderer>
+ <div className="text-sm text-foreground leading-relaxed font-medium">
+   <MarkdownRenderer>{content}</MarkdownRenderer>
  </div>
-
- {showTimeStamp && timestamp ? (
- <time
- dateTime={timestamp.toISOString()}
- className={cn(
-"mt-1 block px-1 text-xs opacity-50",
- animation !=="none" &&"duration-500 animate-in fade-in-0"
- )}
- >
- {formattedTime}
- </time>
- ) : null}
+ {/* Decorative corner bracket for user input */}
+ <div className="absolute -right-1 -bottom-1 w-2 h-2 border-r border-b border-primary/30" />
+ </div>
  </div>
  )
  }
@@ -213,22 +217,34 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
  // Extract sources and clean content
  // ✅ Assistant messages: unified rendering for all cases
  return (
- <div className="flex flex-col items-start gap-3 max-w-full">
- {/* 1. Sources (only if tools were called or explicit citations) */}
- {shouldShowSources && sources && sources.length > 0 && (
- <Sources>
- <SourcesTrigger count={sources.length} />
- <SourcesContent>
- {sources.map((source, i) => (
- <Source
- key={i}
- href="#"
- title={source.description}
- />
- ))}
- </SourcesContent>
- </Sources>
- )}
+ <div className="mb-10 group relative pl-4">
+   {/* Connection Line */}
+   <div className="absolute left-0 top-0 bottom-0 w-px bg-border/50 group-hover:bg-primary/20 transition-colors" />
+
+ <div className="flex flex-col gap-0 max-w-3xl">
+   {/* Header Strip */}
+   <div className="flex items-center justify-between mb-2 pl-1">
+     <div className="flex items-center gap-3">
+       <div className="flex items-center gap-2 bg-zinc-100 dark:bg-zinc-900/50 px-2 py-1 rounded-sm border border-border">
+         <div className="relative flex h-2 w-2">
+           <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
+           <span className="relative inline-flex rounded-full h-2 w-2 bg-[#F04E30]"></span>
+         </div>
+         <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-zinc-700 dark:text-zinc-300">
+           AVION AI // V2.5
+         </span>
+       </div>
+       <span className="text-[10px] font-mono text-muted-foreground hidden sm:inline-block">
+         SYSTEM READOUT
+       </span>
+     </div>
+     
+     {showTimeStamp && timestamp && (
+       <span className="text-[10px] font-mono text-muted-foreground tabular-nums">
+         T+{formattedTime}
+       </span>
+     )}
+   </div>
 
  {/* 2. Thinking/Reasoning block (if present) */}
  {reasoningText && (
@@ -237,51 +253,17 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
 
  {/* 3. Main message container with header */}
  {(cleanContent && cleanContent.trim()) || toolParts.length > 0 ? (
-   <div className="w-full max-w-[85%] rounded-sm overflow-hidden border border-border shadow-sm">
-     {/* Header bar with subtle groove */}
-     <div 
-       className="flex items-center justify-between px-4 py-2 border-b border-border"
-       style={{
-         backgroundColor: 'var(--muted)',
-         boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.05)',
-       }}
-     >
-       <div className="flex items-center gap-2">
-         <span className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">AVION AI</span>
-         <span 
-           className="text-[9px] font-mono px-1.5 py-0.5 rounded-[2px]"
-           style={{
-             backgroundColor: 'rgba(37, 99, 235, 0.1)',
-             color: '#2563EB',
-           }}
-         >
-           2.5F
-         </span>
-       </div>
-       {showTimeStamp && timestamp && (
-         <time
-           dateTime={timestamp.toISOString()}
-           className="text-[10px] font-mono tabular-nums text-muted-foreground"
-         >
-           {formattedTime}
-         </time>
-       )}
-     </div>
+   <div className="tungsten-panel relative overflow-hidden rounded-sm">
+     {/* Scanline Effect */}
+     <div className="scanline-effect opacity-10" />
 
-     {/* Message body with tungsten treatment */}
-     <div 
-       className="p-5 border-l-2"
-       style={{
-         backgroundColor: 'var(--card)',
-         borderLeftColor: '#F04E30',
-         boxShadow: 'inset 1px 0 3px rgba(240, 78, 48, 0.1)',
-       }}
-     >
+     {/* Message body */}
+     <div className="p-6 relative z-10">
        {/* Check if this is a briefing document */}
        {cleanContent && cleanContent.trim() && isBriefingDocument(cleanContent) ? (
          <BriefingRenderer content={cleanContent} />
        ) : cleanContent && cleanContent.trim() ? (
-         <div className="relative">
+         <div className="relative text-sm text-zinc-200 leading-7 tracking-wide">
            <MarkdownRenderer>{cleanContent}</MarkdownRenderer>
            {actions ? (
              <div className="absolute -bottom-4 right-2 flex space-x-1 border border-border rounded-sm bg-background p-1 text-foreground opacity-0 transition-opacity group-hover/message:opacity-100 shadow-sm">
@@ -293,12 +275,30 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
 
        {/* Tool invocations inside message body */}
        {toolParts.length > 0 && (
-         <div className={cn("flex flex-col gap-2", cleanContent && cleanContent.trim() && "mt-4")}>
+         <div className={cn("flex flex-col gap-2", cleanContent && cleanContent.trim() && "mt-4 pt-4 border-t border-white/5")}>
            {toolParts.map((part) => (
              <ToolInvocationRenderer key={part.toolCallId} part={part} />
            ))}
          </div>
        )}
+     </div>
+
+     {/* Sources Data Grid */}
+     {shouldShowSources && sources && sources.length > 0 && (
+        <VerifiedSources sources={sources} />
+     )}
+     
+     {/* Footer Status Bar */}
+     <div className="h-6 bg-black/40 border-t border-white/5 flex items-center justify-between px-3 relative z-10">
+       <div className="flex items-center gap-4">
+          <span className="text-[9px] font-mono text-zinc-600 uppercase">
+            STATUS: NOMINAL
+          </span>
+          <span className="text-[9px] font-mono text-zinc-600 uppercase">
+            LATENCY: 24ms
+          </span>
+       </div>
+       <Cpu size={10} className="text-zinc-700" />
      </div>
    </div>
  ) : null}
@@ -316,6 +316,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
  </time>
  )}
  </div>
+ </div>
  )
 }
 
@@ -329,13 +330,10 @@ function ToolInvocationRenderer({ part }: { part: ToolUIPart }) {
  if (part.state === "input-streaming" || part.state === "input-available") {
  return (
  <div 
-   className="border border-border bg-muted/30 px-3 py-2 text-sm text-muted-foreground rounded-sm flex items-center gap-2"
-   style={{
-     boxShadow: 'inset 1px 1px 3px rgba(0,0,0,0.08), inset -1px -1px 3px rgba(255,255,255,0.05)'
-   }}
+   className="border border-white/10 bg-white/5 px-3 py-2 text-sm text-zinc-300 rounded-sm flex items-center gap-2"
  >
- <div className="animate-spin h-4 w-4 border-2 border-current border-t-transparent rounded-full" />
- <span className="font-mono text-xs">Calling {toolName}...</span>
+ <div className="animate-spin h-3 w-3 border-2 border-primary border-t-transparent rounded-full" />
+ <span className="font-mono text-xs uppercase tracking-wider">Calling {toolName}...</span>
  </div>
  )
  }
@@ -344,12 +342,9 @@ function ToolInvocationRenderer({ part }: { part: ToolUIPart }) {
  if (part.state === "output-error") {
  return (
  <div 
-   className="border border-destructive bg-destructive/10 px-3 py-2 text-sm rounded-sm"
-   style={{
-     boxShadow: 'inset 1px 1px 3px rgba(0,0,0,0.08), inset -1px -1px 3px rgba(255,255,255,0.05)'
-   }}
+   className="border border-destructive/50 bg-destructive/10 px-3 py-2 text-sm rounded-sm"
  >
- <span className="text-destructive font-mono text-xs">Error in {toolName}</span>
+ <span className="text-destructive font-mono text-xs">ERROR: {toolName} FAILURE</span>
  </div>
  )
  }
@@ -361,12 +356,9 @@ function ToolInvocationRenderer({ part }: { part: ToolUIPart }) {
  if (data && typeof data === 'object' && '__cancelled' in data) {
   return (
     <div 
-      className="border border-border bg-muted/30 px-3 py-2 text-sm text-muted-foreground rounded-sm"
-      style={{
-        boxShadow: 'inset 1px 1px 3px rgba(0,0,0,0.08), inset -1px -1px 3px rgba(255,255,255,0.05)'
-      }}
+      className="border border-white/10 bg-white/5 px-3 py-2 text-sm text-zinc-400 rounded-sm"
     >
-      <span className="font-mono text-xs">Tool execution was cancelled.</span>
+      <span className="font-mono text-xs">PROCESS CANCELLED</span>
     </div>
   )
  }
@@ -411,3 +403,4 @@ function dataUrlToUint8Array(data: string) {
  const buf = Buffer.from(base64, "base64")
  return new Uint8Array(buf)
 }
+
