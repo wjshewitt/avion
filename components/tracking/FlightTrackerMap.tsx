@@ -28,6 +28,14 @@ const INITIAL_VIEW_STATE: MapViewState = {
   bearing: 0
 };
 
+// Helper to get color based on altitude
+function getAltitudeColor(altitude: number, onGround: boolean): [number, number, number] {
+  if (onGround || altitude < 50) return [128, 128, 128]; // Grey (Ground)
+  if (altitude < 10000) return [240, 78, 48]; // Orange (Low)
+  if (altitude < 30000) return [14, 165, 233]; // Cyan (Mid)
+  return [99, 102, 241]; // Indigo/Purple (High)
+}
+
 export default function FlightTrackerMap() {
   const [mounted, setMounted] = useState(false);
   const [viewState, setViewState] = useState<MapViewState>(INITIAL_VIEW_STATE);
@@ -103,7 +111,7 @@ export default function FlightTrackerMap() {
       getSize: d => 32,
       getPosition: d => [d.lon, d.lat, d.altitude],
       getAngle: d => -d.heading, // Correct rotation for nose-up icon
-      getColor: d => [255, 140, 0], // Safety Orange
+      getColor: d => getAltitudeColor(d.altitude, d.onGround),
       transitions: {
         getPosition: 1000, // Smooth transition over 1 second
         getAngle: 1000
