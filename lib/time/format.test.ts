@@ -13,6 +13,11 @@ describe("time formatting", () => {
     expect(local).toMatch(/\d{2}:\d{2}.*(EDT|EST)/);
   });
 
+  it("produces accurate local time for JFK november sample", () => {
+    const sample = new Date(Date.UTC(2025, 10, 18, 0, 51, 0));
+    expect(formatLocalWithTz(sample, "America/New_York")).toBe("19:51 EST");
+  });
+
   it("describes offsets and dst usage", () => {
     const offsets = describeTimezoneOffsets("America/New_York");
     expect(typeof offsets.standardOffsetMinutes).toBe("number");

@@ -1,6 +1,6 @@
 import { tool } from 'ai';
 import { z } from 'zod';
-import { runExaAnswer, runExaStructuredAnswer } from '@/lib/ai/chat/exa-client';
+import { runExaAnswer, runExaStructuredAnswer, type AnswerCitation } from '@/lib/ai/chat/exa-client';
 import type { StructuredIntelEntriesPayload } from '@/lib/intel/schema';
 import { detectEntityFromQuery } from '@/lib/intel/entity-detection';
 import { enqueueIntelCandidate } from '@/lib/intel/ingestion-queue';
@@ -23,17 +23,12 @@ const WebSearchInputSchema = z.object({
     .describe('Additional context to include in the search prompt'),
 });
 
-function formatCitations(citations: Array<{
-  title?: string;
-  url: string;
-  author?: string | null;
-  publishedDate?: string | null;
-}>): string {
+function formatCitations(citations: AnswerCitation[]): string {
   if (citations.length === 0) return '';
 
   const formattedList = citations
     .map((citation, index) => {
-      const title = citation.title || 'Untitled';
+      const title = citation.title ?? 'Untitled';
       const metadata: string[] = [];
       
       if (citation.author) metadata.push(citation.author);

@@ -14,6 +14,18 @@ describe("solar calculations", () => {
     expect(solar.sunsetUtc).toBeInstanceOf(Date);
   });
 
+  it("returns realistic local sunrise/sunset strings", () => {
+    const solar = getSolarTimes({
+      latitude: 40.6413,
+      longitude: -73.7781,
+      timezone: "America/New_York",
+      date: new Date(Date.UTC(2025, 10, 17, 23, 51, 0)),
+    });
+
+    expect(solar.sunriseLocal).toBe("06:45 EST");
+    expect(solar.sunsetLocal).toBe("16:37 EST");
+  });
+
   it("detects day segments", () => {
     const solar = getSolarTimes({
       latitude: 51.47,

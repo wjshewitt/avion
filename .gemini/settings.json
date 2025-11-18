@@ -1,0 +1,11 @@
+{
+  "general": {
+    "previewFeatures": true
+  },
+  "ui": {
+    "showMemoryUsage": true
+  },
+  "experimental": {
+    "useModelRouter": false
+  }
+}

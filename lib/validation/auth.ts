@@ -1,12 +1,14 @@
 import { z } from 'zod';
 
 const emailSchema = z
-  .string({ required_error: 'Email is required' })
+  .string()
   .trim()
+  .min(1, { message: 'Email is required' })
   .email('Enter a valid email');
 
 const passwordSchema = z
-  .string({ required_error: 'Password is required' })
+  .string()
+  .min(1, { message: 'Password is required' })
   .min(8, 'Password must be at least 8 characters');
 
 export const loginSchema = z.object({
@@ -20,7 +22,7 @@ export const signupSchema = z
   .object({
     email: emailSchema,
     password: passwordSchema,
-    confirmPassword: z.string({ required_error: 'Confirm your password' }),
+    confirmPassword: z.string().min(1, { message: 'Confirm your password' }),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: 'Passwords must match',

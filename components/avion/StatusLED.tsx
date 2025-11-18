@@ -1,10 +1,13 @@
 "use client";
 
-/**
- * @param {'success' | 'warning' | 'danger' | 'offline'} variant
- */
-export const StatusLED = ({ variant = 'offline' }) => {
-  const colors = {
+type StatusVariant = 'success' | 'warning' | 'danger' | 'offline';
+
+interface StatusLEDProps {
+  variant?: StatusVariant;
+}
+
+export const StatusLED = ({ variant = 'offline' }: StatusLEDProps) => {
+  const colors: Record<StatusVariant, string> = {
     success: 'text-emerald-500',
     warning: 'text-amber-500',
     danger: 'text-[#F04E30]',

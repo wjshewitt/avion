@@ -146,3 +146,97 @@ export interface SigmetEnriched extends SigmetData {
     | "wind_shear"
     | "other";
 }
+
+export type HazardKind =
+  | "sigmet"
+  | "isigmet"
+  | "airsigmet"
+  | "gairmet"
+  | "cwa"
+  | "tcf"
+  | "pirep";
+
+export type HazardSeverity =
+  | "info"
+  | "low"
+  | "moderate"
+  | "high"
+  | "extreme"
+  | "unknown";
+
+export interface HazardAltitudeRange {
+  lowerFt?: number | null;
+  upperFt?: number | null;
+}
+
+export type HazardGeometryType = "Polygon" | "MultiPolygon" | "Point";
+
+export interface HazardGeometry {
+  type: HazardGeometryType;
+  coordinates: number[][][] | number[][][][] | number[];
+  centroid?: [number, number];
+}
+
+export interface HazardFeatureNormalized {
+  id: string;
+  kind: HazardKind;
+  name?: string;
+  severity: HazardSeverity;
+  narrative?: string;
+  validFrom?: string;
+  validTo?: string;
+  issuedAt?: string;
+  region?: string;
+  altitude?: HazardAltitudeRange;
+  movement?: {
+    direction?: number | null;
+    speedKt?: number | null;
+  };
+  geometry?: HazardGeometry | null;
+  rawText?: string;
+}
+
+export type PirepSeverity = "light" | "moderate" | "severe" | "extreme" | "unknown";
+
+export interface PilotReport {
+  id: string;
+  observedAt?: string;
+  aircraftRef?: string;
+  altitudeFtMsl?: number | null;
+  latitude?: number | null;
+  longitude?: number | null;
+  turbulence?: PirepSeverity;
+  icing?: PirepSeverity;
+  weather?: string | null;
+  skyCondition?: string | null;
+  temperatureC?: number | null;
+  rawText?: string | null;
+}
+
+export interface StationInfo {
+  icaoId: string;
+  name?: string;
+  city?: string | null;
+  state?: string | null;
+  country?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
+  elevationFt?: number | null;
+  timezone?: string | null;
+  runwaySummary?: Array<{
+    id?: string;
+    lengthFt?: number | null;
+    surface?: string | null;
+  }>;
+  siteTypes?: string[];
+}
+
+export type WeatherSource = "checkwx" | "awc-fallback";
+
+export interface ProviderTaggedMetar extends MetarData {
+  source: WeatherSource;
+}
+
+export interface ProviderTaggedTaf extends TafData {
+  source: WeatherSource;
+}

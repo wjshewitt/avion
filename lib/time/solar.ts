@@ -1,3 +1,4 @@
+import { DateTime } from "luxon";
 import { getTimes } from "suncalc";
 import { formatDateKey, formatLocalWithTz, formatZulu } from "./format";
 
@@ -32,17 +33,18 @@ export function getSolarTimes(args: {
   date?: Date;
 }): SolarSnapshot {
   const { latitude, longitude, timezone } = args;
-  const targetDate = args.date ? new Date(args.date) : new Date();
-  const cacheKey = formatDateKey(targetDate, timezone);
+  const targetDate = args.date
+    ? DateTime.fromJSDate(args.date).setZone(timezone)
+    : DateTime.now().setZone(timezone);
+  const localMidday = targetDate.startOf("day").plus({ hours: 12 });
+  const cacheKey = formatDateKey(localMidday.toJSDate(), timezone);
 
   const cached = SOLAR_CACHE.get(cacheKey);
   if (cached && cached.expiresAt > Date.now()) {
     return cached.data;
   }
 
-  const baseDate = new Date(targetDate);
-  // Normalize to midnight local date to avoid day drift
-  baseDate.setUTCHours(12, 0, 0, 0);
+  const baseDate = localMidday.toJSDate();
 
   const times = getTimes(baseDate, latitude, longitude);
   const snapshot: SolarSnapshot = {

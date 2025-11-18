@@ -1,4 +1,5 @@
 import type { DecodedMetar, DecodedTaf } from "@/types/checkwx";
+import type { HazardFeatureNormalized, PilotReport } from "@/types/weather";
 
 export type Phase = "preflight" | "planning" | "departure" | "enroute" | "arrival";
 
@@ -9,6 +10,8 @@ export interface RiskInputs {
   metar?: DecodedMetar;
   taf?: DecodedTaf;
   now: Date;
+  hazards?: HazardFeatureNormalized[];
+  pireps?: PilotReport[];
 }
 
 export interface WeatherRiskFactorResult {

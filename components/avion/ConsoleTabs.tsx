@@ -3,14 +3,15 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 
-/**
- * @param {Array<string>} tabs - An array of tab names.
- * @param {function} onTabChange - Callback (receives index of new tab).
- */
-export const ConsoleTabs = ({ tabs, onTabChange }) => {
+interface ConsoleTabsProps {
+  tabs: string[];
+  onTabChange?: (index: number) => void;
+}
+
+export const ConsoleTabs = ({ tabs, onTabChange }: ConsoleTabsProps) => {
   const [selectedTab, setSelectedTab] = useState(0);
 
-  const handleSelect = (index) => {
+  const handleSelect = (index: number) => {
     setSelectedTab(index);
     if (onTabChange) onTabChange(index);
   };

@@ -1,8 +1,10 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { X } from "lucide-react";
 import type { CloudLayerState, CloudMotion, CloudCoverageCategory } from "@/lib/weather/clouds";
+import type { NaturalLanguageSummary } from "@/lib/weather/natural-language";
 
 export type AtmosphereVariant =
   | "sunny"
@@ -22,6 +24,8 @@ interface WeatherContainerProps {
   temp: number | null | undefined;
   visibilitySm?: number | null;
   qnhInHg?: number | null;
+  localTime?: string | null;
+  naturalLanguage?: NaturalLanguageSummary;
   onUnpin?: (icao: string) => void;
 }
 
@@ -44,8 +48,12 @@ const WeatherContainer = ({
   temp,
   visibilitySm,
   qnhInHg,
+  localTime,
+  naturalLanguage,
   onUnpin,
 }: WeatherContainerProps) => {
+  const [isHovered, setIsHovered] = useState(false);
+
   const handleUnpin = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (onUnpin) {
@@ -64,11 +72,18 @@ const WeatherContainer = ({
         dark:border-zinc-700
         hover:border-[--accent-primary]
       `}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
       <div className="relative z-10 flex justify-between items-start">
         <div>
           <div className="font-mono text-xl font-bold text-foreground">{icao}</div>
           <div className="text-xs text-muted-foreground">{stationName}</div>
+          {localTime && (
+            <div className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground mt-1 opacity-80">
+              {localTime}
+            </div>
+          )}
         </div>
         <div className="flex items-center gap-2">
           {flightCategory && (
@@ -91,6 +106,30 @@ const WeatherContainer = ({
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         {children}
       </div>
+      
+      {/* Hover overlay with natural language summary */}
+      <AnimatePresence>
+        {isHovered && naturalLanguage && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15, ease: "easeOut" }}
+            className="absolute inset-0 z-20 bg-black/70 backdrop-blur-lg p-6 flex flex-col justify-center pointer-events-none"
+          >
+            <div className="space-y-3">
+              <p className="text-lg font-medium leading-relaxed text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
+                {naturalLanguage.current}
+              </p>
+              {naturalLanguage.forecast && (
+                <p className="text-base leading-relaxed text-white/80 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
+                  {naturalLanguage.forecast}
+                </p>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
       
       {/* Text contrast overlay for better readability */}
       <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-black/40 to-transparent dark:from-black/60 pointer-events-none" />
@@ -343,15 +382,15 @@ interface CloudEffectProps {
 }
 
 const CloudEffect = ({ cloud }: CloudEffectProps) => {
-  const motion: CloudMotion = cloud?.motion ?? "calm";
+  const cloudMotion: CloudMotion = cloud?.motion ?? "calm";
   const category: CloudCoverageCategory = cloud?.category ?? "scattered";
   const baseOpacity = cloud?.opacity ?? 0.18;
 
   const motionConfig = (() => {
-    if (motion === "windy") {
+    if (cloudMotion === "windy") {
       return { amplitude: 40, durationBase: 14 };
     }
-    if (motion === "breezy") {
+    if (cloudMotion === "breezy") {
       return { amplitude: 28, durationBase: 18 };
     }
     return { amplitude: 18, durationBase: 24 };
@@ -494,6 +533,8 @@ export interface AvionAtmosphereCardProps {
   isNight: boolean;
   visibilitySm?: number | null;
   qnhInHg?: number | null;
+  localTime?: string | null;
+  naturalLanguage?: NaturalLanguageSummary;
   onUnpin?: (icao: string) => void;
   cloudState?: CloudLayerState;
 }
@@ -507,6 +548,8 @@ export function AvionAtmosphereCard({
   isNight,
   visibilitySm,
   qnhInHg,
+  localTime,
+  naturalLanguage,
   onUnpin,
   cloudState,
 }: AvionAtmosphereCardProps) {
@@ -517,6 +560,8 @@ export function AvionAtmosphereCard({
     temp: tempC ?? null,
     visibilitySm,
     qnhInHg,
+    localTime,
+    naturalLanguage,
     onUnpin,
   };
 

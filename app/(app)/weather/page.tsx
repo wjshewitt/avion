@@ -1,40 +1,29 @@
 'use client';
 
-import { useState, useMemo } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useMemo, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Cloud, Wind, Eye, Thermometer, AlertTriangle, Loader2, ArrowLeftRight, MapPin } from 'lucide-react';
 import { useCompleteWeather, useMetar } from "@/lib/tanstack/hooks/useWeather";
 import { useFlights } from "@/lib/tanstack/hooks/useFlights";
 import { useWeatherRisk } from "@/lib/tanstack/hooks/useWeatherRisk";
-import type { DecodedMetar, DecodedTaf, TafForecastPeriod, WindData, VisibilityData, CloudLayer } from "@/types/checkwx";
+import type { DecodedMetar, DecodedTaf, TafForecastPeriod } from "@/types/checkwx";
+import type { HazardFeatureNormalized, PilotReport } from "@/types/weather";
+import type { BoundingBox } from "@/lib/weather/awc";
 import { getUserFriendlyErrorMessage } from '@/lib/utils/errors';
 import { AvionTabs } from '@/components/ui/avion-tabs';
 import { WeatherAirportSearchInput } from '@/components/weather/WeatherAirportSearchInput';
 import { PinnedAtmosphereCard } from '@/components/weather/PinnedAtmosphereCard';
+import { WeatherSummaryText } from '@/components/weather/WeatherSummaryText';
 import { useAppStore } from '@/lib/store';
+import { useStore as useRootStore, type SpeedUnit, type DistanceUnit } from '@/store';
+import { formatWindDisplay, formatVisibilityDisplay, formatCloudsDisplay } from '@/lib/weather/formatting';
+import { formatHazardSentence } from '@/lib/weather/natural-language-hazards';
+import { useAwcHazardFeed, useAwcPireps } from "@/lib/tanstack/hooks/useWeatherHazards";
+import { useAirportTemporalProfile } from "@/lib/tanstack/hooks/useTemporalProfile";
+import { selectAtmosphereCard } from "@/lib/weather/avionAtmosphereMapping";
 
 // --- Helper Functions ---
 const normalizeIcao = (value: string) => value.trim().replace(/[^a-z0-9]/gi, "").toUpperCase().slice(0, 4);
-
-function formatWindCompact(w?: WindData): string {
-  if (!w) return "Calm";
-  const dir = w.degrees !== undefined ? `${w.degrees.toString().padStart(3, "0")}°` : "VRB";
-  const spd = w.speed_kts !== undefined ? `${w.speed_kts} kt` : "0 kt";
-  const gst = w.gust_kts ? ` (G${w.gust_kts})` : "";
-  return `${dir} @ ${spd}${gst}`;
-}
-
-function formatVisibilityCompact(v?: VisibilityData): string {
-  if (!v) return "—";
-  const miles = v.miles_float ?? (typeof v.miles === "number" ? v.miles : undefined);
-  if (miles !== undefined) return `${miles.toFixed(1)} SM`;
-  return v.miles_text || v.meters_text || "—";
-}
-
-function formatCloudsCompact(clouds?: CloudLayer[]): string {
-  if (!clouds || clouds.length === 0) return "Clear";
-  return clouds.map(c => `${c.code}${c.base_feet_agl ? ` ${c.base_feet_agl.toLocaleString()}` : ""}`).join(" / ");
-}
 
 const getFlightCategoryClass = (category?: string) => {
   switch (category) {
@@ -67,10 +56,49 @@ const getRiskColor = (tier?: string | null) => {
   return "bg-zinc-700";
 };
 
+const hazardFeedDisplay = [
+  { id: "sigmet", label: "SIGMET", description: "Severe enroute hazards" },
+  { id: "gairmet", label: "G-AIRMET", description: "Regional icing/turbulence" },
+  { id: "cwa", label: "CWA", description: "Center weather advisories" },
+] as const;
+
+const hazardSeverityOrder: Record<string, number> = {
+  extreme: 5,
+  high: 4,
+  moderate: 3,
+  low: 2,
+  info: 1,
+  unknown: 0,
+};
+
+const hazardSeverityClasses: Record<string, string> = {
+  extreme: "bg-red-600/10 text-red-500 border border-red-500/30",
+  high: "bg-orange-500/10 text-orange-500 border border-orange-500/30",
+  moderate: "bg-amber-500/10 text-amber-500 border border-amber-500/30",
+  low: "bg-emerald-500/10 text-emerald-500 border border-emerald-500/30",
+  info: "bg-blue-500/10 text-blue-500 border border-blue-500/30",
+  unknown: "bg-muted text-muted-foreground border border-border",
+};
+
+const deriveBoundingBox = (coords?: [number, number] | null): BoundingBox | undefined => {
+  if (!coords) return undefined;
+  const [lon, lat] = coords;
+  if (!Number.isFinite(lon) || !Number.isFinite(lat)) return undefined;
+  return {
+    west: lon - 5,
+    east: lon + 5,
+    south: lat - 3,
+    north: lat + 3,
+  };
+};
+
 // --- Main Page Component ---
 export default function WeatherPage() {
   const [selectedTab, setSelectedTab] = useState('airport');
   const { pinnedAirports } = useAppStore();
+  const weatherViewMode = useRootStore((s) => s.weatherViewMode);
+  const weatherUnits = useRootStore((s) => s.weatherUnits);
+  const isSimplified = weatherViewMode === 'standard';
 
   const tabs = [
     { id: 'airport', label: 'Airport' },
@@ -114,8 +142,18 @@ export default function WeatherPage() {
       <AvionTabs tabs={tabs} selectedTab={selectedTab} onSelectTab={setSelectedTab} />
 
       <div className="mt-8">
-        {selectedTab === 'airport' && <AirportWeatherTab />}
-        {selectedTab === 'route' && <RouteWeatherTab />}
+        {selectedTab === 'airport' && (
+          <AirportWeatherTab
+            isSimplified={isSimplified}
+            weatherUnits={weatherUnits}
+          />
+        )}
+        {selectedTab === 'route' && (
+          <RouteWeatherTab
+            isSimplified={isSimplified}
+            weatherUnits={weatherUnits}
+          />
+        )}
         {selectedTab === 'location' && <LocationWeatherTab />}
       </div>
     </div>
@@ -123,9 +161,23 @@ export default function WeatherPage() {
 }
 
 // --- Airport Weather Tab ---
-function AirportWeatherTab() {
+interface WeatherUnitsProps {
+  isSimplified: boolean;
+  weatherUnits: { speed: SpeedUnit; visibility: DistanceUnit };
+}
+
+function AirportWeatherTab({ isSimplified, weatherUnits }: WeatherUnitsProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [activeAirportCode, setActiveAirportCode] = useState("KJFK");
+
+  // Check for icao query parameter and set it as active airport
+  useEffect(() => {
+    const icaoParam = searchParams.get('icao');
+    if (icaoParam && icaoParam.length === 4) {
+      setActiveAirportCode(icaoParam.toUpperCase());
+    }
+  }, [searchParams]);
 
   const { metar, taf, station, loading, error, refetch } = useCompleteWeather({
     icao: activeAirportCode.length === 4 ? activeAirportCode : "",
@@ -150,12 +202,78 @@ function AirportWeatherTab() {
     { enabled: activeAirportCode.length === 4 }
   );
 
+  const { data: temporalProfile } = useAirportTemporalProfile(activeAirportCode, {
+    enabled: Boolean(activeAirportCode && activeAirportCode.length === 4),
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const atmosphere = useMemo(() => {
+    if (!metar) return undefined;
+    return selectAtmosphereCard({
+      metar: metar ?? undefined,
+      taf: taf ?? undefined,
+      isNightOverride: temporalProfile ? !temporalProfile.sun.isDaylight : undefined,
+    });
+  }, [metar, taf, temporalProfile]);
+
+  const hazardBbox = useMemo(() => {
+    const coords =
+      (station?.geometry?.coordinates as [number, number] | undefined) ??
+      (metar?.station?.geometry?.coordinates as [number, number] | undefined);
+    return deriveBoundingBox(coords ?? null);
+  }, [station, metar]);
+
+  const sigmetQuery = useAwcHazardFeed("sigmet", {
+    bbox: hazardBbox,
+    enabled: Boolean(hazardBbox),
+    hours: 4,
+  });
+  const gairmetQuery = useAwcHazardFeed("gairmet", {
+    bbox: hazardBbox,
+    enabled: Boolean(hazardBbox),
+    hours: 6,
+  });
+  const cwaQuery = useAwcHazardFeed("cwa", {
+    bbox: hazardBbox,
+    enabled: Boolean(hazardBbox),
+    hours: 2,
+  });
+  const pirepQuery = useAwcPireps({
+    bbox: hazardBbox,
+    enabled: Boolean(hazardBbox),
+    hours: 3,
+  });
+
+  const hazards = useMemo(() => {
+    return [
+      ...(sigmetQuery.data ?? []),
+      ...(gairmetQuery.data ?? []),
+      ...(cwaQuery.data ?? []),
+    ];
+  }, [sigmetQuery.data, gairmetQuery.data, cwaQuery.data]);
+
+  const hazardLoading =
+    sigmetQuery.isLoading ||
+    gairmetQuery.isLoading ||
+    cwaQuery.isLoading ||
+    (Boolean(hazardBbox) && pirepQuery.isLoading);
+  const hazardError =
+    sigmetQuery.error || gairmetQuery.error || cwaQuery.error || pirepQuery.error;
+
+  const handleAirportSelect = (icao: string) => {
+    setActiveAirportCode(icao);
+    // Clear the URL parameter when user performs a new search
+    const url = new URL(window.location.href);
+    url.searchParams.delete('icao');
+    window.history.replaceState({}, '', url.toString());
+  };
+
   return (
     <div className="animate-in fade-in duration-300">
       <div className="bg-card border border-border rounded-sm p-6 mb-8">
         <div className="text-[10px] font-mono uppercase tracking-[0.2em] text-muted-foreground mb-4">AIRPORT SEARCH</div>
         <WeatherAirportSearchInput
-          onAirportSelect={(icao) => setActiveAirportCode(icao)}
+          onAirportSelect={handleAirportSelect}
           placeholder="Search airports by code, city, or name..."
           autoFocus
         />
@@ -166,8 +284,35 @@ function AirportWeatherTab() {
 
       {!loading.any && !error.any && metar && (
         <div className="space-y-8 animate-in fade-in duration-500">
-          <MetarDisplay metar={metar} station={station} />
-          {taf && <TafDisplay taf={taf} />}
+          <MetarDisplay 
+            metar={metar} 
+            station={station}
+            taf={taf ?? undefined}
+            hazards={hazards}
+            pireps={pirepQuery.data ?? []}
+            atmosphere={atmosphere?.variant}
+            temporalProfile={temporalProfile}
+            isSimplified={isSimplified}
+            weatherUnits={weatherUnits}
+          />
+          
+          {hazardBbox && (
+            <HazardAwarenessPanel
+              bbox={hazardBbox}
+              hazards={hazards}
+              hazardLoading={hazardLoading}
+              hazardError={hazardError}
+              pireps={pirepQuery.data ?? []}
+              isSimplified={isSimplified}
+            />
+          )}
+          {taf && (
+            <TafDisplay
+              taf={taf}
+              isSimplified={isSimplified}
+              weatherUnits={weatherUnits}
+            />
+          )}
           {departingFlights.length > 0 && <DepartingFlightsDisplay flights={departingFlights} router={router} />}
           {riskData && <RiskAssessmentDisplay riskData={riskData} riskLoading={riskLoading} />}
         </div>
@@ -177,7 +322,7 @@ function AirportWeatherTab() {
 }
 
 // --- Route Weather Tab ---
-function RouteWeatherTab() {
+function RouteWeatherTab({ isSimplified, weatherUnits }: WeatherUnitsProps) {
   const router = useRouter();
   const [departureInput, setDepartureInput] = useState("KJFK");
   const [arrivalInput, setArrivalInput] = useState("KLAX");
@@ -232,8 +377,22 @@ function RouteWeatherTab() {
       
       {!isLoading && !isError && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 animate-in fade-in duration-500">
-          <RouteMetarCard label="Departure" icao={normalizeIcao(departureInput)} metar={departureMetar} router={router} />
-          <RouteMetarCard label="Arrival" icao={normalizeIcao(arrivalInput)} metar={arrivalMetar} router={router} />
+          <RouteMetarCard
+            label="Departure"
+            icao={normalizeIcao(departureInput)}
+            metar={departureMetar}
+            router={router}
+            isSimplified={isSimplified}
+            weatherUnits={weatherUnits}
+          />
+          <RouteMetarCard
+            label="Arrival"
+            icao={normalizeIcao(arrivalInput)}
+            metar={arrivalMetar}
+            router={router}
+            isSimplified={isSimplified}
+            weatherUnits={weatherUnits}
+          />
         </div>
       )}
     </div>
@@ -277,7 +436,36 @@ const ErrorState = ({ error, onRetry }: { error: any, onRetry: () => void }) => 
   </div>
 );
 
-const MetarDisplay = ({ metar, station }: { metar: DecodedMetar, station: any }) => (
+const MetarDisplay = ({ 
+  metar, 
+  station,
+  taf,
+  hazards,
+  pireps,
+  atmosphere,
+  temporalProfile,
+  isSimplified,
+  weatherUnits,
+}: { 
+  metar: DecodedMetar;
+  station: any;
+  taf?: DecodedTaf;
+  hazards?: HazardFeatureNormalized[];
+  pireps?: PilotReport[];
+  atmosphere?: any;
+  temporalProfile?: any;
+  isSimplified?: boolean;
+  weatherUnits?: { speed: SpeedUnit; visibility: DistanceUnit };
+}) => {
+  const mode = (isSimplified ? 'simplified' : 'technical') as 'simplified' | 'technical';
+  const speedUnit = weatherUnits?.speed ?? 'kt';
+  const visibilityUnit = weatherUnits?.visibility ?? 'mi';
+  const opts = { mode, speedUnit, visibilityUnit } as const;
+  const windFormatted = formatWindDisplay(metar.wind, opts);
+  const visibilityFormatted = formatVisibilityDisplay(metar.visibility, opts);
+  const cloudsFormatted = formatCloudsDisplay(metar.clouds, opts);
+
+  return (
   <div className="bg-card border border-border rounded-sm p-6 relative overflow-hidden">
     <div className="relative z-10">
       <div className="flex justify-between items-start">
@@ -291,29 +479,50 @@ const MetarDisplay = ({ metar, station }: { metar: DecodedMetar, station: any })
       </div>
       <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
         <MetricDisplay icon={Thermometer} label="Temperature" value={`${metar.temperature?.celsius.toFixed(0) ?? '--'}°C`} detail={`Dewpoint: ${metar.dewpoint?.celsius.toFixed(0) ?? '--'}°C`} />
-        <MetricDisplay icon={Wind} label="Wind" value={formatWindCompact(metar.wind)} />
-        <MetricDisplay icon={Eye} label="Visibility" value={formatVisibilityCompact(metar.visibility)} />
-        <MetricDisplay icon={Cloud} label="Clouds" value={formatCloudsCompact(metar.clouds)} />
+        <MetricDisplay icon={Wind} label="Wind" value={windFormatted.primary} detail={windFormatted.secondary} />
+        <MetricDisplay icon={Eye} label="Visibility" value={visibilityFormatted} />
+        <MetricDisplay icon={Cloud} label="Clouds" value={cloudsFormatted} />
       </div>
-      <div className="mt-8 pt-4 border-t border-border">
-        <div className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground mb-2">RAW METAR</div>
-        <p className="font-mono text-sm text-muted-foreground">{metar.raw_text}</p>
-      </div>
+      
+      <WeatherSummaryText
+        metar={metar}
+        taf={taf}
+        hazards={hazards ?? []}
+        pireps={pireps ?? []}
+        atmosphere={atmosphere}
+        temporalProfile={temporalProfile}
+      />
+      {!isSimplified && (
+        <div className="mt-8 pt-4 border-t border-border">
+          <div className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground mb-2">RAW METAR</div>
+          <p className="font-mono text-sm text-muted-foreground">{metar.raw_text}</p>
+        </div>
+      )}
     </div>
   </div>
-);
+  );
+};
 
-const TafDisplay = ({ taf }: { taf: DecodedTaf }) => (
+const TafDisplay = ({ taf, isSimplified, weatherUnits }: { taf: DecodedTaf; isSimplified?: boolean; weatherUnits?: { speed: SpeedUnit; visibility: DistanceUnit } }) => (
   <div className="bg-card border border-border rounded-sm p-6">
     <div className="text-[10px] font-mono uppercase tracking-[0.2em] text-muted-foreground mb-1">TERMINAL AERODROME FORECAST</div>
     <div className="font-mono text-xs text-muted-foreground mb-4">Issued: {taf.issued ? new Date(taf.issued).toLocaleString() : 'N/A'}</div>
     <div className="space-y-4">
-      {taf.forecast?.map((period, index) => <TafPeriod key={index} period={period} />) ?? <p className="text-sm text-muted-foreground">No forecast periods available</p>}
+      {taf.forecast?.map((period, index) => (
+        <TafPeriod
+          key={index}
+          period={period}
+          isSimplified={isSimplified}
+          weatherUnits={weatherUnits}
+        />
+      )) ?? <p className="text-sm text-muted-foreground">No forecast periods available</p>}
     </div>
-    <div className="mt-6 pt-4 border-t border-border">
-      <div className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground mb-2">RAW TAF</div>
-      <p className="font-mono text-sm text-muted-foreground">{taf.raw_text}</p>
-    </div>
+    {!isSimplified && (
+      <div className="mt-6 pt-4 border-t border-border">
+        <div className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground mb-2">RAW TAF</div>
+        <p className="font-mono text-sm text-muted-foreground">{taf.raw_text}</p>
+      </div>
+    )}
   </div>
 );
 
@@ -328,7 +537,152 @@ const MetricDisplay = ({ icon: Icon, label, value, detail }: { icon: React.Eleme
   </div>
 );
 
-const TafPeriod = ({ period }: { period: TafForecastPeriod }) => {
+interface HazardPanelProps {
+  bbox?: BoundingBox;
+  hazards: HazardFeatureNormalized[];
+  hazardLoading: boolean;
+  hazardError?: Error | null;
+  pireps: PilotReport[];
+  isSimplified?: boolean;
+}
+
+const HazardAwarenessPanel = ({
+  bbox,
+  hazards,
+  hazardLoading,
+  hazardError,
+  pireps,
+  isSimplified,
+}: HazardPanelProps) => {
+  const [activeFeeds, setActiveFeeds] = useState<Record<string, boolean>>({
+    sigmet: true,
+    gairmet: true,
+    cwa: true,
+  });
+
+  if (!bbox) {
+    return null;
+  }
+
+  const toggleFeed = (id: string) => {
+    setActiveFeeds((prev) => ({ ...prev, [id]: !prev[id] }));
+  };
+
+  const counts = hazardFeedDisplay.reduce<Record<string, number>>((acc, feed) => {
+    acc[feed.id] = hazards.filter((hazard) => hazard.kind === feed.id).length;
+    return acc;
+  }, {});
+
+  const filteredHazards = hazards
+    .filter((hazard) => activeFeeds[hazard.kind] !== false)
+    .sort((a, b) => {
+      const severityDelta =
+        (hazardSeverityOrder[b.severity] ?? 0) -
+        (hazardSeverityOrder[a.severity] ?? 0);
+      if (severityDelta !== 0) return severityDelta;
+      const aTime = a.validTo ? new Date(a.validTo).getTime() : 0;
+      const bTime = b.validTo ? new Date(b.validTo).getTime() : 0;
+      return bTime - aTime;
+    })
+    .slice(0, 5);
+
+  const pirepSummary = (() => {
+    if (!pireps.length) return "No recent PIREPs";
+    const severeCount = pireps.filter(
+      (report) =>
+        report.icing === "severe" ||
+        report.icing === "extreme" ||
+        report.turbulence === "severe" ||
+        report.turbulence === "extreme"
+    ).length;
+    if (severeCount) {
+      return `${severeCount} severe pilot reports`;
+    }
+    return `${pireps.length} recent pilot reports`;
+  })();
+
+  return (
+    <div className="bg-card border border-border rounded-sm p-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <div className="text-[10px] font-mono uppercase tracking-[0.2em] text-muted-foreground">HAZARD INTELLIGENCE</div>
+          <p className="text-sm text-muted-foreground mt-1">
+            Active advisories within ~300NM corridor around the airport.
+          </p>
+        </div>
+        <div className="text-xs font-mono text-muted-foreground">{pirepSummary}</div>
+      </div>
+
+      <div className="mt-4 flex flex-wrap gap-2">
+        {hazardFeedDisplay.map((feed) => (
+          <button
+            key={feed.id}
+            type="button"
+            onClick={() => toggleFeed(feed.id)}
+            className={`flex items-center gap-2 rounded-sm border px-3 py-1 text-xs font-semibold transition-colors ${
+              activeFeeds[feed.id] !== false
+                ? "border-foreground/30 text-foreground"
+                : "border-border text-muted-foreground bg-muted"
+            }`}
+          >
+            <span>{feed.label}</span>
+            <span className="font-mono text-[11px]">{counts[feed.id] ?? 0}</span>
+          </button>
+        ))}
+      </div>
+
+      {hazardError && (
+        <div className="mt-4 text-xs text-red-500 font-mono">
+          Unable to load some hazard layers: {hazardError.message}
+        </div>
+      )}
+
+      <div className="mt-6 space-y-4">
+        {hazardLoading && (
+          <div className="text-sm text-muted-foreground">Updating advisories…</div>
+        )}
+        {!hazardLoading && filteredHazards.length === 0 && (
+          <div className="text-sm text-muted-foreground">No active advisories in this sector.</div>
+        )}
+        {filteredHazards.map((hazard, index) => (
+          <div
+            key={`${hazard.kind}-${hazard.id}-${index}`}
+            className="border border-border rounded-sm p-4 bg-muted/20"
+          >
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <div className="font-semibold text-sm">
+                  {isSimplified
+                    ? `${hazard.kind.toUpperCase()} – ${formatHazardSentence(hazard).split(',')[0]}`
+                    : hazard.name || hazard.kind.toUpperCase()}
+                </div>
+                <div className="text-xs text-muted-foreground">
+                  {formatHazardTimeRange(hazard)}
+                </div>
+              </div>
+              <span
+                className={`text-[10px] font-mono uppercase px-2 py-0.5 rounded-sm ${
+                  hazardSeverityClasses[hazard.severity] || hazardSeverityClasses.unknown
+                }`}
+              >
+                {hazard.severity}
+              </span>
+            </div>
+            <p className="text-xs text-muted-foreground mt-3">
+              {isSimplified
+                ? formatHazardSentence(hazard)
+                : hazard.narrative
+                ? `${hazard.narrative.slice(0, 220)}${hazard.narrative.length > 220 ? "…" : ""}`
+                : ""}
+            </p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+const TafPeriod = ({ period, isSimplified, weatherUnits }: { period: TafForecastPeriod; isSimplified?: boolean; weatherUnits?: { speed: SpeedUnit; visibility: DistanceUnit } }) => {
   const timeRange = (() => {
     if (typeof period.timestamp === "string") return new Date(period.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
     if (period.timestamp?.from && period.timestamp?.to) {
@@ -339,6 +693,11 @@ const TafPeriod = ({ period }: { period: TafForecastPeriod }) => {
     return "Forecast Period";
   })();
 
+  const mode = (isSimplified ? 'simplified' : 'technical') as 'simplified' | 'technical';
+  const speedUnit = weatherUnits?.speed ?? 'kt';
+  const visibilityUnit = weatherUnits?.visibility ?? 'mi';
+  const opts = { mode, speedUnit, visibilityUnit } as const;
+
   return (
     <div className="border-l-2 pl-4 border-border hover:border-[--accent-primary] transition-colors">
       <div className="flex items-center justify-between">
@@ -348,15 +707,61 @@ const TafPeriod = ({ period }: { period: TafForecastPeriod }) => {
         </div>
       </div>
       <div className="mt-2 grid grid-cols-2 md:grid-cols-3 gap-x-4 gap-y-1 text-sm font-mono text-muted-foreground">
-        <div><span className="text-muted-foreground">Wind:</span> {formatWindCompact(period.wind)}</div>
-        {period.visibility && <div><span className="text-muted-foreground">Vis:</span> {formatVisibilityCompact(period.visibility)}</div>}
-        {period.clouds && period.clouds.length > 0 && <div className="col-span-2 md:col-span-1"><span className="text-muted-foreground">Clouds:</span> {formatCloudsCompact(period.clouds)}</div>}
+        <div>
+          <span className="text-muted-foreground">Wind:</span>{' '}
+          {formatWindDisplay(period.wind, opts).primary}
+        </div>
+        {period.visibility && (
+          <div>
+            <span className="text-muted-foreground">Vis:</span>{' '}
+            {formatVisibilityDisplay(period.visibility, opts)}
+          </div>
+        )}
+        {period.clouds && period.clouds.length > 0 && (
+          <div className="col-span-2 md:col-span-1">
+            <span className="text-muted-foreground">Clouds:</span>{' '}
+            {formatCloudsDisplay(period.clouds, opts)}
+          </div>
+        )}
       </div>
     </div>
   );
 };
 
-const RouteMetarCard = ({ label, icao, metar, router }: { label: string, icao: string, metar: DecodedMetar | null, router: any }) => {
+const formatZulu = (iso: string) => {
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return iso;
+  return date.toUTCString().replace(" GMT", "Z");
+};
+
+const formatHazardTimeRange = (hazard: HazardFeatureNormalized) => {
+  if (hazard.validFrom && hazard.validTo) {
+    return `${formatZulu(hazard.validFrom)} → ${formatZulu(hazard.validTo)}`;
+  }
+  if (hazard.validTo) {
+    return `Valid until ${formatZulu(hazard.validTo)}`;
+  }
+  if (hazard.issuedAt) {
+    return `Issued ${formatZulu(hazard.issuedAt)}`;
+  }
+  return "Timing pending";
+};
+
+const RouteMetarCard = ({
+  label,
+  icao,
+  metar,
+  router,
+  isSimplified,
+  weatherUnits,
+}: {
+  label: string;
+  icao: string;
+  metar: DecodedMetar | null;
+  router: any;
+  isSimplified?: boolean;
+  weatherUnits: { speed: SpeedUnit; visibility: DistanceUnit };
+}) => {
   if (icao.length !== 4) {
     return (
       <div>
@@ -388,15 +793,26 @@ const RouteMetarCard = ({ label, icao, metar, router }: { label: string, icao: s
         </div>
       </div>
       <div className="bg-card border border-border rounded-sm p-4 space-y-4">
+        {metar && (() => {
+          const mode = (isSimplified ? 'simplified' : 'technical') as 'simplified' | 'technical';
+          const opts = { mode, speedUnit: weatherUnits.speed, visibilityUnit: weatherUnits.visibility } as const;
+          const windFormatted = formatWindDisplay(metar.wind, opts);
+          const visibilityFormatted = formatVisibilityDisplay(metar.visibility, opts);
+          const cloudsFormatted = formatCloudsDisplay(metar.clouds, opts);
+          return (
         <div className="grid grid-cols-2 gap-4">
           <MiniMetric label="Temp" value={`${metar.temperature?.celsius.toFixed(0) ?? '--'}°C`} />
-          <MiniMetric label="Wind" value={formatWindCompact(metar.wind)} />
-          <MiniMetric label="Vis" value={formatVisibilityCompact(metar.visibility)} />
-          <MiniMetric label="Clouds" value={formatCloudsCompact(metar.clouds)} />
+          <MiniMetric label="Wind" value={windFormatted.primary} />
+          <MiniMetric label="Vis" value={visibilityFormatted} />
+          <MiniMetric label="Clouds" value={cloudsFormatted} />
         </div>
-        <div className="border-t border-border pt-3">
-          <p className="font-mono text-xs text-muted-foreground">{metar.raw_text}</p>
-        </div>
+          );
+        })()}
+        {!isSimplified && (
+          <div className="border-t border-border pt-3">
+            <p className="font-mono text-xs text-muted-foreground">{metar.raw_text}</p>
+          </div>
+        )}
         <button
           onClick={() => router.push(`/weather/${icao}`)}
           className="w-full border border-border px-3 py-2 text-xs text-foreground hover:bg-accent transition-colors rounded-sm"

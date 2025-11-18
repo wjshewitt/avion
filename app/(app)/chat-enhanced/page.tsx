@@ -85,6 +85,9 @@ function EnhancedChatPageContent() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [showSettings, setShowSettings] = useState(false);
   const { showThinkingProcess, showTimestamps } = useChatSettings();
+  
+  // Track the last sent message text for preview
+  const lastSentMessageRef = useRef<string>('');
 
   const {
     messages,
@@ -102,9 +105,33 @@ function EnhancedChatPageContent() {
     conversationId: mainConversationId,
     surface: 'main',
     onConversationCreated: useCallback((conversationId: string) => {
+      // Replace temporary conversation with real DB conversation
+      if (mainConversationId?.startsWith('temp-')) {
+        // Use the last sent message for preview
+        const messagePreview = lastSentMessageRef.current.substring(0, 60);
+        
+        queryClient.setQueryData(['general-conversations'], (old: any[] = []) => {
+          // Replace temp conversation with a complete real conversation object
+          return old.map((conv) => {
+            if (conv.id === mainConversationId) {
+              return {
+                ...conv,
+                id: conversationId,
+                message_count: 1,
+                last_message_preview: messagePreview,
+                updated_at: new Date().toISOString(),
+              };
+            }
+            return conv;
+          });
+        });
+      }
+      
       setConversationId('main', conversationId);
-      queryClient.invalidateQueries({ queryKey: ['general-conversations'] });
-    }, [setConversationId, queryClient]),
+      
+      // Don't invalidate here - let usePremiumChat's onFinish handle it after 500ms
+      // This prevents race condition where we refetch before DB write completes
+    }, [setConversationId, queryClient, mainConversationId]),
     onError: useCallback((error: Error) => {
       console.error('Chat error:', error);
       toast.error('Failed to send message', { description: error.message });
@@ -112,7 +139,17 @@ function EnhancedChatPageContent() {
   });
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    // Smart auto-scroll: only scroll if the user is already near the bottom
+    const container = messagesEndRef.current?.parentElement?.parentElement;
+    if (container) {
+      const isNearBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 100;
+      if (isNearBottom) {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+      }
+    } else {
+      // Fallback for initial load
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
   }, [messages]);
 
   useEffect(() => {
@@ -168,6 +205,9 @@ function EnhancedChatPageContent() {
     if (mainConversationId && mainConversationId !== id && messages.length >= MIN_MESSAGES_FOR_TITLE) {
       requestConversationTitle(mainConversationId, 'conversation-switch');
     }
+    
+    // No need to manually update cache or manage temp conversations anymore
+    // usePremiumChat handles the transition gracefully via hydration logic
     setConversationId('main', id);
   }, [mainConversationId, messages.length, setConversationId]);
 
@@ -175,18 +215,28 @@ function EnhancedChatPageContent() {
     if (mainConversationId && messages.length >= MIN_MESSAGES_FOR_TITLE) {
       requestConversationTitle(mainConversationId, 'conversation-switch');
     }
+    
+    // Simply clear the conversation ID. 
+    // usePremiumChat will generate a new client-side UUID automatically.
     setConversationId('main', null);
     setInput('');
-    queryClient.removeQueries({ queryKey: ['conversation-messages'] });
-  }, [mainConversationId, messages.length, setConversationId, setInput, queryClient]);
+    
+    // We don't need to manually manipulate the cache anymore
+    // queryClient.removeQueries({ queryKey: ['conversation-messages'] }); 
+  }, [mainConversationId, messages.length, setConversationId, setInput]);
 
   const handleSubmit = useCallback((event?: React.FormEvent) => {
     event?.preventDefault?.();
     if (!input.trim() || isStreaming || missingCredentials) return;
+    
+    // Store message text for preview in conversation list
+    lastSentMessageRef.current = input.trim();
     sendMessage();
   }, [input, isStreaming, missingCredentials, sendMessage]);
 
   const handleSuggestionSelect = useCallback((text: string) => {
+    // Store message text for preview in conversation list
+    lastSentMessageRef.current = text.trim();
     setInput(text);
     sendMessage(text);
   }, [setInput, sendMessage]);
@@ -215,29 +265,21 @@ function EnhancedChatPageContent() {
           ) : (
             <>
               <div className="flex-1 min-h-0 overflow-y-auto relative bg-background">
-                {/* Scanline Effect */}
-                <div 
-                  className="absolute inset-0 pointer-events-none opacity-30"
-                  style={{
-                    background: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px)',
-                  }}
-                />
-                
                 <div className="p-6 md:p-8 lg:p-12">
-                  <div className="max-w-5xl mx-auto w-full">
+                  <div className="max-w-4xl mx-auto w-full">
                     {messages.length === 0 && !missingCredentials ? (
                       <div className="h-full min-h-[60vh] flex flex-col items-center justify-center text-center">
-                        <div className="w-16 h-16 rounded-sm border border-border bg-card flex items-center justify-center mb-6">
-                          <Bot size={32} strokeWidth={1.5} className="text-primary" />
+                        <div className="w-16 h-16 rounded-sm border border-border bg-card flex items-center justify-center mb-6 shadow-sm">
+                          <Bot size={32} strokeWidth={1.5} className="text-muted-foreground" />
                         </div>
-                        <h2 className="text-lg font-medium text-foreground mb-2">How can I assist you?</h2>
-                        <p className="text-sm text-muted-foreground">Ask about operations, weather, or airports.</p>
-                        <div className="mt-8 grid grid-cols-2 gap-3 max-w-lg">
+                        <h2 className="text-lg font-medium text-foreground mb-2">System Ready</h2>
+                        <p className="text-sm text-muted-foreground">Awaiting command. Ask about operations, weather, or airports.</p>
+                        <div className="mt-8 grid grid-cols-2 gap-3 max-w-lg w-full">
                           {contextSuggestions.map((suggestion) => (
                             <button
                               key={suggestion}
                               onClick={() => handleSuggestionSelect(suggestion)}
-                              className="px-4 py-3 rounded-sm border border-border bg-card text-sm text-foreground hover:border-primary/50 hover:bg-accent transition-all"
+                              className="px-4 py-3 rounded-sm border border-border bg-card text-xs font-mono text-muted-foreground hover:text-foreground hover:border-zinc-400 hover:bg-accent transition-all text-left"
                             >
                               {suggestion}
                             </button>
@@ -245,7 +287,7 @@ function EnhancedChatPageContent() {
                         </div>
                       </div>
                     ) : (
-                      <div className="space-y-6">
+                      <div className="space-y-8 pb-4">
                         {messages.map((msg) => {
                           const typedMsg = msg as FlightChatMessage;
                           const toolParts = getToolParts(typedMsg);
@@ -255,7 +297,7 @@ function EnhancedChatPageContent() {
                           });
                           
                           return (
-                            <div key={msg.id} className="space-y-3">
+                            <div key={msg.id} className="space-y-4">
                               <AIMessage
                                 content={getMessageText(msg)}
                                 isUser={msg.role === 'user'}
@@ -265,7 +307,7 @@ function EnhancedChatPageContent() {
                                 toolCalls={toolParts}
                               />
                               {toolParts.length > 0 && (
-                                <div className="ml-12 space-y-2">
+                                <div className="ml-0 pl-4 border-l-2 border-border space-y-4 my-4">
                                   {toolParts.map((part) => (
                                     <MainToolInvocation key={part.toolCallId} part={part} />
                                   ))}
@@ -275,7 +317,7 @@ function EnhancedChatPageContent() {
                           );
                         })}
                         {isResponseStreaming && (!showThinkingProcess || thinkingContent.length === 0) && (
-                          <div className="flex justify-start">
+                          <div className="flex justify-start pl-4">
                             <ThinkingIndicator material="tungsten" />
                           </div>
                         )}
@@ -289,46 +331,52 @@ function EnhancedChatPageContent() {
                 </div>
               </div>
 
-              <div className="border-t border-border bg-card/80 backdrop-blur-sm p-3">
-                <div className="max-w-5xl mx-auto w-full">
-                  <form onSubmit={handleSubmit} className="relative">
-                    <div className="groove-input rounded-sm border border-border overflow-hidden bg-background">
+              <div className="border-t border-border bg-background p-6 pb-8">
+                <div className="max-w-4xl mx-auto w-full">
+                  <form onSubmit={handleSubmit} className="relative group">
+                    <div className="relative">
                       <Textarea
                         value={input}
-                        onChange={(e) => setInput(e.target.value)}
+                        onChange={(e) => {
+                          setInput(e.target.value);
+                          // Auto-expand input
+                          e.target.style.height = 'auto';
+                          e.target.style.height = `${Math.min(e.target.scrollHeight, 200)}px`;
+                        }}
                         onKeyDown={(e) => {
                           if (e.key === 'Enter' && !e.shiftKey) {
                             e.preventDefault();
                             handleSubmit();
                           }
                         }}
-                        placeholder="Ask about operations, weather, or airports…"
+                        placeholder="ENTER COMMAND OR QUERY..."
                         disabled={Boolean(missingCredentials) || isStreaming}
-                        className="w-full resize-none border-0 bg-transparent focus:ring-2 focus:ring-primary shadow-none p-4 pr-24 min-h-[56px] text-sm text-foreground placeholder:text-muted-foreground"
+                        className="w-full resize-none rounded-sm border border-input bg-background px-4 py-3 pr-14 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#F04E30] disabled:cursor-not-allowed disabled:opacity-50 min-h-[52px] font-mono shadow-sm transition-all duration-200 ease-in-out"
                         rows={1}
+                        style={{ overflow: 'hidden' }}
                       />
-                    </div>
-                    <div className="absolute top-1/2 right-4 transform -translate-y-1/2 flex items-center gap-2">
-                      {isStreaming && (
+                      <div className="absolute top-1/2 right-2 transform -translate-y-1/2 flex items-center gap-2">
+                        {isStreaming && (
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            onClick={stopStreaming} 
+                            title="Stop (Esc)"
+                            className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                          >
+                            <div className="w-2 h-2 bg-current rounded-sm" />
+                          </Button>
+                        )}
                         <Button 
-                          variant="ghost" 
+                          type="submit" 
                           size="icon" 
-                          onClick={stopStreaming} 
-                          title="Stop (Esc)"
-                          className="h-8 w-8"
+                          disabled={!input.trim() || isStreaming}
+                          className="h-8 w-8 bg-foreground text-background hover:bg-foreground/90 disabled:opacity-40 disabled:cursor-not-allowed rounded-sm"
+                          title="Send (Enter)"
                         >
-                          <div className="w-3 h-3 bg-destructive rounded-sm" />
+                          <ArrowRight size={16} strokeWidth={2} />
                         </Button>
-                      )}
-                      <Button 
-                        type="submit" 
-                        size="icon" 
-                        disabled={!input.trim() || isStreaming}
-                        className="h-8 w-8 bg-primary hover:bg-primary/90 text-primary-foreground disabled:opacity-40 disabled:cursor-not-allowed"
-                        title="Send (Enter)"
-                      >
-                        <ArrowRight size={16} strokeWidth={1.5} />
-                      </Button>
+                      </div>
                     </div>
                   </form>
                 </div>

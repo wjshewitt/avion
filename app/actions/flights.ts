@@ -300,15 +300,17 @@ export async function updateFlight(
     } = await supabase.auth.getUser();
 
     // Get the current flight data before update for event logging
-    const { data: currentFlight } = await supabase
-      .from<Database['public']['Tables']['user_flights']['Row']>("user_flights")
+    const { data: flightData, error: fetchError } = await supabase
+      .from("user_flights")
       .select()
       .eq("id", id)
       .single();
 
-    if (!currentFlight) {
+    if (fetchError || !flightData) {
       throw new Error("Flight not found");
     }
+
+    const currentFlight: Flight = flightData;
 
     // Prepare typed update payload
     const typedUpdateFields: Record<string, any> = {};

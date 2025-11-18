@@ -2,6 +2,7 @@
 
 import { useParams, useRouter } from "next/navigation";
 import { useState, useMemo } from "react";
+import * as React from "react";
 import {
   ArrowLeft,
   Cloud,
@@ -30,8 +31,10 @@ import {
 } from "@/lib/weather/weatherConcerns";
 import { AirportWeatherGeminiCard } from "@/components/weather/AirportWeatherGeminiCard";
 import { AvionAtmosphereCard } from "@/components/weather/AvionAtmosphereCard";
+import { QuickWeatherBriefing } from "@/components/weather/QuickWeatherBriefing";
 import { selectAtmosphereCard } from "@/lib/weather/avionAtmosphereMapping";
 import type { DecodedMetar, TafForecastPeriod } from "@/types/checkwx";
+import type { HazardFeatureNormalized, PilotReport } from "@/types/weather";
 import { getUserFriendlyErrorMessage } from "@/lib/utils/errors";
 import { toast } from "sonner";
 import { useAirportTemporalProfile } from "@/lib/tanstack/hooks/useTemporalProfile";
@@ -112,6 +115,7 @@ export default function IndividualWeatherPage() {
   const [showRawData, setShowRawData] = useState(false);
   const [expandedTaf, setExpandedTaf] = useState(false);
   const [showBriefing] = useState(true);
+  const [hazardsData, setHazardsData] = useState<{ hazards: HazardFeatureNormalized[]; pireps: PilotReport[] }>({ hazards: [], pireps: [] });
 
   const {
     data: weatherData,
@@ -130,6 +134,37 @@ export default function IndividualWeatherPage() {
     enabled: Boolean(icao && icao.length === 4),
     staleTime: 5 * 60 * 1000,
   });
+
+  // Fetch hazards data when METAR is available
+  React.useEffect(() => {
+    if (!metar) return;
+    
+    const fetchHazards = async () => {
+      try {
+        const coords = metar.station?.geometry?.coordinates;
+        if (!coords || coords.length !== 2) return;
+        
+        const [lon, lat] = coords;
+        if (typeof lon !== "number" || typeof lat !== "number") return;
+        
+        const bboxStr = `${lon - 5},${lat - 3},${lon + 5},${lat + 3}`;
+        
+        const [sigmetRes, pirepRes] = await Promise.all([
+          fetch(`/api/weather/awc/sigmet?bbox=${bboxStr}&hours=4`).catch(() => null),
+          fetch(`/api/weather/awc/pirep?bbox=${bboxStr}&hours=2`).catch(() => null),
+        ]);
+        
+        const sigmets = sigmetRes?.ok ? await sigmetRes.json().then(d => d.data || []) : [];
+        const pireps = pirepRes?.ok ? await pirepRes.json().then(d => d.data || []) : [];
+        
+        setHazardsData({ hazards: sigmets, pireps });
+      } catch (error) {
+        console.error("Failed to fetch hazards:", error);
+      }
+    };
+    
+    fetchHazards();
+  }, [metar]);
 
   // Analyze weather concerns
   const concerns = useMemo(() => {
@@ -350,6 +385,25 @@ export default function IndividualWeatherPage() {
         </div>
       )}
 
+      {/* Quick Weather Briefing */}
+      {!isLoading && (metar || taf) && (
+        <div className="mb-6">
+          <QuickWeatherBriefing
+            icao={icao}
+            metar={metar ?? undefined}
+            taf={taf ?? undefined}
+            hazards={hazardsData.hazards}
+            pireps={hazardsData.pireps}
+            concerns={concerns}
+            atmosphere={atmosphere?.variant}
+            temporalProfile={temporalProfile}
+            lastUpdated={metar?.observed}
+            onRefresh={() => refetch()}
+            isRefreshing={isLoading}
+          />
+        </div>
+      )}
+
       {atmosphere && (
         <div className="mb-6 max-w-[720px]">
           <AvionAtmosphereCard
@@ -361,6 +415,7 @@ export default function IndividualWeatherPage() {
             tempC={atmosphere.tempC ?? undefined}
             visibilitySm={atmosphere.visibilitySm ?? undefined}
             qnhInHg={atmosphere.qnhInHg ?? undefined}
+            localTime={temporalProfile?.clock.localTime ?? null}
           />
         </div>
       )}

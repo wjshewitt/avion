@@ -22,27 +22,36 @@ export interface MapClusterResult {
   airports: AirportLite[];
 }
 
+type AirportFeatureProps = {
+  icao: string;
+  type: string;
+  popularity: number;
+  runway: number;
+};
+
 export function buildClusterIndex(dataset?: AirportLiteDeckDataset | null) {
   if (!dataset?.airports.length) return null;
 
-  const features = dataset.airports.map((airport, index) => ({
-    type: "Feature" as const,
-    geometry: {
-      type: "Point" as const,
-      coordinates: [dataset.positions[index * 2], dataset.positions[index * 2 + 1]],
-    },
-    properties: {
-      icao: airport.icao,
-      type: airport.type,
-      popularity: dataset.popularityScores[index],
-      runway: dataset.runwayLengths[index],
-    },
-  }));
+  const features: GeoJSON.Feature<GeoJSON.Point, AirportFeatureProps>[] = dataset.airports.map(
+    (airport, index) => ({
+      type: "Feature",
+      geometry: {
+        type: "Point",
+        coordinates: [dataset.positions[index * 2], dataset.positions[index * 2 + 1]],
+      },
+      properties: {
+        icao: airport.icao,
+        type: airport.type,
+        popularity: dataset.popularityScores[index],
+        runway: dataset.runwayLengths[index],
+      },
+    })
+  );
 
-  return new Supercluster({
+  return new Supercluster<AirportFeatureProps, ClusterPointProperties>({
     radius: 60,
     maxZoom: 9,
-  }).load(features as GeoJSON.Feature<GeoJSON.Point>[]);
+  }).load(features);
 }
 
 export function useAirportClusterer(dataset?: AirportLiteDeckDataset) {
@@ -62,10 +71,10 @@ export function useAirportClusterer(dataset?: AirportLiteDeckDataset) {
 
       raw.forEach((feature) => {
         const props = feature.properties ?? {};
-        if (props.cluster) {
+        if ((props as ClusterPointProperties).cluster) {
           clusters.push(feature as ClusterFeature);
         } else {
-          const airport = airportLookup?.get(props.icao as string);
+          const airport = airportLookup?.get((props as AirportFeatureProps).icao);
           if (airport) airports.push(airport);
         }
       });

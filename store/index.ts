@@ -6,9 +6,13 @@ import type {
   CrewBriefing,
   AirportCoordinate,
 } from "@/types";
-import type { UserProfile } from "@/types/profile";
+import type { UserProfile, UserPreferences } from "@/types/profile";
 
 // Application state interface
+export type WeatherViewMode = "standard" | "advanced";
+export type SpeedUnit = "kt" | "kmh" | "mph";
+export type DistanceUnit = "sm" | "mi" | "km";
+
 export interface AppState {
   flights: FlightRecord[];
   selectedFlightId: string | null;
@@ -19,7 +23,11 @@ export interface AppState {
   isLoadingProfile: boolean;
 
   // Preferences
-  weatherViewMode: 'standard' | 'advanced';
+  weatherViewMode: WeatherViewMode;
+  weatherUnits: {
+    speed: SpeedUnit;
+    visibility: DistanceUnit;
+  };
 
   // Actions
   setFlights: (flights: FlightRecord[]) => void;
@@ -29,7 +37,8 @@ export interface AppState {
   setAirports: (airports: AirportCoordinate[]) => void;
   setUserProfile: (profile: UserProfile | null) => void;
   setIsLoadingProfile: (isLoading: boolean) => void;
-  setWeatherViewMode: (mode: 'standard' | 'advanced') => void;
+  setWeatherViewMode: (mode: WeatherViewMode) => void;
+  setWeatherUnits: (partial: Partial<AppState["weatherUnits"]>) => void;
 }
 
 // Create Zustand store with devtools middleware
@@ -44,7 +53,11 @@ export const useStore = create<AppState>()(
       airports: [],
       userProfile: null,
       isLoadingProfile: false,
-      weatherViewMode: 'standard',
+      weatherViewMode: "standard",
+      weatherUnits: {
+        speed: "kt",
+        visibility: "mi",
+      },
 
       // Actions
       setFlights: (flights) => set({ flights }, false, "setFlights"),
@@ -63,6 +76,17 @@ export const useStore = create<AppState>()(
 
       setIsLoadingProfile: (isLoading) => set({ isLoadingProfile: isLoading }, false, "setIsLoadingProfile"),
       setWeatherViewMode: (mode) => set({ weatherViewMode: mode }, false, "setWeatherViewMode"),
+      setWeatherUnits: (partial) =>
+        set(
+          (state) => ({
+            weatherUnits: {
+              ...state.weatherUnits,
+              ...partial,
+            },
+          }),
+          false,
+          "setWeatherUnits",
+        ),
     }),
     {
       name: "FlightOps Store",

@@ -75,6 +75,26 @@ function createMockSupabase({ conversation = baseConversation, messages = baseMe
   } as any;
 }
 
+function createGenerateTextResult(text: string) {
+  return {
+    text,
+    content: [
+      {
+        type: 'output_text',
+        text,
+      },
+    ],
+    reasoning: [],
+    finishReason: 'stop',
+    usage: {
+      promptTokens: 0,
+      completionTokens: 0,
+      totalTokens: 0,
+    },
+    toolInvocations: [],
+  } as any;
+}
+
 beforeEach(() => {
   vi.mocked(generateText).mockReset();
 });
@@ -92,7 +112,7 @@ describe('normalizeGeneratedTitle', () => {
 
 describe('generateConversationTitle', () => {
   it('updates the conversation title when eligible', async () => {
-    vi.mocked(generateText).mockResolvedValue({ text: 'Weather briefing for EGLL mission' });
+    vi.mocked(generateText).mockResolvedValue(createGenerateTextResult('Weather briefing for EGLL mission'));
     const supabase = createMockSupabase({});
 
     const result = await generateConversationTitle({

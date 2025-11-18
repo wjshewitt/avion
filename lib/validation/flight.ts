@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 const isoDateSchema = z
-  .string({ required_error: 'Date is required' })
+  .string()
   .min(1, 'Date is required')
   .refine((value) => !Number.isNaN(Date.parse(value)), {
     message: 'Invalid date provided',
@@ -9,7 +9,7 @@ const isoDateSchema = z
 
 const airportSchema = z.object({
   icao: z
-    .string({ required_error: 'ICAO is required' })
+    .string()
     .trim()
     .min(4, 'ICAO must be 4 characters')
     .max(4, 'ICAO must be 4 characters'),
@@ -36,8 +36,9 @@ const statusOptions = ['On Time', 'Delayed', 'Cancelled'] as const;
 export const flightCreationSchema = z
   .object({
     flightCode: z
-      .string({ required_error: 'Flight code is required' })
+      .string()
       .trim()
+      .min(1, 'Flight code is required')
       .min(3, 'Flight code must be at least 3 characters')
       .max(10, 'Flight code must be at most 10 characters'),
     status: z.enum(statusOptions),

@@ -23,12 +23,14 @@ export interface Airport {
 export interface Weather {
  condition: WeatherCondition;
  temperature: number;
+ tempCelsius?: number;
  wind: {
  speed: number;
  direction: number;
  };
  visibility: number;
  ceiling?: number;
+ qnh?: number;
  risks: string[];
 }
 

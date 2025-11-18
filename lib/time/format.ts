@@ -1,9 +1,9 @@
+import { DateTime, type DateTimeFormatOptions } from "luxon";
+
 const TZ_LABEL_CACHE = new Map<string, string>();
 
 export function formatZulu(date: Date = new Date()): string {
-  const hours = date.getUTCHours().toString().padStart(2, "0");
-  const minutes = date.getUTCMinutes().toString().padStart(2, "0");
-  return `${hours}:${minutes} Z`;
+  return DateTime.fromJSDate(date, { zone: "utc" }).toFormat("HH:mm 'Z'");
 }
 
 export function formatLocalTime(
@@ -11,14 +11,14 @@ export function formatLocalTime(
   timezone: string,
   options: Intl.DateTimeFormatOptions = {},
 ): string {
-  const formatter = new Intl.DateTimeFormat("en-US", {
-    timeZone: timezone,
+  const dt = DateTime.fromJSDate(date).setZone(timezone, { keepLocalTime: false });
+  const resolved: DateTimeFormatOptions = {
     hour: "2-digit",
     minute: "2-digit",
     hour12: false,
-    ...options,
-  });
-  return formatter.format(date);
+    ...(options as DateTimeFormatOptions),
+  };
+  return dt.toLocaleString(resolved);
 }
 
 export function getTimezoneAbbreviation(timezone: string, date: Date = new Date()): string {
@@ -30,7 +30,6 @@ export function getTimezoneAbbreviation(timezone: string, date: Date = new Date(
     timeZone: timezone,
     timeZoneName: "short",
   });
-
   const parts = formatter.formatToParts(date);
   const abbrev = parts.find((part) => part.type === "timeZoneName")?.value ?? timezone;
   TZ_LABEL_CACHE.set(cacheKey, abbrev);
@@ -46,29 +45,20 @@ export function formatLocalWithTz(
   return `${time} ${abbr}`;
 }
 
-export function calculateOffsetMinutes(date: Date, timezone: string): number {
-  const localeDate = new Date(date.toLocaleString("en-US", { timeZone: timezone }));
-  return (localeDate.getTime() - date.getTime()) / 60000;
-}
-
 export function describeTimezoneOffsets(timezone: string) {
-  const now = new Date();
-  const jan = new Date(Date.UTC(now.getUTCFullYear(), 0, 1, 12, 0, 0));
-  const jul = new Date(Date.UTC(now.getUTCFullYear(), 6, 1, 12, 0, 0));
+  const now = DateTime.now().setZone(timezone);
+  const jan = DateTime.utc(now.year, 1, 1, 12, 0, 0).setZone(timezone);
+  const jul = DateTime.utc(now.year, 7, 1, 12, 0, 0).setZone(timezone);
 
-  const janOffset = calculateOffsetMinutes(jan, timezone);
-  const julOffset = calculateOffsetMinutes(jul, timezone);
+  const janOffset = jan.offset;
+  const julOffset = jul.offset;
   const usesDst = janOffset !== julOffset;
 
   const offsets = [janOffset, julOffset];
-  const standardOffsetMinutes = usesDst
-    ? Math.min(...offsets)
-    : janOffset;
-  const dstOffsetMinutes = usesDst
-    ? Math.max(...offsets)
-    : null;
+  const standardOffsetMinutes = usesDst ? Math.min(...offsets) : janOffset;
+  const dstOffsetMinutes = usesDst ? Math.max(...offsets) : null;
 
-  const currentOffset = calculateOffsetMinutes(now, timezone);
+  const currentOffset = now.offset;
   const isDstActive = usesDst && dstOffsetMinutes != null
     ? currentOffset === dstOffsetMinutes
     : false;
@@ -82,11 +72,7 @@ export function describeTimezoneOffsets(timezone: string) {
 }
 
 export function formatDateKey(date: Date, timezone: string): string {
-  const formatter = new Intl.DateTimeFormat("en-CA", {
-    timeZone: timezone,
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  });
-  return `${timezone}:${formatter.format(date)}`;
+  const dt = DateTime.fromJSDate(date).setZone(timezone, { keepLocalTime: false });
+  const isoDate = dt.toISODate() ?? dt.toISO()?.split("T")[0] ?? dt.toFormat("yyyy-LL-dd");
+  return `${timezone}:${isoDate}`;
 }

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { createAirportLiteDeckDataset } from "./airport-lite-utils";
-import { buildClusterIndex } from "./useAirportClusterer";
+import { buildClusterIndex, type ClusterPointProperties } from "./useAirportClusterer";
 import type { AirportLite } from "@/types/airport-lite";
 
 const sampleAirports: AirportLite[] = [
@@ -52,7 +52,10 @@ describe("buildClusterIndex", () => {
     const index = buildClusterIndex(dataset);
     expect(index).not.toBeNull();
     const clusters = index!.getClusters([-180, -90, 180, 90], 0);
-    const clusterFeature = clusters.find((feature) => feature.properties?.cluster);
-    expect(clusterFeature?.properties?.point_count).toBe(2);
+    const clusterFeature = clusters.find(
+      (feature) => (feature.properties as ClusterPointProperties | undefined)?.cluster
+    );
+    const clusterProps = clusterFeature?.properties as ClusterPointProperties | undefined;
+    expect(clusterProps?.point_count).toBe(2);
   });
 });

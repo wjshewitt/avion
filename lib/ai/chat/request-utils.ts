@@ -93,9 +93,11 @@ export function safeClone<T>(value: T): T {
 
 export function cloneUiMessageForStorage(message: UIMessage, conversationId: string | null): UIMessage {
   const cloned = safeClone(message);
+  type MessageMetadata = Record<string, unknown> & { conversationId?: string | null };
+  const metadata = (cloned.metadata ?? {}) as MessageMetadata;
   cloned.metadata = {
-    ...(cloned.metadata ?? {}),
-    conversationId: conversationId ?? cloned.metadata?.conversationId ?? null,
+    ...metadata,
+    conversationId: conversationId ?? metadata.conversationId ?? null,
   };
   return cloned;
 }

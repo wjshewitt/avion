@@ -13,7 +13,7 @@ export const StructuredIntelEntriesSchema = z.object({
             z.number(),
             z.boolean(),
             z.array(z.any()),
-            z.record(z.any()),
+            z.record(z.string(), z.any()),
           ])
           .optional(),
         confidence: z.number().min(0).max(1).optional(),

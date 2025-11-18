@@ -7,11 +7,13 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useAppStore } from '@/lib/store';
 import { useFlights } from '@/lib/tanstack/hooks/useFlights';
 import { useFlightAlerts } from '@/lib/tanstack/hooks/useFlightAlerts';
-import WeatherWidget from '@/components/weather-widget';
+import { AtmosphereCard } from '@/components/weather/atmospheric/AtmosphereCard';
+import type { WeatherCondition } from '@/components/weather/atmospheric/SkyEngine';
 import { adaptMetarToWeather } from '@/lib/weather/weather-adapter';
 import { RouteMap } from '@/components/map';
 import { ArrowRight, Plus, ChevronDown } from 'lucide-react';
 import FlightAlerts from '@/components/flights/FlightAlerts';
+import type { Weather } from '@/lib/types';
 
 // Helper functions
 function formatDate(date: string): string {
@@ -21,6 +23,25 @@ function formatDate(date: string): string {
     hour: '2-digit',
     minute: '2-digit',
   });
+}
+
+function mapWeatherToCondition(weather: Weather): WeatherCondition {
+  // Map from flight category/risks to SkyEngine condition
+  const risks = weather.risks.join(' ').toLowerCase();
+  
+  if (risks.includes('thunderstorm')) return 'storm';
+  if (risks.includes('snow')) return 'snow';
+  if (risks.includes('rain')) return 'rain';
+  if (risks.includes('fog') || risks.includes('reduced visibility')) return 'fog';
+  
+  // Fallback to flight category mapping
+  switch (weather.condition) {
+    case 'LIFR': return 'fog'; // Often fog
+    case 'IFR': return 'cloudy'; 
+    case 'MVFR': return 'cloudy';
+    case 'VFR': return 'clear';
+    default: return 'clear';
+  }
 }
 
 function getBadgeColors(level?: string | null) {
@@ -244,12 +265,26 @@ export default function DashboardPage() {
             <h2 className="text-base font-semibold text-foreground mb-4">Weather Summary</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {locations.map((location) => (
-                <WeatherWidget
-                  key={location.code}
-                  location={location.name}
-                  weather={location.weather}
-                  icao={location.code}
-                />
+                <div 
+                  key={location.code} 
+                  onClick={() => router.push(`/weather?icao=${location.code}`)}
+                  className="cursor-pointer"
+                >
+                  <AtmosphereCard
+                    icao={location.code}
+                    stationName={location.name}
+                    flightCategory={location.weather.condition} // Using the VFR/IFR string as category
+                    condition={mapWeatherToCondition(location.weather)}
+                    tempC={location.weather.tempCelsius}
+                    windSpeed={location.weather.wind.speed}
+                    windDirection={location.weather.wind.direction.toString()}
+                    visibilitySm={location.weather.visibility}
+                    qnhInHg={location.weather.qnh}
+                    // Fallback hour calculation
+                    hour={new Date().getUTCHours()}
+                    localTime="UTC" 
+                  />
+                </div>
               ))}
             </div>
           </section>

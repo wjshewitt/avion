@@ -3,9 +3,10 @@
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Gauge, Plane, Cloud, MapPin, MessageSquare, Settings, ChevronLeft, ChevronRight, Shield } from "lucide-react";
+import { Gauge, Plane, Cloud, MapPin, MessageSquare, Settings, ChevronLeft, ChevronRight, Shield, Info, AlertTriangle } from "lucide-react";
 import { motion } from "framer-motion";
 import { useStore } from "@/store";
+import type { UserPreferences } from "@/types/profile";
 
 const navGroups = [
   {
@@ -21,6 +22,7 @@ const navGroups = [
     items: [
       { href: "/weather", icon: Cloud, label: "Weather", count: null },
       { href: "/airports", icon: MapPin, label: "Airports", count: null },
+      { href: "/risk", icon: AlertTriangle, label: "Risk", count: null },
     ],
   },
   {
@@ -28,6 +30,7 @@ const navGroups = [
     items: [
       { href: "/chat-enhanced", icon: MessageSquare, label: "Chat", count: null },
       { href: "/settings", icon: Settings, label: "Settings", count: null },
+      { href: "/legal", icon: Info, label: "Legal", count: null },
     ],
   },
 ];
@@ -37,11 +40,26 @@ export function AdaptiveSidebar() {
   const [isExpanded, setIsExpanded] = useState(false);
   const [hovering, setHovering] = useState(false);
   const { userProfile, isLoadingProfile } = useStore();
+  const [initialized, setInitialized] = useState(false);
 
   useEffect(() => {
-    const stored = typeof window !== "undefined" ? localStorage.getItem("sidebar-expanded") : null;
-    if (stored) setIsExpanded(stored === "true");
-  }, []);
+    if (typeof window === "undefined") return;
+    if (initialized) return;
+    if (isLoadingProfile) return;
+
+    const stored = window.localStorage.getItem("sidebar-expanded");
+    if (stored !== null) {
+      setIsExpanded(stored === "true");
+      setInitialized(true);
+      return;
+    }
+
+    const prefs = (userProfile?.preferences ?? {}) as UserPreferences;
+    const fromProfile = prefs.sidebar_expanded_default ?? false;
+    setIsExpanded(fromProfile);
+    window.localStorage.setItem("sidebar-expanded", String(fromProfile));
+    setInitialized(true);
+  }, [initialized, isLoadingProfile, userProfile]);
 
   const toggleExpanded = useCallback(() => {
     setIsExpanded((prev) => {

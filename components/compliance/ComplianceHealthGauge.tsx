@@ -47,6 +47,13 @@ export function ComplianceHealthGauge({ score }: ComplianceHealthGaugeProps) {
     return 'text-[#F04E30]';
   };
 
+  const getFactorBarColor = (value: number, max: number) => {
+    const percentage = (value / max) * 100;
+    if (percentage >= 90) return '#10b981';
+    if (percentage >= 70) return '#f59e0b';
+    return '#F04E30';
+  };
+
   return (
     <div className="flex flex-col items-center">
       {/* Circular Gauge */}
@@ -88,7 +95,7 @@ export function ComplianceHealthGauge({ score }: ComplianceHealthGaugeProps) {
           >
             {Math.round(animatedScore)}
           </motion.div>
-          <div className="text-xs font-mono text-muted-foreground mt-1">SCORE</div>
+          <div className="text-xs font-mono text-zinc-400 mt-1 tracking-widest">SCORE</div>
         </div>
       </div>
 
@@ -102,22 +109,22 @@ export function ComplianceHealthGauge({ score }: ComplianceHealthGaugeProps) {
 
       {/* Factor Breakdown */}
       <div className="w-full space-y-3">
-        <div className="text-[10px] font-mono uppercase tracking-[0.2em] text-muted-foreground mb-3 text-center">
+        <div className="text-[10px] font-mono uppercase tracking-[0.2em] text-zinc-400 mb-3 text-center">
           Compliance Factors
         </div>
         {factors.map((factor) => (
           <div key={factor.label} className="flex items-center justify-between">
-            <span className="text-xs font-mono text-muted-foreground">
+            <span className="text-xs font-mono text-zinc-500 dark:text-zinc-400">
               {factor.label}
             </span>
             <div className="flex items-center gap-2">
-              <div className="w-24 h-2 bg-zinc-200 dark:bg-zinc-800 rounded-sm overflow-hidden">
+              <div className="w-24 h-2 bg-zinc-100 dark:bg-zinc-800 rounded-sm overflow-hidden border border-zinc-200 dark:border-zinc-700 shadow-inner">
                 <motion.div
                   initial={{ width: 0 }}
                   animate={{ width: `${(factor.value / factor.max) * 100}%` }}
                   transition={{ duration: 0.8, delay: 0.2 }}
                   className="h-full"
-                  style={{ backgroundColor: getScoreColor((factor.value / factor.max) * 100) }}
+                  style={{ backgroundColor: getFactorBarColor(factor.value, factor.max) }}
                 />
               </div>
               <span

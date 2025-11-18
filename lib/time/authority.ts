@@ -1,4 +1,5 @@
 import tzLookup from "tz-lookup";
+import { DateTime } from "luxon";
 import { getAirportCore, type AirportCore } from "@/lib/airports/store";
 import { formatLocalWithTz, formatZulu, describeTimezoneOffsets } from "./format";
 import { DaySegment, getSolarTimes, determineDaySegment, isNightTime } from "./solar";
@@ -155,7 +156,7 @@ export async function getAirportTemporalProfile(icao: string): Promise<AirportTe
       segment,
     },
     metadata: {
-      cacheKey: `${timezone}:${now.getUTCFullYear()}-${now.getUTCMonth()}-${now.getUTCDate()}`,
+      cacheKey: `${timezone}:${DateTime.fromJSDate(now).setZone(timezone).toISODate()}`,
       computedAt: formatZulu(now),
       warnings: metadataWarnings,
     },

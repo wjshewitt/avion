@@ -9,8 +9,12 @@ import { assessVisibility } from "@/lib/weather/risk/factors/visibility";
 import { assessCeilingClouds } from "@/lib/weather/risk/factors/ceilingClouds";
 import { assessPrecipitation } from "@/lib/weather/risk/factors/precipitation";
 import { assessTrendStability } from "@/lib/weather/risk/factors/trendStability";
+import { assessHazardAdvisories } from "@/lib/weather/risk/factors/hazards";
+import { assessTemperature } from "@/lib/weather/risk/factors/temperature";
 import { buildMessaging } from "@/lib/weather/risk/messaging";
 import type { DecodedMetar, DecodedTaf } from "@/types/checkwx";
+import { getAwcWeatherService } from "@/lib/weather/awc";
+import type { HazardFeatureNormalized, PilotReport } from "@/types/weather";
 
 type Mode = "lite" | "full";
 
@@ -89,6 +93,50 @@ function earliestTimestamp(values: Array<string | null | undefined>): string | u
   }
 
   return new Date(Math.min(...timestamps)).toISOString();
+}
+
+async function collectHazardsForAirport(
+  metar?: DecodedMetar
+): Promise<{ hazards: HazardFeatureNormalized[]; pireps: PilotReport[] }> {
+  try {
+    const coords = metar?.station?.geometry?.coordinates;
+    if (!coords || coords.length !== 2) {
+      return { hazards: [], pireps: [] };
+    }
+
+    const [lon, lat] = coords;
+    if (
+      typeof lon !== "number" ||
+      typeof lat !== "number" ||
+      Number.isNaN(lon) ||
+      Number.isNaN(lat)
+    ) {
+      return { hazards: [], pireps: [] };
+    }
+
+    const bbox = {
+      west: lon - 5,
+      east: lon + 5,
+      south: lat - 3,
+      north: lat + 3,
+    } as const;
+
+    const service = getAwcWeatherService();
+    const [sigmets, gairmets, cwas, pireps] = await Promise.all([
+      service.getHazards("sigmet", { bbox, hours: 4 }).catch(() => []),
+      service.getHazards("gairmet", { bbox, hours: 6 }).catch(() => []),
+      service.getHazards("cwa", { bbox, hours: 2 }).catch(() => []),
+      service.getPireps({ bbox, hours: 2 }).catch(() => []),
+    ]);
+
+    return {
+      hazards: [...sigmets, ...gairmets, ...cwas],
+      pireps,
+    };
+  } catch (error) {
+    console.error("[Weather Risk] Failed to collect AWC hazards", error);
+    return { hazards: [], pireps: [] };
+  }
 }
 
 export interface AirfieldWeatherSnapshotResult {
@@ -241,13 +289,24 @@ export async function getAirportRisk(params: AirportRiskParams) {
 
     const phase = mapPhase(schedule, now);
 
-    const inputs: RiskInputs = { icao: normalizedIcao, metar, taf, now };
+    const hazardContext = await collectHazardsForAirport(metar);
+
+    const inputs: RiskInputs = {
+      icao: normalizedIcao,
+      metar,
+      taf,
+      now,
+      hazards: hazardContext.hazards,
+      pireps: hazardContext.pireps,
+    };
     const factors = [
       assessSurfaceWind(inputs),
       assessVisibility(inputs),
       assessCeilingClouds(inputs),
       assessPrecipitation(inputs),
       assessTrendStability(inputs),
+      assessHazardAdvisories(inputs),
+      assessTemperature(inputs),
     ];
 
     const datasetsAvailable = [metar, taf].filter(Boolean).length;

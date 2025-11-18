@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronDown, Plus, Search, MessageSquare, Clock } from 'lucide-react';
+import { ChevronDown, Search, MessageSquare } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface Conversation {
@@ -38,17 +38,14 @@ export function ConversationSidebar({
     });
   }, [conversations, searchQuery]);
 
-  const activeCount = filteredConversations.length;
-
   return (
     <aside className="w-[300px] border-r border-border bg-background flex flex-col">
       {/* Header with New Chat button */}
       <div className="p-4 border-b border-border">
         <button
           onClick={onNewChat}
-          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-primary hover:bg-primary/90 text-primary-foreground rounded-sm text-xs font-mono uppercase tracking-wider transition-colors shadow-sm"
+          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 border border-border hover:border-muted-foreground/50 bg-card hover:bg-accent text-foreground rounded-sm text-xs font-medium uppercase tracking-wide transition-all"
         >
-          <Plus size={16} strokeWidth={1.5} />
           New Chat
         </button>
       </div>
@@ -64,11 +61,6 @@ export function ConversationSidebar({
             <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-muted-foreground">
               Chat History
             </span>
-            {activeCount > 0 && (
-              <span className="bg-primary text-primary-foreground px-2 py-0.5 rounded-sm text-[10px] font-mono tabular-nums">
-                {activeCount}
-              </span>
-            )}
           </div>
           <ChevronDown
             size={16}
@@ -91,14 +83,14 @@ export function ConversationSidebar({
             >
               {/* Search Input */}
               <div className="px-4 pb-3">
-                <div className="groove-input flex items-center bg-card border border-border rounded-sm px-3 py-2">
+                <div className="flex items-center bg-card border border-border rounded-sm px-3 py-2">
                   <Search size={14} strokeWidth={1.5} className="text-muted-foreground" />
                   <input
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Search conversations..."
-                    className="w-full bg-transparent pl-2 border-none text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
+                    placeholder="Search logs..."
+                    className="w-full bg-transparent pl-2 border-none text-xs text-foreground placeholder:text-muted-foreground focus:outline-none font-mono"
                   />
                 </div>
               </div>
@@ -108,12 +100,12 @@ export function ConversationSidebar({
       </div>
 
       {/* Conversations List */}
-      <div className="flex-1 overflow-y-auto p-3 space-y-2">
+      <div className="flex-1 overflow-y-auto p-0">
         {isExpanded && filteredConversations.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-12 text-center">
-            <MessageSquare size={32} strokeWidth={1.5} className="text-muted-foreground mb-3" />
-            <p className="text-sm text-muted-foreground">
-              {searchQuery ? 'No matching conversations' : 'No conversations yet'}
+          <div className="flex flex-col items-center justify-center py-12 text-center px-4">
+            <MessageSquare size={32} strokeWidth={1.5} className="text-muted-foreground/40 mb-3" />
+            <p className="text-xs text-muted-foreground">
+              {searchQuery ? 'No matching logs found' : 'No logs available'}
             </p>
           </div>
         ) : (
@@ -130,55 +122,41 @@ export function ConversationSidebar({
                 key={conv.id}
                 onClick={() => onSelectConversation(conv.id)}
                 className={cn(
-                  'w-full text-left px-3 py-2.5 rounded-sm transition-all duration-150 border',
+                  'w-full text-left px-4 py-3 transition-all duration-150 border-b border-border group relative',
                   isActive
-                    ? 'bg-primary/10 border-primary/50 shadow-sm'
-                    : 'bg-card border-border hover:bg-accent/50 hover:border-border'
+                    ? 'bg-accent/50'
+                    : 'bg-background hover:bg-accent/30'
                 )}
               >
-                <div className="flex items-start gap-2">
-                  <MessageSquare
-                    size={14}
-                    strokeWidth={1.5}
-                    className={cn(
-                      'mt-0.5 flex-shrink-0',
-                      isActive ? 'text-primary' : 'text-muted-foreground'
-                    )}
-                  />
-                  <div className="flex-1 min-w-0">
-                    <p
-                      className={cn(
-                        'text-sm truncate',
-                        isActive ? 'text-foreground font-medium' : 'text-foreground'
-                      )}
-                    >
+                {isActive && (
+                  <div className="absolute left-0 top-0 bottom-0 w-[2px] bg-[#F04E30]" />
+                )}
+                
+                <div className="flex flex-col gap-1">
+                  <div className="flex justify-between items-center w-full">
+                    <span className={cn(
+                      'text-xs font-medium truncate max-w-[180px]', 
+                      isActive ? 'text-foreground' : 'text-zinc-500 group-hover:text-zinc-400'
+                    )}>
                       {displayTitle}
-                    </p>
+                    </span>
                     {conv.updated_at && (
-                      <p className="text-[10px] font-mono text-muted-foreground mt-1 tabular-nums">
-                        {new Date(conv.updated_at).toLocaleDateString()}
-                      </p>
+                       <span className="text-[10px] font-mono text-zinc-600 tabular-nums">
+                         {new Date(conv.updated_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                       </span>
                     )}
                   </div>
+                  {conv.updated_at && (
+                    <span className="text-[10px] font-mono text-zinc-600 tabular-nums">
+                      {new Date(conv.updated_at).toLocaleDateString()}
+                    </span>
+                  )}
                 </div>
               </button>
             );
           })
         )}
       </div>
-
-      {/* Footer with timestamp */}
-      {isExpanded && filteredConversations.length > 0 && (
-        <div className="px-4 py-2 border-t border-border">
-          <div className="flex items-center gap-2 text-[10px] font-mono uppercase tracking-[0.2em] text-muted-foreground">
-            <Clock size={12} strokeWidth={1.5} />
-            <span>
-              {filteredConversations.length} conversation
-              {filteredConversations.length !== 1 ? 's' : ''}
-            </span>
-          </div>
-        </div>
-      )}
     </aside>
   );
 }

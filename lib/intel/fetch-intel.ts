@@ -1,5 +1,10 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
-import type { Database } from '@/lib/supabase/types';
+import type {
+  AirportIntelEntry,
+  Database,
+  IntelCitation,
+  OperatorIntelEntry,
+} from '@/lib/supabase/types';
 
 export interface IntelCitationsResponse {
   title?: string | null;
@@ -22,7 +27,9 @@ export interface IntelEntryResponse {
   citations: IntelCitationsResponse[];
 }
 
-type Client = SupabaseClient<Database>;
+type Client = SupabaseClient<Database, 'public'>;
+type AirportIntelRow = AirportIntelEntry & { citations?: IntelCitation[] | null };
+type OperatorIntelRow = OperatorIntelEntry & { citations?: IntelCitation[] | null };
 
 export async function fetchAirportIntel(
   supabase: Client,
@@ -37,14 +44,16 @@ export async function fetchAirportIntel(
     )
     .eq('airport_icao', icao)
     .order('source_rank', { ascending: false })
-    .order('confidence', { ascending: false, nullsLast: true })
+    .order('confidence', { ascending: false })
     .limit(limit);
 
   if (error || !data) {
     return [];
   }
 
-  return data.map((entry) => ({
+  const rows = (data ?? []) as AirportIntelRow[];
+
+  return rows.map((entry) => ({
     id: entry.id,
     category: entry.category,
     field: entry.field,
@@ -55,7 +64,12 @@ export async function fetchAirportIntel(
     source_type: entry.source_type,
     source_label: entry.source_label,
     source_url: entry.source_url,
-    citations: entry.citations || [],
+    citations: (entry.citations ?? []).map((citation) => ({
+      title: citation.title,
+      url: citation.url,
+      confidence: citation.confidence,
+      ranking: citation.ranking,
+    } satisfies IntelCitationsResponse)),
   }));
 }
 
@@ -72,14 +86,16 @@ export async function fetchOperatorIntel(
     )
     .eq('operator_id', operatorId)
     .order('source_rank', { ascending: false })
-    .order('confidence', { ascending: false, nullsLast: true })
+    .order('confidence', { ascending: false })
     .limit(limit);
 
   if (error || !data) {
     return [];
   }
 
-  return data.map((entry) => ({
+  const rows = (data ?? []) as OperatorIntelRow[];
+
+  return rows.map((entry) => ({
     id: entry.id,
     category: entry.category,
     field: entry.field,
@@ -90,6 +106,11 @@ export async function fetchOperatorIntel(
     source_type: entry.source_type,
     source_label: entry.source_label,
     source_url: entry.source_url,
-    citations: entry.citations || [],
+    citations: (entry.citations ?? []).map((citation) => ({
+      title: citation.title,
+      url: citation.url,
+      confidence: citation.confidence,
+      ranking: citation.ranking,
+    } satisfies IntelCitationsResponse)),
   }));
 }

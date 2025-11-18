@@ -4,7 +4,7 @@ import {
   analyzeMetarConcerns,
   analyzeTafConcerns,
   DEFAULT_WEATHER_THRESHOLDS,
-} from "@/lib/weather/weatherConcerns";
+} from "./weatherConcerns";
 
 export interface AtmosphereContext {
   metar?: DecodedMetar | null;
@@ -53,14 +53,16 @@ export function selectAtmosphereCard({ metar, taf, isNightOverride }: Atmosphere
 
   const metarRaw = metar?.raw_text ?? "";
   const tafRaw = taf?.raw_text ?? "";
-  const text = `${metarRaw} ${tafRaw}`;
 
-  const hasCode = (codes: string[]) =>
-    codes.some((code) => text.includes(code));
+  const hasMetarCode = (codes: string[]) =>
+    codes.some((code) => metarRaw.includes(code));
+
+  const hasAnyCode = (codes: string[]) =>
+    codes.some((code) => (metarRaw + " " + tafRaw).includes(code));
 
   // 1) Thunderstorm
   if (
-    hasCode([" TS ", "TSRA", " TSTORM", "VCTS", "+TS"]) ||
+    hasAnyCode([" TS ", "TSRA", " TSTORM", "VCTS", "+TS"]) ||
     concerns.some((c) => c.type === "thunderstorms" && (c.severity === "high" || c.severity === "extreme"))
   ) {
     return { variant: "thunderstorm", isNight: true, tempC, visibilitySm, qnhInHg };
@@ -68,8 +70,8 @@ export function selectAtmosphereCard({ metar, taf, isNightOverride }: Atmosphere
 
   // 2) Low Vis / Fog
   if (
-    visibilitySm != null && visibilitySm < 3 ||
-    hasCode([" FG", " BR", " HZ", "VV"]) ||
+    (visibilitySm != null && visibilitySm < 3) ||
+    hasMetarCode([" FG", " BR", " HZ", "VV"]) ||
     concerns.some((c) => c.type === "low_visibility" && (c.severity === "moderate" || c.severity === "high" || c.severity === "extreme"))
   ) {
     return { variant: "low-vis-fog", isNight: true, tempC, visibilitySm, qnhInHg };
@@ -77,7 +79,7 @@ export function selectAtmosphereCard({ metar, taf, isNightOverride }: Atmosphere
 
   // 3) Heavy Rain
   if (
-    hasCode(["+RA", " RA", "SHRA"]) && !hasCode(["TSRA"]) &&
+    hasMetarCode(["+RA", " RA", "SHRA"]) && !hasMetarCode(["TSRA"]) &&
     !concerns.some((c) => c.type === "low_visibility" && c.severity === "extreme")
   ) {
     return { variant: "heavy-rain", isNight: isNight, tempC, visibilitySm, qnhInHg };
@@ -85,8 +87,8 @@ export function selectAtmosphereCard({ metar, taf, isNightOverride }: Atmosphere
 
   // 4) Arctic / Snow
   if (
-    tempC != null && tempC <= 0 &&
-    hasCode([" SN", "SG", " PL", "SNRA"]) ||
+    (tempC != null && tempC <= 0 &&
+    hasMetarCode([" SN", "SG", " PL", "SNRA"])) ||
     concerns.some((c) => c.type === "icing_conditions" && (c.severity === "high" || c.severity === "extreme"))
   ) {
     return { variant: "arctic-snow", isNight: false, tempC, visibilitySm, qnhInHg };
@@ -95,7 +97,7 @@ export function selectAtmosphereCard({ metar, taf, isNightOverride }: Atmosphere
   // 5) Clear Night
   if (
     isNight &&
-    !hasCode([" RA", " SN", " FG", " BR"]) &&
+    !hasMetarCode([" RA", " SN", " FG", " BR"]) &&
     visibilitySm != null && visibilitySm >= 6
   ) {
     return { variant: "clear-night", isNight: true, tempC, visibilitySm, qnhInHg };

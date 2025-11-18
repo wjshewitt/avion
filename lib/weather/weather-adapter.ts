@@ -20,8 +20,9 @@ export function adaptMetarToWeather(metar: DecodedMetar | null | undefined): Wea
   const condition = mapFlightCategoryToCondition(metar.flight_category);
 
   // Extract temperature in Fahrenheit, fallback to Celsius converted to F
+  const tempCelsius = metar.temperature?.celsius;
   const temperature = metar.temperature?.fahrenheit ?? 
-    (metar.temperature?.celsius ? Math.round(metar.temperature.celsius * 9/5 + 32) : 0);
+    (tempCelsius ? Math.round(tempCelsius * 9/5 + 32) : 0);
 
   // Extract wind data in knots
   const windSpeed = metar.wind?.speed_kts ?? 0;
@@ -36,18 +37,23 @@ export function adaptMetarToWeather(metar: DecodedMetar | null | undefined): Wea
   const ceiling = metar.ceiling?.feet ?? 
     (metar.clouds?.find(cloud => cloud.code === 'BKN' || cloud.code === 'OVC')?.feet);
 
+  // Extract QNH (barometer)
+  const qnh = metar.barometer?.hg;
+
   // Extract weather risks based on conditions
   const risks = extractWeatherRisks(metar, condition);
 
   return {
     condition,
     temperature,
+    tempCelsius,
     wind: {
       speed: windSpeed,
       direction: windDirection,
     },
     visibility,
     ceiling: ceiling || undefined,
+    qnh: qnh || undefined,
     risks,
   };
 }

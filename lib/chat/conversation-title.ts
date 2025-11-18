@@ -13,6 +13,10 @@ type ChatMessageRow = Database['public']['Tables']['chat_messages']['Row'] & {
 };
 
 type ChatConversationRow = Database['public']['Tables']['chat_conversations']['Row'];
+type ChatConversationUpdate = Database['public']['Tables']['chat_conversations']['Update'];
+
+const CHAT_CONVERSATIONS_TABLE: keyof Database['public']['Tables'] = 'chat_conversations';
+const CHAT_MESSAGES_TABLE: keyof Database['public']['Tables'] = 'chat_messages';
 
 export interface GenerateConversationTitleParams {
   supabase: SupabaseClient<Database>;
@@ -75,9 +79,10 @@ export async function generateConversationTitle({
     return { updated: false, reason: 'unchanged', title: normalized };
   }
 
-  const { error: updateError } = await supabase
-    .from('chat_conversations')
-    .update({ title: normalized })
+  const conversationTable = supabase.from(CHAT_CONVERSATIONS_TABLE) as any;
+
+  const { error: updateError } = await conversationTable
+    .update({ title: normalized } as ChatConversationUpdate)
     .eq('id', conversationId);
 
   if (updateError) {
@@ -93,7 +98,7 @@ async function fetchConversation(
   conversationId: string,
 ): Promise<ChatConversationRow | null> {
   const { data, error } = await supabase
-    .from('chat_conversations')
+    .from(CHAT_CONVERSATIONS_TABLE)
     .select('id, user_id, title')
     .eq('id', conversationId)
     .single();
@@ -103,7 +108,7 @@ async function fetchConversation(
     return null;
   }
 
-  return data;
+  return data as ChatConversationRow;
 }
 
 async function fetchConversationTranscript(
@@ -111,7 +116,7 @@ async function fetchConversationTranscript(
   conversationId: string,
 ) {
   const { data, error } = await supabase
-    .from('chat_messages')
+    .from(CHAT_MESSAGES_TABLE)
     .select('id, role, content, text_content, created_at')
     .eq('conversation_id', conversationId)
     .order('created_at', { ascending: false })
@@ -122,7 +127,8 @@ async function fetchConversationTranscript(
     return [] as Array<{ role: 'user' | 'assistant'; text: string }>;
   }
 
-  return normalizeTranscript((data as ChatMessageRow[]).reverse());
+  const typedMessages = (data ?? []) as ChatMessageRow[];
+  return normalizeTranscript(typedMessages.reverse());
 }
 
 function normalizeTranscript(messages: ChatMessageRow[]) {
@@ -152,14 +158,24 @@ async function requestTitleFromModel(transcript: Array<{ role: 'user' | 'assista
     .map((entry) => `${entry.role === 'user' ? 'User' : 'AI'}: ${entry.text}`)
     .join('\n');
 
-  const { text } = await generateText({
+  const result = await generateText({
     model: liteModel,
     system:
       'You create short, descriptive chat conversation titles. Respond with a single sentence (max 12 words). Do not include quotation marks.',
     prompt: `Conversation transcript:\n${conversationText}\n\nProvide only the title.`,
   });
 
-  return text;
+  const directText = result.text?.trim();
+  if (directText) {
+    return directText;
+  }
+
+  const contentText = result.content
+    ?.map((part) => ('text' in part && typeof part.text === 'string' ? part.text : ''))
+    .join('')
+    .trim();
+
+  return contentText ?? null;
 }
 
 export function normalizeGeneratedTitle(raw: string | null | undefined): string | null {

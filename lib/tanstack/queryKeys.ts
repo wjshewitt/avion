@@ -25,6 +25,19 @@ export const queryKeys = {
       [...queryKeys.weather.all, "metar-radius", icao, miles] as const,
     complete: (icao: string) =>
       [...queryKeys.weather.all, "complete", icao] as const,
+    awcHazard: (
+      feed: string,
+      params: { bbox?: string; hours?: number }
+    ) =>
+      [
+        ...queryKeys.weather.all,
+        "awc",
+        "hazard",
+        feed,
+        params,
+      ] as const,
+    awcPirep: (params: { bbox?: string; hours?: number }) =>
+      [...queryKeys.weather.all, "awc", "pirep", params] as const,
     risk: (params: { flightId?: string; airport?: string; mode?: string; scheduledDeparture?: string; scheduledArrival?: string }) =>
       [...queryKeys.weather.all, "risk", params] as const,
     riskExplanation: (params: { flightId?: string; airport?: string; riskData?: any }) =>

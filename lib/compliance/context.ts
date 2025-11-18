@@ -1,7 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type {
   AircraftRecord,
-  AirportRow,
   Database,
   Jurisdiction,
   Operator,
@@ -9,6 +8,18 @@ import type {
 import { describeRegistry } from '@/lib/aircraft/registry';
 
 type Client = SupabaseClient<Database>;
+type Tables = Database['public']['Tables'];
+
+const TABLES = {
+  jurisdictions: 'jurisdictions',
+  operators: 'operators',
+  airports: 'airports',
+  aircraft: 'aircraft',
+} as const satisfies Record<string, keyof Tables>;
+
+function table<T extends keyof Tables>(client: Client, tableName: T) {
+  return client.from(tableName) as any;
+}
 
 export interface FlightComplianceContextOptions {
   supabase: Client;
@@ -30,12 +41,17 @@ export interface FlightComplianceContextResult {
   contextPayload: Record<string, any>;
 }
 
-let jurisdictionCache: Jurisdiction[] | null = null;
+let jurisdictionCache: Jurisdiction[] | undefined;
 
 async function getJurisdictions(client: Client): Promise<Jurisdiction[]> {
   if (jurisdictionCache) return jurisdictionCache;
-  const { data } = await client.from<Jurisdiction>('jurisdictions').select('*');
-  jurisdictionCache = data ?? [];
+  const { data, error } = await table(client, TABLES.jurisdictions).select('*');
+  if (error) {
+    console.error('Failed to load jurisdictions:', error);
+    jurisdictionCache = [];
+    return jurisdictionCache;
+  }
+  jurisdictionCache = (data ?? []) as Jurisdiction[];
   return jurisdictionCache;
 }
 
@@ -65,28 +81,27 @@ async function findOperatorByName(client: Client, name?: string | null): Promise
   const normalized = normalize(name);
   if (!normalized) return null;
 
-  const { data } = await client
-    .from<Operator>('operators')
+  const { data } = await table(client, TABLES.operators)
     .select('*')
     .ilike('name', normalized)
     .limit(1)
     .maybeSingle();
 
-  return data ?? null;
+  return (data as Operator | null) ?? null;
 }
 
 async function getAirportCountryCode(client: Client, icao?: string | null): Promise<string | null> {
   const normalized = normalize(icao);
   if (!normalized) return null;
 
-  const { data } = await client
-    .from<Pick<AirportRow, 'country'>>('airports')
+  const { data } = await table(client, TABLES.airports)
     .select('country')
     .eq('icao', normalized)
     .maybeSingle();
 
-  if (!data?.country) return null;
-  return lookupJurisdictionCode(client, data.country);
+  const airport = data as { country: string | null } | null;
+  if (!airport?.country) return null;
+  return lookupJurisdictionCode(client, airport.country);
 }
 
 async function ensureAircraftRecord(
@@ -98,34 +113,35 @@ async function ensureAircraftRecord(
   persist: boolean
 ) {
   if (!persist) return;
-  const updatePayload: Partial<AircraftRecord> = {
+  const updatePayload: Tables['aircraft']['Update'] = {
     operator_id: operator?.id ?? null,
     operator_name: operator?.name ?? operatorName,
     registry_country_code: registryCode,
   };
 
-  const { data: existing } = await client
-    .from<Pick<AircraftRecord, 'tail_number'>>('aircraft')
+  const { data: existing } = await table(client, TABLES.aircraft)
     .select('tail_number')
     .eq('tail_number', tailNumber)
     .maybeSingle();
 
-  if (existing) {
-    await client
-      .from('aircraft')
+  const existingRecord = existing as Pick<AircraftRecord, 'tail_number'> | null;
+
+  if (existingRecord) {
+    await table(client, TABLES.aircraft)
       .update(updatePayload)
       .eq('tail_number', tailNumber);
   } else {
-    await client
-      .from('aircraft')
-      .insert({
-        tail_number: tailNumber,
-        manufacturer: null,
-        model: null,
-        mtow_kg: null,
-        equipment: {},
-        ...updatePayload,
-      });
+    const insertPayload: Tables['aircraft']['Insert'] = {
+      tail_number: tailNumber,
+      operator_id: updatePayload.operator_id ?? null,
+      operator_name: updatePayload.operator_name ?? null,
+      registry_country_code: updatePayload.registry_country_code ?? null,
+      manufacturer: null,
+      model: null,
+      mtow_kg: null,
+      equipment: {},
+    };
+    await table(client, TABLES.aircraft).insert(insertPayload);
   }
 }
 

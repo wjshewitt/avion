@@ -44,7 +44,7 @@ export default function FlightCreationWizard() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const methods = useForm<FlightFormValues>({
-    resolver: zodResolver(flightCreationSchema),
+    resolver: zodResolver(flightCreationSchema) as any,
     mode: 'onSubmit',
     reValidateMode: 'onChange',
     defaultValues,

@@ -15,11 +15,46 @@ export function determineFlightPhase(schedule?: FlightSchedule, now: Date = new 
 }
 
 const PHASE_WEIGHTS: Record<Phase, Record<string, number>> = {
-  departure: { surface_wind: 0.35, visibility: 0.25, ceiling_clouds: 0.15, precipitation: 0.15, trend_stability: 0.1 },
-  arrival: { ceiling_clouds: 0.30, visibility: 0.25, surface_wind: 0.20, precipitation: 0.15, trend_stability: 0.1 },
-  planning: { precipitation: 0.25, ceiling_clouds: 0.25, surface_wind: 0.20, visibility: 0.20, trend_stability: 0.1 },
-  preflight: { visibility: 0.25, ceiling_clouds: 0.25, surface_wind: 0.20, precipitation: 0.20, trend_stability: 0.1 },
-  enroute: { precipitation: 0.30, trend_stability: 0.25, surface_wind: 0.20, visibility: 0.15, ceiling_clouds: 0.1 },
+  departure: {
+    surface_wind: 0.3,
+    visibility: 0.22,
+    ceiling_clouds: 0.13,
+    precipitation: 0.13,
+    trend_stability: 0.08,
+    temperature: 0.14,
+  },
+  arrival: {
+    ceiling_clouds: 0.28,
+    visibility: 0.23,
+    surface_wind: 0.18,
+    precipitation: 0.13,
+    trend_stability: 0.08,
+    temperature: 0.1,
+  },
+  planning: {
+    precipitation: 0.23,
+    ceiling_clouds: 0.23,
+    surface_wind: 0.18,
+    visibility: 0.18,
+    trend_stability: 0.08,
+    temperature: 0.1,
+  },
+  preflight: {
+    visibility: 0.23,
+    ceiling_clouds: 0.23,
+    surface_wind: 0.18,
+    precipitation: 0.18,
+    trend_stability: 0.08,
+    temperature: 0.1,
+  },
+  enroute: {
+    precipitation: 0.28,
+    trend_stability: 0.23,
+    surface_wind: 0.18,
+    visibility: 0.13,
+    ceiling_clouds: 0.08,
+    temperature: 0.1,
+  },
 };
 
 export function aggregateRisk(

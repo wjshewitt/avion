@@ -1,6 +1,6 @@
 'use client';
 
-import { Plus, Settings, X } from 'lucide-react';
+import { Settings, X } from 'lucide-react';
 import { LEDStatus } from '@/components/ai-drawer/LEDStatus';
 import ContextSelector from '@/components/chat/context-selector';
 import { Button } from '@/components/ui/button';
@@ -20,61 +20,53 @@ export function ChatHeader({
   providerLabel,
   showSettings,
   onToggleSettings,
-  onNewChat,
 }: ChatHeaderProps) {
   return (
-    <header className="h-14 border-b border-border bg-card/80 backdrop-blur-sm flex-shrink-0 z-10">
+    <header className="h-16 border-b border-border bg-background flex-shrink-0 z-10">
       <div className="h-full px-6 flex items-center justify-between gap-4">
-        {/* Left: Page Label & Title */}
+        {/* Left: Title & Model Info */}
         <div className="flex-1 min-w-0">
-          <div className="text-[10px] font-mono uppercase tracking-[0.2em] text-muted-foreground mb-1">
-            Chat Console
-          </div>
           <h1 className="text-base font-medium text-foreground truncate">
-            {showSettings ? 'Chat Settings' : conversationTitle || 'AI Aviation Assistant'}
+            {showSettings ? 'Chat Settings' : conversationTitle || 'Aviation Assistant'}
           </h1>
+          <div className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider">
+            {providerLabel.toUpperCase()}
+          </div>
         </div>
 
+        {/* Center: Context (if not in settings) */}
+        {!showSettings && (
+          <div className="hidden md:flex flex-1 justify-center">
+             <div className="text-xs font-medium text-muted-foreground flex items-center gap-2">
+                <ContextSelector />
+             </div>
+          </div>
+        )}
+
         {/* Right: Status & Controls */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4 flex-1 justify-end">
           {!showSettings && (
-            <>
-              {/* AI Status */}
-              <div className="flex items-center gap-3 text-xs">
-                <LEDStatus status={aiStatus} size="sm" />
-                <span className="font-mono text-muted-foreground truncate max-w-[200px] tabular-nums">
-                  {providerLabel}
-                </span>
-              </div>
-
-              {/* Context Selector */}
-              <ContextSelector />
-
-              {/* New Chat Button */}
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={onNewChat}
-                title="New Chat"
-                className="h-8 w-8"
-              >
-                <Plus size={16} strokeWidth={1.5} />
-              </Button>
-            </>
+            /* AI Status */
+            <div className="flex items-center gap-2 text-xs">
+              <LEDStatus status={aiStatus} size="sm" />
+              <span className="font-mono text-muted-foreground uppercase text-[10px] tracking-wider hidden sm:inline-block">
+                {aiStatus === 'streaming' ? 'TRANSMITTING' : aiStatus === 'thinking' ? 'PROCESSING' : 'SYSTEM READY'}
+              </span>
+            </div>
           )}
 
           {/* Settings Toggle */}
           <Button
-            variant={showSettings ? 'default' : 'ghost'}
+            variant="ghost"
             size="icon"
             onClick={onToggleSettings}
             title={showSettings ? 'Close Settings' : 'Settings'}
-            className={showSettings ? 'h-8 w-8 bg-primary hover:bg-primary/90' : 'h-8 w-8'}
+            className="h-9 w-9 text-muted-foreground hover:text-foreground hover:bg-accent"
           >
             {showSettings ? (
-              <X size={16} strokeWidth={1.5} />
+              <X size={18} strokeWidth={1.5} />
             ) : (
-              <Settings size={16} strokeWidth={1.5} />
+              <Settings size={18} strokeWidth={1.5} />
             )}
           </Button>
         </div>

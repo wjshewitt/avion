@@ -6,7 +6,7 @@ import { StructuredIntelEntriesSchema, type StructuredIntelEntriesPayload } from
 const ExaCitationSchema = z.object({
   id: z.string().optional(),
   url: z.string().url(),
-  title: z.string().optional(),
+  title: z.string().nullable().optional(),
   author: z.string().nullable().optional(),
   publishedDate: z.string().nullable().optional(),
   text: z.string().optional(),
@@ -15,7 +15,7 @@ const ExaCitationSchema = z.object({
 });
 
 const ExaAnswerResponseSchema = z.object({
-  answer: z.union([z.string(), z.record(z.any())]).optional(),
+  answer: z.union([z.string(), z.record(z.string(), z.any())]).optional(),
   citations: z.array(ExaCitationSchema).optional(),
   costDollars: z
     .object({
@@ -28,15 +28,17 @@ export type ExaCitation = z.infer<typeof ExaCitationSchema>;
 
 export interface ExaAnswerResult {
   summary: string;
-  citations: Array<{
-    id?: string;
-    title?: string;
-    url: string;
-    author?: string | null;
-    publishedDate?: string | null;
-  }>;
+  citations: AnswerCitation[];
   costUsd: number | null;
   raw: z.infer<typeof ExaAnswerResponseSchema>;
+}
+
+export interface AnswerCitation {
+  id?: string;
+  title: string | null;
+  url: string;
+  author: string | null;
+  publishedDate: string | null;
 }
 
 export interface RunExaAnswerOptions {
@@ -47,6 +49,12 @@ export interface RunExaAnswerOptions {
 export interface ExaStructuredIntelResult {
   entries: StructuredIntelEntriesPayload['entries'];
 }
+
+type StructuredIntelCitation = StructuredIntelEntriesPayload['entries'][number]['citations'] extends (
+  infer Item
+)[]
+  ? Item
+  : { title?: string; url: string; confidence?: number };
 
 let cachedClient: Exa | null = null;
 
@@ -85,7 +93,7 @@ export async function runExaAnswer(
 
   return {
     summary: summary.trim() || 'No answer returned.',
-    citations: mapCitations(parsed.citations),
+    citations: mapAnswerCitations(parsed.citations),
     costUsd: parsed.costDollars?.total ?? null,
     raw: parsed,
   };
@@ -151,23 +159,45 @@ export async function runExaStructuredAnswer(query: string): Promise<ExaStructur
     throw new Error('Structured EXA response failed validation');
   }
 
-  const fallbackCitations = mapCitations(response.citations);
+  const fallbackCitations = mapAnswerCitations(response.citations);
   const entries = parsed.data.entries.map((entry) => ({
     ...entry,
-    citations: entry.citations?.length ? entry.citations : fallbackCitations.slice(0, 3),
+    citations: entry.citations?.length
+      ? entry.citations
+      : fallbackCitations.slice(0, 3).map(convertAnswerCitationToSchema),
   }));
 
   return { entries };
 }
 
-function mapCitations(citations?: Array<SearchResult<Record<string, unknown>>>): ExaAnswerResult['citations'] {
-  return (citations ?? []).map((citation) => ({
-    id: citation.id,
-    title: citation.title,
+type CitationLike = {
+  id?: string | null;
+  url: string;
+  title?: string | null;
+  author?: string | null;
+  publishedDate?: string | null;
+};
+
+function mapAnswerCitations(
+  citations?: Array<CitationLike | SearchResult<Record<string, unknown>>>
+): AnswerCitation[] {
+  return (citations ?? []).map((citation) => {
+    const raw = citation as CitationLike;
+    return {
+      id: raw.id ?? undefined,
+      title: raw.title ?? null,
+      url: citation.url,
+      author: raw.author ?? null,
+      publishedDate: raw.publishedDate ?? null,
+    } satisfies AnswerCitation;
+  });
+}
+
+function convertAnswerCitationToSchema(citation: AnswerCitation): StructuredIntelCitation {
+  return {
+    title: citation.title ?? undefined,
     url: citation.url,
-    author: citation.author ?? null,
-    publishedDate: citation.publishedDate ?? null,
-  }));
+  };
 }
 
 function extractErrorMessage(error: unknown): string {

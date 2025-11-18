@@ -5,6 +5,8 @@ export type RegulationCategory = 'crew-duty' | 'passenger-briefing' | 'country-r
 
 export type ComplianceStatus = 'legal' | 'marginal' | 'illegal';
 
+export type ComplianceDashboardData = Record<string, unknown>;
+
 // Compliance Health Score (for dashboard widgets)
 export interface ComplianceHealthScore {
   overall: number;

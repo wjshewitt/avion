@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { Save, User, Bell, Monitor, Database, Shield, Globe } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { useStore } from '@/store/index';
+import type { UserPreferences } from '@/types/profile';
 
 type SettingsSection = 'profile' | 'notifications' | 'display' | 'data' | 'security' | 'system';
 
@@ -50,6 +51,8 @@ export default function SettingsPage() {
   const { userProfile, isLoadingProfile, setUserProfile } = useStore();
   const weatherViewMode = useStore((s) => s.weatherViewMode);
   const setWeatherViewMode = useStore((s) => s.setWeatherViewMode);
+  const weatherUnits = useStore((s) => s.weatherUnits);
+  const setWeatherUnits = useStore((s) => s.setWeatherUnits);
 
   const [profileSettings, setProfileSettings] = useState({
     display_name: '',
@@ -72,11 +75,18 @@ export default function SettingsPage() {
         timezone: userProfile.timezone || 'UTC',
         bio: userProfile.bio || '',
       });
-      if (userProfile.theme_preference && userProfile.theme_preference !== theme) {
+
+      const prefs = (userProfile.preferences ?? {}) as UserPreferences;
+      setDisplaySettings((prev) => ({
+        ...prev,
+        sidebarExpanded: prefs.sidebar_expanded_default ?? prev.sidebarExpanded,
+      }));
+
+      if (userProfile.theme_preference) {
         setTheme(userProfile.theme_preference);
       }
     }
-  }, [userProfile, theme, setTheme]);
+  }, [userProfile, setTheme]);
 
   const [notificationSettings, setNotificationSettings] = useState({
     weatherAlerts: true,
@@ -122,6 +132,13 @@ export default function SettingsPage() {
         timezone: profileSettings.timezone,
         bio: profileSettings.bio,
         theme_preference: theme || 'light',
+        preferences: {
+          ...(userProfile.preferences || {}),
+          weather_view_mode: weatherViewMode === 'advanced' ? 'ops' : 'standard',
+          weather_speed_unit: weatherUnits.speed,
+          weather_visibility_unit: weatherUnits.visibility,
+          sidebar_expanded_default: displaySettings.sidebarExpanded,
+        },
       };
       const response = await fetch('/api/user/profile', {
         method: 'PUT',
@@ -131,6 +148,26 @@ export default function SettingsPage() {
       if (!response.ok) throw new Error('Failed to save profile');
       const savedProfile = await response.json();
       setUserProfile(savedProfile.profile);
+      const prefs = savedProfile.profile?.preferences as import('@/types/profile').UserPreferences | undefined;
+      if (prefs) {
+        setWeatherViewMode(prefs.weather_view_mode === 'ops' ? 'advanced' : 'standard');
+        setWeatherUnits({
+          speed: prefs.weather_speed_unit ?? weatherUnits.speed,
+          visibility: prefs.weather_visibility_unit ?? weatherUnits.visibility,
+        });
+
+        setDisplaySettings((prev) => ({
+          ...prev,
+          sidebarExpanded: prefs.sidebar_expanded_default ?? prev.sidebarExpanded,
+        }));
+
+        if (typeof window !== 'undefined') {
+          window.localStorage.setItem(
+            'sidebar-expanded',
+            String(prefs.sidebar_expanded_default ?? displaySettings.sidebarExpanded)
+          );
+        }
+      }
       setHasChanges(false);
       setSaveMessage('Settings saved successfully!');
       setTimeout(() => setSaveMessage(null), 3000);
@@ -319,6 +356,26 @@ export default function SettingsPage() {
                     </div>
                   </div>
                   <div>
+                    <label className={FIELD_LABEL}>Weather View</label>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => { setWeatherViewMode('standard'); setHasChanges(true); }}
+                        className={`px-4 py-2 text-xs font-bold uppercase tracking-wide rounded-sm transition-colors ${weatherViewMode === 'standard' ? 'bg-primary text-primary-foreground' : 'bg-accent hover:bg-accent/80'}`}
+                      >
+                        Simplified
+                      </button>
+                      <button
+                        onClick={() => { setWeatherViewMode('advanced'); setHasChanges(true); }}
+                        className={`px-4 py-2 text-xs font-bold uppercase tracking-wide rounded-sm transition-colors ${weatherViewMode === 'advanced' ? 'bg-primary text-primary-foreground' : 'bg-accent hover:bg-accent/80'}`}
+                      >
+                        Professional (Ops)
+                      </button>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-2">
+                      Simplified view hides raw METAR/TAF strings and uses plain English phrasing for wind, visibility, clouds, and advisories.
+                    </p>
+                  </div>
+                  <div>
                     <label className={FIELD_LABEL}>Unit System</label>
                     <div className="flex gap-2">
                       {['imperial', 'metric'].map((unit) => (
@@ -328,6 +385,46 @@ export default function SettingsPage() {
                       ))}
                     </div>
                   </div>
+                  {weatherViewMode === 'standard' && (
+                    <div className="space-y-4 pt-4 border-t border-border">
+                      <div>
+                        <label className={FIELD_LABEL}>Weather Speed Units</label>
+                        <div className="flex flex-wrap gap-2">
+                          {[
+                            { id: 'kt', label: 'Knots (kt)' },
+                            { id: 'kmh', label: 'km/h' },
+                            { id: 'mph', label: 'Miles per hour' },
+                          ].map((opt) => (
+                            <button
+                              key={opt.id}
+                              onClick={() => { setWeatherUnits({ speed: opt.id as any }); setHasChanges(true); }}
+                              className={`px-4 py-2 text-xs font-bold uppercase tracking-wide rounded-sm transition-colors ${weatherUnits.speed === opt.id ? 'bg-primary text-primary-foreground' : 'bg-accent hover:bg-accent/80'}`}
+                            >
+                              {opt.label}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                      <div>
+                        <label className={FIELD_LABEL}>Weather Visibility Units</label>
+                        <div className="flex flex-wrap gap-2">
+                          {[
+                            { id: 'mi', label: 'Miles (mi)' },
+                            { id: 'km', label: 'Kilometres (km)' },
+                            { id: 'sm', label: 'Statute miles (SM)' },
+                          ].map((opt) => (
+                            <button
+                              key={opt.id}
+                              onClick={() => { setWeatherUnits({ visibility: opt.id as any }); setHasChanges(true); }}
+                              className={`px-4 py-2 text-xs font-bold uppercase tracking-wide rounded-sm transition-colors ${weatherUnits.visibility === opt.id ? 'bg-primary text-primary-foreground' : 'bg-accent hover:bg-accent/80'}`}
+                            >
+                              {opt.label}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  )}
                   <div className="space-y-4 pt-6 border-t border-border">
                     <div className="flex items-center justify-between">
                       <div>

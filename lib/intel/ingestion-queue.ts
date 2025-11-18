@@ -1,5 +1,6 @@
 import { createAdminClient } from '@/lib/supabase/admin';
 import type { StructuredIntelEntriesPayload } from '@/lib/intel/schema';
+import type { Database } from '@/lib/supabase/types';
 import type { EntityDetectionResult } from './entity-detection';
 
 export interface IntelQueueInput {
@@ -13,6 +14,8 @@ export interface IntelQueueInput {
   structuredEntries?: StructuredIntelEntriesPayload['entries'];
 }
 
+type IntelIngestionInsert = Database['public']['Tables']['intel_ingestion_queue']['Insert'];
+
 export async function enqueueIntelCandidate(input: IntelQueueInput): Promise<void> {
   const hasAdminKey = Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY);
   if (!hasAdminKey) {
@@ -21,7 +24,7 @@ export async function enqueueIntelCandidate(input: IntelQueueInput): Promise<voi
 
   try {
     const supabase = createAdminClient();
-    const payload = {
+    const payload: IntelIngestionInsert = {
       entity_type: input.detection.entityType,
       entity_id_guess: input.detection.entityIdGuess ?? null,
       query: buildStoredQuery(input),
@@ -30,9 +33,14 @@ export async function enqueueIntelCandidate(input: IntelQueueInput): Promise<voi
         structured_entries: input.structuredEntries ?? null,
       },
       requested_by: input.requestedBy ?? null,
+      status: 'pending',
+      failure_reason: null,
+      processed_at: null,
+      retry_count: 0,
     };
 
-    await supabase.from('intel_ingestion_queue').insert(payload);
+    const queueTable = supabase.from('intel_ingestion_queue') as any;
+    await queueTable.insert(payload);
   } catch (error) {
     console.warn('⚠️ Failed to enqueue intel ingestion job:', error);
   }

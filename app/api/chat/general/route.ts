@@ -183,9 +183,9 @@ export async function POST(req: NextRequest) {
         modelId,
         supportsThinking: supportsThinkingForModel,
       }),
-      onFinish: (event) => {
+      onFinish: async (event) => {
         if (!convId) return;
-        void persistChatExchange({
+        await persistChatExchange({
           supabase,
           conversationId: convId,
           lastUserMessage: lastUserMessage ?? undefined,
@@ -212,9 +212,13 @@ export async function POST(req: NextRequest) {
       }
     });
     
-    if (wasNewConversation && convId) {
+    // Ensure X-Conversation-Id is always set if we have one, not just for new conversations
+    // This helps the client reconcile IDs if needed
+    if (convId) {
       response.headers.set('X-Conversation-Id', convId);
-      console.log('📤 Sending new conversation ID in header:', convId);
+      if (wasNewConversation) {
+          console.log('📤 Sending new conversation ID in header:', convId);
+      }
     }
 
     return response;

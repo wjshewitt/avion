@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
   const limit = Math.max(1, Math.min(5, Number(req.nextUrl.searchParams.get('limit')) || 3));
   const supabase = createAdminClient();
 
-  const { data: queueItems, error } = await supabase
+  const { data, error } = await supabase
     .from('intel_ingestion_queue')
     .select('*')
     .eq('status', 'pending')
@@ -31,9 +31,11 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  if (!queueItems || queueItems.length === 0) {
+  if (!data || data.length === 0) {
     return NextResponse.json({ processed: 0, message: 'No pending items' });
   }
+
+  const queueItems: IntelIngestionQueueRow[] = data;
 
   const results: Array<{ id: string; entries: number; entityType?: EntityType; entityId?: string }> = [];
 
@@ -85,9 +87,14 @@ async function markQueueStatus(
   status: IntelIngestionQueueRow['status'],
   failureReason?: string,
 ) {
-  await supabase
-    .from('intel_ingestion_queue')
-    .update({ status, failure_reason: failureReason ?? null, processed_at: status === 'completed' ? new Date().toISOString() : null })
+  const updateData: Partial<IntelIngestionQueueRow> = {
+    status,
+    failure_reason: failureReason ?? null,
+    processed_at: status === 'completed' ? new Date().toISOString() : null,
+  };
+
+  await (supabase.from('intel_ingestion_queue') as any)
+    .update(updateData)
     .eq('id', id);
 }
 
@@ -137,8 +144,8 @@ async function resolveEntity(
 
 async function airportExists(supabase: AdminClient, icao: string): Promise<string | null> {
   const normalized = icao.toUpperCase();
-  const { data } = await supabase
-    .from('airports')
+  const { data } = await (supabase
+    .from('airports') as any)
     .select('icao')
     .eq('icao', normalized)
     .maybeSingle();
@@ -147,8 +154,8 @@ async function airportExists(supabase: AdminClient, icao: string): Promise<strin
 
 async function findOperatorBySlug(supabase: AdminClient, slug: string): Promise<string | null> {
   const normalized = slug.replace(/-/g, ' ');
-  const { data } = await supabase
-    .from('operators')
+  const { data } = await (supabase
+    .from('operators') as any)
     .select('id')
     .ilike('name', `%${normalized}%`)
     .maybeSingle();
@@ -166,8 +173,8 @@ async function inferOperatorFromPayload(
 
   const tokens = Array.from(new Set(aggregatedText.toLowerCase().match(/([a-z]{4,})/g) || []));
   for (const token of tokens) {
-    const { data } = await supabase
-      .from('operators')
+    const { data } = await (supabase
+      .from('operators') as any)
       .select('id')
       .ilike('name', `%${token}%`)
       .limit(1)
@@ -182,8 +189,8 @@ async function inferOperatorFromPayload(
       if (!citation?.url) continue;
       try {
         const hostname = new URL(citation.url).hostname.replace(/^www\./, '');
-        const { data } = await supabase
-          .from('operators')
+        const { data } = await (supabase
+          .from('operators') as any)
           .select('id')
           .eq('domain', hostname)
           .maybeSingle();

@@ -16,14 +16,29 @@ export function ThemeSwitch() {
     return null; // Prevents hydration mismatch
   }
 
-  const toggleTheme = () => {
-    if (theme === 'light') {
-      setTheme('dark');
-    } else if (theme === 'dark') {
-      setTheme('system');
-    } else {
-      setTheme('light');
+  const updateThemePreference = async (newTheme: string) => {
+    // Optimistic update handled by next-themes
+    try {
+      await fetch('/api/user/profile', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ theme_preference: newTheme })
+      });
+    } catch (error) {
+      console.error('Failed to update theme preference:', error);
     }
+  };
+
+  const toggleTheme = () => {
+    let newTheme = 'light';
+    if (theme === 'light') {
+      newTheme = 'dark';
+    } else if (theme === 'dark') {
+      newTheme = 'system';
+    }
+    
+    setTheme(newTheme);
+    updateThemePreference(newTheme);
   };
 
   const getIcon = () => {
@@ -60,8 +75,22 @@ export function ThemeToggleCompact() {
 
   if (!mounted) return null;
 
+  const updateThemePreference = async (newTheme: string) => {
+    try {
+      await fetch('/api/user/profile', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ theme_preference: newTheme })
+      });
+    } catch (error) {
+      console.error('Failed to update theme preference:', error);
+    }
+  };
+
   const toggleTheme = () => {
-    setTheme(resolvedTheme === 'dark' ? 'light' : 'dark');
+    const newTheme = resolvedTheme === 'dark' ? 'light' : 'dark';
+    setTheme(newTheme);
+    updateThemePreference(newTheme);
   };
 
   return (
@@ -85,9 +114,25 @@ export function ThemeToggleSimple() {
 
   if (!mounted) return null;
 
+  const updateThemePreference = async (newTheme: string) => {
+    try {
+      await fetch('/api/user/profile', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ theme_preference: newTheme })
+      });
+    } catch (error) {
+      console.error('Failed to update theme preference:', error);
+    }
+  };
+
   return (
     <button
-      onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
+      onClick={() => {
+        const newTheme = resolvedTheme === 'dark' ? 'light' : 'dark';
+        setTheme(newTheme);
+        updateThemePreference(newTheme);
+      }}
       className="p-1.5 text-text-secondary hover:text-text-primary hover:bg-surface transition-colors rounded"
       title={`Switch to ${resolvedTheme === 'dark' ? 'light' : 'dark'} mode`}
     >

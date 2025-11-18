@@ -1,13 +1,16 @@
 'use client';
 
+import { useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
 import { useCompleteWeather } from '@/lib/tanstack/hooks/useWeather';
 import { useAppStore } from '@/lib/store';
-import { AvionAtmosphereCard } from '@/components/weather/AvionAtmosphereCard';
+import { AtmosphereCard } from '@/components/weather/atmospheric/AtmosphereCard';
 import { selectAtmosphereCard } from '@/lib/weather/avionAtmosphereMapping';
 import { deriveCloudLayerState } from '@/lib/weather/clouds';
 import { useAirportTemporalProfile } from '@/lib/tanstack/hooks/useTemporalProfile';
+import { generateWeatherSummary } from '@/lib/weather/natural-language';
+import type { WeatherCondition } from '@/components/weather/atmospheric/SkyEngine';
 
 interface PinnedAtmosphereCardProps {
   icao: string;
@@ -30,6 +33,58 @@ export function PinnedAtmosphereCard({ icao }: PinnedAtmosphereCardProps) {
     enabled: Boolean(icao && icao.length === 4),
     staleTime: 5 * 60 * 1000,
   });
+  
+  // Compute derived values before any early returns
+  const isNightFromAuthority = temporalProfile ? !temporalProfile.sun.isDaylight : undefined;
+  const atmosphere = metar ? selectAtmosphereCard({ metar, taf, isNightOverride: isNightFromAuthority }) : null;
+  const cloudState = metar ? deriveCloudLayerState(metar) : null;
+
+  const variant = useMemo(() => {
+    if (!atmosphere) return 'sunny' as const;
+    if (!cloudState) return atmosphere.variant;
+    if (
+      atmosphere.variant === 'sunny' &&
+      cloudState.category !== 'clear' &&
+      cloudState.category !== 'high-thin'
+    ) {
+      return 'cloudy' as const;
+    }
+    return atmosphere.variant;
+  }, [atmosphere, cloudState]);
+
+  // Map to new Engine conditions
+  const condition: WeatherCondition = useMemo(() => {
+    switch (variant) {
+      case 'sunny': return 'clear';
+      case 'clear-night': return 'clear';
+      case 'cloudy': return 'cloudy';
+      case 'heavy-rain': return 'rain';
+      case 'thunderstorm': return 'storm';
+      case 'low-vis-fog': return 'fog';
+      case 'arctic-snow': return 'snow';
+      default: return 'clear';
+    }
+  }, [variant]);
+
+  const localTime = temporalProfile?.clock.localTime ?? null;
+  
+  // Parse Hour for SkyEngine (0-24)
+  const hour = useMemo(() => {
+     if (temporalProfile?.clock.localIso) {
+         const date = new Date(temporalProfile.clock.localIso);
+         if (!isNaN(date.getTime())) {
+             return date.getHours() + (date.getMinutes() / 60);
+         }
+     }
+     // Fallback if no profile
+     return new Date().getUTCHours(); 
+  }, [temporalProfile]);
+
+  // Generate natural language summary
+  const naturalLanguage = useMemo(() => {
+    if (!metar) return undefined;
+    return generateWeatherSummary(metar, variant, temporalProfile, taf);
+  }, [metar, variant, temporalProfile, taf]);
   
   const handleCardClick = () => {
     router.push(`/weather?icao=${icao}`);
@@ -58,34 +113,22 @@ export function PinnedAtmosphereCard({ icao }: PinnedAtmosphereCardProps) {
     );
   }
 
-  const isNightFromAuthority = temporalProfile ? !temporalProfile.sun.isDaylight : undefined;
-  const atmosphere = selectAtmosphereCard({ metar, taf, isNightOverride: isNightFromAuthority });
-  const cloudState = deriveCloudLayerState(metar);
-
-  const variant = (() => {
-    if (!atmosphere) return 'sunny' as const;
-    if (
-      atmosphere.variant === 'sunny' &&
-      cloudState.category !== 'clear' &&
-      cloudState.category !== 'high-thin'
-    ) {
-      return 'cloudy' as const;
-    }
-    return atmosphere.variant;
-  })();
-
   return (
     <div onClick={handleCardClick} className="cursor-pointer">
-      <AvionAtmosphereCard
+      <AtmosphereCard
         icao={icao}
         stationName={station?.name}
         flightCategory={metar.flight_category}
-        variant={variant}
+        condition={condition}
         tempC={metar.temperature?.celsius}
-        isNight={atmosphere?.isNight ?? false}
-        visibilitySm={metar.visibility?.miles_float}
+        windSpeed={metar.wind?.speed_kts}
+        windDirection={metar.wind?.degrees?.toString()}
         qnhInHg={metar.barometer?.hg}
-        cloudState={cloudState}
+        visibilitySm={metar.visibility?.miles_float}
+        hour={hour}
+        localTime={localTime}
+        naturalLanguage={naturalLanguage}
+        cloudState={cloudState ?? undefined}
         onUnpin={handleUnpin}
       />
     </div>

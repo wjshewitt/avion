@@ -5,6 +5,7 @@ import type { ChangeEvent } from 'react';
 import { useChat } from '@ai-sdk/react';
 import { DefaultChatTransport } from 'ai';
 import { useQueryClient } from '@tanstack/react-query';
+import { v4 as uuidv4 } from 'uuid';
 
 import {
   cloneMessageWithTimestamp,
@@ -30,8 +31,20 @@ export function usePremiumChat(options: UsePremiumChatOptions) {
 
   const queryClient = useQueryClient();
   const conversationIdRef = useRef<string | null>(conversationId ?? null);
+  
+  // Client-side ID generation for new chats
+  const [generatedConversationId, setGeneratedConversationId] = useState<string | null>(null);
+
   useEffect(() => {
     conversationIdRef.current = conversationId ?? null;
+    // If conversationId becomes null (new chat), generate a new UUID immediately
+    if (!conversationId) {
+      const newId = uuidv4();
+      setGeneratedConversationId(newId);
+      conversationIdRef.current = newId;
+    } else {
+      setGeneratedConversationId(null);
+    }
   }, [conversationId]);
 
   // ✅ Get chat mode from settings
@@ -45,7 +58,7 @@ export function usePremiumChat(options: UsePremiumChatOptions) {
     return new DefaultChatTransport<FlightChatMessage>({
       api: '/api/chat/general',
       body: () => ({ 
-        conversationId: conversationIdRef.current,
+        conversationId: conversationIdRef.current, // Use the ref which might have the generated ID
         mode: effectiveMode,
         selectedModel,
         pageContext: contextEnabled ? pageContext : null,
@@ -58,9 +71,13 @@ export function usePremiumChat(options: UsePremiumChatOptions) {
   const [missingCredentials, setMissingCredentials] = useState<MissingCredentialsType>(null);
   const [providerInfo, setProviderInfo] = useState<ProviderInfo | null>(null);
   
-  // 🔧 FIX: Track hydration state to prevent race conditions
-  const [lastHydratedConvId, setLastHydratedConvId] = useState<string | null>(null);
-  const [isHydrating, setIsHydrating] = useState(false);
+  const { data: conversationData, isLoading: isLoadingMessages } = useConversationMessages(conversationId);
+  const dbMessages = useMemo(() => conversationData?.messages ?? [], [conversationData?.messages]);
+
+  const initialMessages = useMemo(() => {
+    if (!conversationId) return [];
+    return dbMessages.map(mapConversationMessageToFlightChatMessage);
+  }, [conversationId, dbMessages]);
 
   const {
     messages,
@@ -71,7 +88,9 @@ export function usePremiumChat(options: UsePremiumChatOptions) {
     error,
     clearError,
   } = useChat<FlightChatMessage>({
-    id: conversationId ?? undefined,
+    id: conversationId ?? generatedConversationId ?? undefined,
+    // @ts-expect-error - initialMessages property exists in UseChatOptions but TS is confused
+    initialMessages: conversationId ? initialMessages : [],
     transport,
     onError: (err) => {
       const message = err?.message ?? '';
@@ -87,10 +106,14 @@ export function usePremiumChat(options: UsePremiumChatOptions) {
     },
     onFinish: (event) => {
       setMissingCredentials(null);
-      const metaConversationId = event.message.metadata?.conversationId;
-      if (metaConversationId && metaConversationId !== conversationIdRef.current) {
-        conversationIdRef.current = metaConversationId;
-        onConversationCreated?.(metaConversationId);
+      
+      // Determine the final conversation ID
+      const currentId = conversationIdRef.current;
+      
+      // If we just created a new chat with a generated ID, notify parent
+      if (generatedConversationId && currentId === generatedConversationId) {
+        onConversationCreated?.(generatedConversationId);
+        setGeneratedConversationId(null); // Clear it as it's now "real"
       }
 
       const metadataInfo = extractProviderInfo(event.message.metadata as FlightChatMetadata | undefined);
@@ -98,26 +121,14 @@ export function usePremiumChat(options: UsePremiumChatOptions) {
         setProviderInfo(metadataInfo);
       }
 
-      setMessages((current) =>
-        current.map((msg) =>
-          msg.id === event.message.id
-            ? cloneMessageWithTimestamp(
-                withMetadata(msg, { conversationId: conversationIdRef.current ?? metaConversationId ?? '' }),
-                new Date()
-              )
-            : msg
-        )
-      );
-      
       // 🔧 FIX: Invalidate queries after database save completes
-      const finalConvId = conversationIdRef.current ?? metaConversationId;
-      if (finalConvId) {
+      if (currentId) {
         // Use setTimeout to ensure database write completes first
         setTimeout(() => {
-          console.log('🔄 Invalidating queries for conversation:', finalConvId);
+          console.log('🔄 Invalidating queries for conversation:', currentId);
           
           queryClient.invalidateQueries({
-            queryKey: ['conversation-messages', finalConvId]
+            queryKey: ['conversation-messages', currentId]
           });
           
           queryClient.invalidateQueries({
@@ -128,96 +139,24 @@ export function usePremiumChat(options: UsePremiumChatOptions) {
     },
   });
 
-  const { data: conversationData } = useConversationMessages(conversationId);
-  const dbMessages = useMemo(() => conversationData?.messages ?? [], [conversationData?.messages]);
-
-  const mergeHydratedMessages = useCallback((hydratedMessages: FlightChatMessage[]) => {
-    setMessages((current) => {
-      const incoming = new Map(hydratedMessages.map((msg) => [msg.id, msg]));
-      const next = current.map((msg) => {
-        if (!msg.id) return msg;
-        const replacement = incoming.get(msg.id);
-        if (!replacement) return msg;
-        incoming.delete(msg.id);
-        return replacement;
-      });
-
-      incoming.forEach((msg) => next.push(msg));
-
-      next.sort((a, b) => {
-        const aTime = a.createdAt ? a.createdAt.getTime() : 0;
-        const bTime = b.createdAt ? b.createdAt.getTime() : 0;
-        return aTime - bTime;
-      });
-
-      return next;
-    });
-  }, [setMessages]);
-
-  // 🔧 FIX: Smarter hydration logic to prevent race conditions
+  // Reset messages when switching conversations to prevent "ghosting"
   useEffect(() => {
-    // Clear messages when no conversation
-    if (!conversationId) {
-      if (messages.length > 0 || lastHydratedConvId !== null) {
-        setMessages([]);
-        setLastHydratedConvId(null);
-      }
-      return;
+    if (conversationId && !isLoadingMessages && initialMessages.length > 0) {
+        // Only force update if we are not streaming/submitting
+        if (status !== 'streaming' && status !== 'submitted') {
+             setMessages(initialMessages);
+        }
+    } else if (!conversationId) {
+        // New chat
+        if (status !== 'streaming' && status !== 'submitted') {
+            setMessages([]);
+        }
     }
-
-    // 🔧 FIX: Never hydrate while streaming
-    if (status === 'streaming' || status === 'submitted') {
-      return;
-    }
-
-    // 🔧 FIX: Only hydrate once per conversation or when conversation changes
-    if (conversationId === lastHydratedConvId && !isHydrating) {
-      return;  // Already hydrated this conversation, trust useChat state
-    }
-
-    // 🔧 FIX: Only hydrate if we have database messages
-    if (dbMessages.length === 0) {
-      if (conversationId !== lastHydratedConvId) {
-        setLastHydratedConvId(conversationId);
-      }
-      return;
-    }
-
-    // Perform hydration
-    const hydratedMessages = dbMessages.map(mapConversationMessageToFlightChatMessage);
-    
-    console.log('🔄 Hydrating messages:', {
-      conversationId,
-      dbCount: dbMessages.length,
-      uiCount: messages.length,
-      lastHydrated: lastHydratedConvId,
-    });
-
-    mergeHydratedMessages(hydratedMessages);
-    setLastHydratedConvId(conversationId);
-    setIsHydrating(false);
-    
-  }, [dbMessages, conversationId, status, lastHydratedConvId, isHydrating, mergeHydratedMessages]);
-  // 🔧 FIX: Removed 'messages' and 'setMessages' from deps to prevent loops
+  }, [conversationId, initialMessages, isLoadingMessages, setMessages, status]);
 
   const isResponseStreaming = status === 'streaming';
   const isThinkingState = status === 'submitted';
   const isStreaming = isResponseStreaming || isThinkingState;
-
-  // 🔧 FIX: Handle conversation switching
-  useEffect(() => {
-    // When conversation ID changes, mark for re-hydration
-    if (conversationId !== conversationIdRef.current) {
-      console.log('🔄 Conversation switched:', {
-        from: conversationIdRef.current,
-        to: conversationId,
-      });
-      
-      // Mark that we need to hydrate this new conversation
-      setIsHydrating(true);
-      setLastHydratedConvId(null);
-    }
-  }, [conversationId]);
 
   useEffect(() => {
     const latestAssistant = [...messages]

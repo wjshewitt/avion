@@ -1,12 +1,20 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
+import { useTheme } from "next-themes";
 import { useStore } from "@/store";
 import { createClient } from "@/lib/supabase/client";
+import type { UserPreferences } from "@/types/profile";
 
 export function ProfileProvider({ children }: { children: React.ReactNode }) {
   const setUserProfile = useStore((state) => state.setUserProfile);
   const setIsLoadingProfile = useStore((state) => state.setIsLoadingProfile);
+  const setWeatherViewMode = useStore((state) => state.setWeatherViewMode);
+  const setWeatherUnits = useStore((state) => state.setWeatherUnits);
+  const { setTheme } = useTheme();
+  // Track if we've already initialized the theme from profile to prevent overwriting user changes
+  // during the same session if the profile re-fetches
+  const isThemeInitialized = useRef(false);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -34,9 +42,22 @@ export function ProfileProvider({ children }: { children: React.ReactNode }) {
         }
 
         const data = await response.json();
-        
+
         if (data.profile) {
           setUserProfile(data.profile);
+
+          const prefs = (data.profile.preferences ?? {}) as UserPreferences;
+          setWeatherViewMode(prefs.weather_view_mode === "ops" ? "advanced" : "standard");
+          setWeatherUnits({
+            speed: prefs.weather_speed_unit ?? "kt",
+            visibility: prefs.weather_visibility_unit ?? "mi",
+          });
+
+          // Only set theme from profile on first load
+          if (data.profile.theme_preference && !isThemeInitialized.current) {
+            setTheme(data.profile.theme_preference);
+            isThemeInitialized.current = true;
+          }
         }
       } catch (error) {
         console.error('Error fetching profile:', error);
@@ -47,7 +68,7 @@ export function ProfileProvider({ children }: { children: React.ReactNode }) {
     };
 
     fetchProfile();
-  }, [setUserProfile, setIsLoadingProfile]);
+  }, [setUserProfile, setIsLoadingProfile, setWeatherViewMode, setWeatherUnits, setTheme]);
 
   return <>{children}</>;
 }

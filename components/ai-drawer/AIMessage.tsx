@@ -3,6 +3,7 @@
 import { useMemo } from "react";
 import { MarkdownRenderer } from "@/components/ui/markdown-renderer";
 import { Sources, SourcesTrigger, SourcesContent, Source } from "@/components/ai/sources";
+import { Bot } from "lucide-react";
 
 interface AIMessageProps {
   content: string;
@@ -61,20 +62,16 @@ export function AIMessage({
   }, [isUser, toolCalls, sources]);
 
   if (isUser) {
-    const bgColor = 'bg-surface';
-    const textColor = 'text-text-primary';
-    const borderColor = 'border-border';
-
     return (
-      <div className="flex justify-end mb-4">
-        <div className="max-w-[80%]">
-          <div className={`${bgColor} ${borderColor} border rounded-sm p-3 shadow-sm`}>
-            <div className={`text-sm ${textColor} leading-relaxed`}>
+      <div className="flex justify-end mb-6 group">
+        <div className="max-w-[85%] pl-12">
+          <div className="bg-[#F4F4F4] dark:bg-[#2A2A2A] rounded-2xl rounded-tr-sm px-5 py-4 shadow-sm">
+            <div className="text-sm text-foreground leading-relaxed">
               <MarkdownRenderer>{cleanContent}</MarkdownRenderer>
             </div>
           </div>
           {showTimestamp && timestamp && (
-            <div className="text-[10px] font-mono text-zinc-400 mt-1 text-right">
+            <div className="text-[10px] font-mono text-zinc-400 mt-1.5 text-right tabular-nums opacity-0 group-hover:opacity-100 transition-opacity">
               {timestamp}
             </div>
           )}
@@ -83,54 +80,54 @@ export function AIMessage({
     );
   }
 
-  // AI Message with proper sources rendering - Avion v1.5 precision instrument style
+  // AI Message - Professional Console Style
   return (
-    <div className="mb-4">
-      {/* Sources - Only if tools called or explicit citations */}
-      {shouldShowSources && sources && sources.length > 0 && (
-        <div className="mb-2">
-          <Sources>
-            <SourcesTrigger count={sources.length} />
-            <SourcesContent>
-              {sources.map((source: any, i) => (
-                <Source
-                  key={i}
-                  href="#"
-                  title={`[${source.category}] ${source.description}`}
-                />
-              ))}
-            </SourcesContent>
-          </Sources>
+    <div className="mb-8 group flex gap-4">
+      {/* Avatar Column */}
+      <div className="flex-shrink-0 pt-1">
+        <div className="h-8 w-8 rounded-lg bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 flex items-center justify-center shadow-sm ring-1 ring-zinc-100 dark:ring-zinc-900">
+          <Bot size={16} className="text-blue-600 dark:text-blue-400" />
         </div>
-      )}
+      </div>
 
-      {/* Avion v1.5: Tungsten card with groove header and instrument aesthetic */}
-      <div className="border border-border rounded-sm overflow-hidden bg-card">
-        {/* Header bar with badge - groove shadow */}
-        <div 
-          className="px-3 py-1.5 bg-muted/30 border-b border-border flex items-center justify-between"
-          style={{ boxShadow: 'inset 1px 1px 3px rgba(0,0,0,0.06)' }}
-        >
-          <div className="flex items-center gap-2">
-            <span className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
-              AVION AI
-            </span>
-            <span className="text-[9px] font-mono px-1.5 py-0.5 rounded-sm bg-blue-500/10 text-blue-600 border border-blue-500/20">
-              2.5F
-            </span>
-          </div>
+      {/* Content Column */}
+      <div className="flex-1 max-w-3xl min-w-0">
+        {/* Header */}
+        <div className="flex items-center gap-2 mb-2 select-none">
+          <span className="text-xs font-semibold text-zinc-900 dark:text-zinc-100 tracking-tight">
+            Avion AI
+          </span>
           {showTimestamp && timestamp && (
-            <span className="text-[10px] font-mono text-muted-foreground">
+            <span className="text-[10px] font-mono text-zinc-400 dark:text-zinc-500 tabular-nums">
               {timestamp}
             </span>
           )}
         </div>
 
-        {/* Message body */}
-        <div className="px-3 py-3 bg-card">
-          <div className="text-sm text-foreground leading-relaxed">
+        {/* Message Bubble */}
+        <div className="bg-white dark:bg-zinc-900/50 border border-zinc-200/60 dark:border-zinc-800 rounded-2xl rounded-tl-sm px-5 py-4 shadow-sm">
+          {/* Message Body */}
+          <div className="text-sm text-foreground leading-7">
             <MarkdownRenderer>{cleanContent}</MarkdownRenderer>
           </div>
+
+          {/* Sources Footer */}
+          {shouldShowSources && sources && sources.length > 0 && (
+            <div className="mt-4 pt-3 border-t border-dashed border-zinc-200 dark:border-zinc-800/50">
+              <Sources>
+                <SourcesTrigger count={sources.length} />
+                <SourcesContent>
+                  {sources.map((source: any, i) => (
+                    <Source
+                      key={i}
+                      href="#"
+                      title={`[${source.category}] ${source.description}`}
+                    />
+                  ))}
+                </SourcesContent>
+              </Sources>
+            </div>
+          )}
         </div>
       </div>
     </div>
