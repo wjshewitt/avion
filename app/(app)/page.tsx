@@ -8,12 +8,11 @@ import { useAppStore } from '@/lib/store';
 import { useFlights } from '@/lib/tanstack/hooks/useFlights';
 import { useFlightAlerts } from '@/lib/tanstack/hooks/useFlightAlerts';
 import { DashboardAtmosphereCard } from '@/components/weather/DashboardAtmosphereCard';
-import type { WeatherCondition } from '@/components/weather/atmospheric/SkyEngine';
 import { adaptMetarToWeather } from '@/lib/weather/weather-adapter';
 import { RouteMap } from '@/components/map';
-import { ArrowRight, Plus, ChevronDown } from 'lucide-react';
+import FlightTrackerMap from '@/components/tracking/FlightTrackerMap';
+import { ArrowRight, ChevronDown, Radar, Map as MapIcon } from 'lucide-react';
 import FlightAlerts from '@/components/flights/FlightAlerts';
-import type { Weather } from '@/lib/types';
 
 // Helper functions
 function formatDate(date: string): string {
@@ -23,25 +22,6 @@ function formatDate(date: string): string {
     hour: '2-digit',
     minute: '2-digit',
   });
-}
-
-function mapWeatherToCondition(weather: Weather): WeatherCondition {
-  // Map from flight category/risks to SkyEngine condition
-  const risks = weather.risks.join(' ').toLowerCase();
-  
-  if (risks.includes('thunderstorm')) return 'storm';
-  if (risks.includes('snow')) return 'snow';
-  if (risks.includes('rain')) return 'rain';
-  if (risks.includes('fog') || risks.includes('reduced visibility')) return 'fog';
-  
-  // Fallback to flight category mapping
-  switch (weather.condition) {
-    case 'LIFR': return 'fog'; // Often fog
-    case 'IFR': return 'cloudy'; 
-    case 'MVFR': return 'cloudy';
-    case 'VFR': return 'clear';
-    default: return 'clear';
-  }
 }
 
 function getBadgeColors(level?: string | null) {
@@ -71,6 +51,7 @@ export default function DashboardPage() {
   });
   const [selectedFlightId, setSelectedFlightId] = useState<string | undefined>();
   const [mapExpanded, setMapExpanded] = useState(!mapCollapsed);
+  const [mapMode, setMapMode] = useState<'route' | 'live'>('route');
 
   // Get active flights (first 3 for preview)
   const activeFlights = flights
@@ -202,21 +183,51 @@ export default function DashboardPage() {
                 Navigation & Status
               </div>
               <h2 className="text-base font-semibold text-foreground tracking-tight">
-                Route Map
+                {mapMode === 'live' ? 'Live Air Traffic' : 'Route Map'}
               </h2>
             </div>
 
-            <button
-              onClick={() => setMapExpanded(!mapExpanded)}
-              className="inline-flex items-center gap-1 px-2 py-1 border border-border rounded-sm text-[11px] font-mono uppercase tracking-[0.2em] text-muted-foreground hover:text-foreground hover:border-foreground transition-colors"
-            >
-              <span>{mapExpanded ? 'Collapse' : 'Expand'}</span>
-              <ChevronDown
-                size={12}
-                strokeWidth={1.5}
-                className={`transition-transform ${mapExpanded ? 'rotate-180' : ''}`}
-              />
-            </button>
+            <div className="flex items-center gap-2">
+              <div className="flex items-center bg-surface border border-border rounded-sm p-0.5">
+                <button
+                  onClick={() => setMapMode('route')}
+                  className={`px-2 py-1 rounded-xs text-[10px] font-mono uppercase tracking-wider flex items-center gap-1.5 transition-all ${
+                    mapMode === 'route' 
+                      ? 'bg-background text-foreground shadow-sm' 
+                      : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  <MapIcon size={12} />
+                  Route
+                </button>
+                <button
+                  onClick={() => {
+                    setMapMode('live');
+                    if (!mapExpanded) setMapExpanded(true);
+                  }}
+                  className={`px-2 py-1 rounded-xs text-[10px] font-mono uppercase tracking-wider flex items-center gap-1.5 transition-all ${
+                    mapMode === 'live' 
+                      ? 'bg-[#F04E30] text-white shadow-sm' 
+                      : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  <Radar size={12} />
+                  Live
+                </button>
+              </div>
+
+              <button
+                onClick={() => setMapExpanded(!mapExpanded)}
+                className="inline-flex items-center gap-1 px-2 py-1 border border-border rounded-sm text-[11px] font-mono uppercase tracking-[0.2em] text-muted-foreground hover:text-foreground hover:border-foreground transition-colors"
+              >
+                <span>{mapExpanded ? 'Collapse' : 'Expand'}</span>
+                <ChevronDown
+                  size={12}
+                  strokeWidth={1.5}
+                  className={`transition-transform ${mapExpanded ? 'rotate-180' : ''}`}
+                />
+              </button>
+            </div>
           </div>
 
           <AnimatePresence>
@@ -239,18 +250,23 @@ export default function DashboardPage() {
                   <div 
                     className="relative bg-[#1A1A1A]"
                     style={{
-                      boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.4), inset 0 -1px 2px rgba(255,255,255,0.03)'
+                      boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.4), inset 0 -1px 2px rgba(255,255,255,0.03)',
+                      height: mapMode === 'live' ? '600px' : '400px'
                     }}
                   >
-                    <RouteMap
-                      flights={activeFlights}
-                      selectedFlightId={selectedFlightId}
-                      onFlightSelect={(id) => {
-                        setSelectedFlightId(id);
-                        router.push(`/flights/${id}`);
-                      }}
-                      className="h-[400px] w-full"
-                    />
+                    {mapMode === 'live' ? (
+                      <FlightTrackerMap />
+                    ) : (
+                      <RouteMap
+                        flights={activeFlights}
+                        selectedFlightId={selectedFlightId}
+                        onFlightSelect={(id) => {
+                          setSelectedFlightId(id);
+                          router.push(`/flights/${id}`);
+                        }}
+                        className="h-full w-full"
+                      />
+                    )}
                   </div>
                 </div>
               </motion.div>
@@ -273,8 +289,6 @@ export default function DashboardPage() {
                   <DashboardAtmosphereCard
                     icao={location.code}
                     stationName={location.name}
-                    weather={location.weather}
-                    mapCondition={mapWeatherToCondition}
                   />
                 </div>
               ))}

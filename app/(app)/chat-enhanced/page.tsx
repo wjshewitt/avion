@@ -16,12 +16,12 @@ import { requestConversationTitle } from '@/lib/chat/title-client';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { AIMessage } from '@/components/ai-drawer/AIMessage';
-import { ThinkingIndicator } from '@/components/ai-drawer/ThinkingIndicator';
-import { ThinkingModal } from '@/components/ai-drawer/ThinkingModal';
-import { WeatherToolUI, FlightSelectorToolUI, AirportInfoToolUI } from '@/components/chat/tool-ui';
-import { GenericToolUI } from '@/components/chat/GenericToolUI';
+import { ThinkingBlock } from '@/components/chat/ThinkingBlock';
 import { ConversationSidebar } from '@/components/chat-enhanced/ConversationSidebar';
 import { ChatHeader } from '@/components/chat-enhanced/ChatHeader';
+import { ArtifactPanel } from '@/components/chat-enhanced/ArtifactPanel';
+import { ArtifactTrigger } from '@/components/chat-enhanced/ArtifactTrigger';
+import { useArtifactStore } from '@/lib/artifact-store';
 
 const MIN_MESSAGES_FOR_TITLE = 2;
 
@@ -29,42 +29,18 @@ export const dynamic = 'force-dynamic';
 
 const MainToolInvocation = memo(({ part }: { part: import('ai').ToolUIPart }) => {
   const toolName = part.type.replace('tool-', '');
+  const data = part.output ?? part.input;
 
-  if (part.state === 'input-streaming' || part.state === 'input-available') {
+  // Check if execution was cancelled
+  if (part.state === 'output-available' && data && typeof data === 'object' && '__cancelled' in data) {
     return (
-      <div className="border border-border bg-muted/30 px-3 py-2 text-[11px] font-mono uppercase tracking-widest text-muted-foreground rounded-sm flex items-center gap-2">
-        <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-        <span>Calling {toolName}…</span>
+      <div className="border border-border bg-muted/30 px-3 py-2 text-[11px] font-mono uppercase tracking-widest text-muted-foreground rounded-sm">
+        Tool execution cancelled
       </div>
     );
   }
 
-  if (part.state === 'output-error') {
-    return (
-      <div className="border border-destructive/50 bg-destructive/10 px-3 py-2 text-xs font-mono uppercase tracking-widest text-destructive/80 rounded-sm">
-        Error in {toolName}
-      </div>
-    );
-  }
-
-  if (part.state === 'output-available') {
-    const data = part.output ?? part.input;
-
-    if (data && typeof data === 'object' && '__cancelled' in data) {
-      return (
-        <div className="border border-border bg-muted/30 px-3 py-2 text-[11px] font-mono uppercase tracking-widest text-muted-foreground rounded-sm">
-          Tool execution cancelled
-        </div>
-      );
-    }
-
-    if (toolName === 'get_airport_weather') return <WeatherToolUI result={{ data: data as any }} />;
-    if (toolName === 'get_airport_capabilities') return <AirportInfoToolUI result={{ data: data as any }} />;
-    if (toolName === 'get_user_flights') return <FlightSelectorToolUI result={{ data: data as any }} />;
-    return <GenericToolUI toolName={toolName} data={data} />;
-  }
-
-  return null;
+  return <ArtifactTrigger toolCallId={part.toolCallId} toolName={toolName} data={data} state={part.state} />;
 });
 MainToolInvocation.displayName = 'MainToolInvocation';
 
@@ -79,6 +55,7 @@ export default function EnhancedChatPage() {
 function EnhancedChatPageContent() {
   usePageContext();
   const { mainConversationId, setConversationId } = useChatSessionStore();
+  const { isOpen: isArtifactOpen } = useArtifactStore();
   const queryClient = useQueryClient();
   const { data: conversations = [] } = useGeneralConversations();
   const { data: flights = [] } = useFlights();
@@ -128,9 +105,6 @@ function EnhancedChatPageContent() {
       }
       
       setConversationId('main', conversationId);
-      
-      // Don't invalidate here - let usePremiumChat's onFinish handle it after 500ms
-      // This prevents race condition where we refetch before DB write completes
     }, [setConversationId, queryClient, mainConversationId]),
     onError: useCallback((error: Error) => {
       console.error('Chat error:', error);
@@ -196,18 +170,23 @@ function EnhancedChatPageContent() {
 
   const thinkingContent = useMemo(() => {
     const latestAssistant = [...messages].reverse().find((msg) => msg.role === 'assistant');
-    if (!latestAssistant) return isThinking ? ['Analyzing request…'] : [];
+    if (!latestAssistant) return '';
     const reasoningParts = getReasoningParts(latestAssistant);
-    return reasoningParts.length > 0 ? reasoningParts.map((part) => part.text).filter(Boolean) : (isThinking ? ['Processing…'] : []);
+    return reasoningParts.length > 0 ? reasoningParts.map((part) => part.text).filter(Boolean).join('\n\n') : '';
+  }, [messages]);
+
+  const isStreamingReasoning = useMemo(() => {
+    const latestAssistant = [...messages].reverse().find((msg) => msg.role === 'assistant');
+    if (!latestAssistant) return false;
+    const hasContent = getMessageText(latestAssistant).trim().length > 0;
+    const hasTools = getToolParts(latestAssistant).length > 0;
+    return isThinking && !hasContent && !hasTools;
   }, [messages, isThinking]);
 
   const handleConversationSelect = useCallback((id: string) => {
     if (mainConversationId && mainConversationId !== id && messages.length >= MIN_MESSAGES_FOR_TITLE) {
       requestConversationTitle(mainConversationId, 'conversation-switch');
     }
-    
-    // No need to manually update cache or manage temp conversations anymore
-    // usePremiumChat handles the transition gracefully via hydration logic
     setConversationId('main', id);
   }, [mainConversationId, messages.length, setConversationId]);
 
@@ -215,27 +194,18 @@ function EnhancedChatPageContent() {
     if (mainConversationId && messages.length >= MIN_MESSAGES_FOR_TITLE) {
       requestConversationTitle(mainConversationId, 'conversation-switch');
     }
-    
-    // Simply clear the conversation ID. 
-    // usePremiumChat will generate a new client-side UUID automatically.
     setConversationId('main', null);
     setInput('');
-    
-    // We don't need to manually manipulate the cache anymore
-    // queryClient.removeQueries({ queryKey: ['conversation-messages'] }); 
   }, [mainConversationId, messages.length, setConversationId, setInput]);
 
   const handleSubmit = useCallback((event?: React.FormEvent) => {
     event?.preventDefault?.();
     if (!input.trim() || isStreaming || missingCredentials) return;
-    
-    // Store message text for preview in conversation list
     lastSentMessageRef.current = input.trim();
     sendMessage();
   }, [input, isStreaming, missingCredentials, sendMessage]);
 
   const handleSuggestionSelect = useCallback((text: string) => {
-    // Store message text for preview in conversation list
     lastSentMessageRef.current = text.trim();
     setInput(text);
     sendMessage(text);
@@ -249,7 +219,7 @@ function EnhancedChatPageContent() {
         onSelectConversation={handleConversationSelect}
         onNewChat={handleNewMainChat}
       />
-      <div className="flex-1 flex flex-col min-h-0">
+      <div className="flex-1 flex flex-col min-h-0 relative">
         <ChatHeader
           conversationTitle={activeConversation?.title}
           aiStatus={aiStatus}
@@ -259,13 +229,16 @@ function EnhancedChatPageContent() {
           onNewChat={handleNewMainChat}
         />
 
-        <div className="flex-1 min-h-0 flex flex-col">
+        <div className="flex-1 min-h-0 flex flex-row overflow-hidden">
           {showSettings ? (
-            <ChatSettingsPanel onBack={() => setShowSettings(false)} />
+            <div className="flex-1">
+              <ChatSettingsPanel onBack={() => setShowSettings(false)} />
+            </div>
           ) : (
             <>
-              <div className="flex-1 min-h-0 overflow-y-auto relative bg-background">
-                <div className="p-6 md:p-8 lg:p-12">
+              <div className="flex-1 min-h-0 flex flex-col min-w-0">
+                <div className="flex-1 min-h-0 overflow-y-auto relative bg-background">
+                  <div className="p-6 md:p-8 lg:p-12">
                   <div className="max-w-4xl mx-auto w-full">
                     {messages.length === 0 && !missingCredentials ? (
                       <div className="h-full min-h-[60vh] flex flex-col items-center justify-center text-center">
@@ -316,13 +289,14 @@ function EnhancedChatPageContent() {
                             </div>
                           );
                         })}
-                        {isResponseStreaming && (!showThinkingProcess || thinkingContent.length === 0) && (
-                          <div className="flex justify-start pl-4">
-                            <ThinkingIndicator material="tungsten" />
+                        {isResponseStreaming && showThinkingProcess && thinkingContent && (
+                          <div className="pl-4">
+                            <ThinkingBlock 
+                              content={thinkingContent} 
+                              isStreaming={isStreamingReasoning} 
+                              defaultOpen={true}
+                            />
                           </div>
-                        )}
-                        {isThinking && showThinkingProcess && thinkingContent.length > 0 && (
-                          <ThinkingModal isThinking thoughts={thinkingContent} material="tungsten" />
                         )}
                       </div>
                     )}
@@ -381,6 +355,8 @@ function EnhancedChatPageContent() {
                   </form>
                 </div>
               </div>
+              </div>
+              <ArtifactPanel />
             </>
           )}
         </div>

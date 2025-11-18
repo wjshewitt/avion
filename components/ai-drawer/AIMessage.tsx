@@ -3,7 +3,7 @@
 import { useMemo } from "react";
 import { MarkdownRenderer } from "@/components/ui/markdown-renderer";
 import { VerifiedSources, type SourceItem } from "@/components/ai/sources";
-import { Terminal, Cpu, ExternalLink } from "lucide-react";
+import { Cpu } from "lucide-react";
 
 interface AIMessageProps {
   content: string;
@@ -22,7 +22,7 @@ function extractSources(content: string): SourceItem[] | null {
   const sourcesText = sourceMatch[1];
   const sourceLines = sourcesText.split('\n').filter(line => line.trim());
   
-  return sourceLines.map(line => {
+  return sourceLines.map((line): SourceItem | null => {
     const match = line.match(/^\d+\.\s*\[(.*?)\]\s*(.*)/);
     if (match) {
       return {
@@ -60,6 +60,13 @@ export function AIMessage({
     if (sources && sources.length > 0) return true;
     return false;
   }, [isUser, toolCalls, sources]);
+
+  // Completely hide if empty content (unless it's a tool call container, but AIMessage usually handles text)
+  // If toolCalls are passed, we might still want to render the container depending on usage.
+  // But standard text messages should be hidden if empty.
+  if (!isUser && !cleanContent?.trim() && (!toolCalls || toolCalls.length === 0)) {
+    return null;
+  }
 
   if (isUser) {
     return (

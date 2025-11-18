@@ -127,7 +127,9 @@ export default function AppShell({ children }: AppShellProps) {
           />
         )}
 
-        <FlightBreadcrumb />
+        <div className="absolute top-10 left-0 z-30 w-fit">
+          <FlightBreadcrumb />
+        </div>
 
         <motion.div
           animate={{ marginRight: aiChatOpen && !isChatEnhancedPage ? 420 : 0 }}

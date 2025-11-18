@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import DeckGL from '@deck.gl/react';
 import { MapViewState } from '@deck.gl/core';
 import { IconLayer } from '@deck.gl/layers';
@@ -25,9 +25,14 @@ const INITIAL_VIEW_STATE: MapViewState = {
 };
 
 export default function FlightTrackerMap() {
+  const [mounted, setMounted] = useState(false);
   const [viewState, setViewState] = useState<MapViewState>(INITIAL_VIEW_STATE);
   const [bounds, setBounds] = useState<{ north: number, south: number, east: number, west: number } | null>(null);
   
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   // Update bounds when view state changes
   const onViewStateChange = ({ viewState }: { viewState: any }) => {
     const vs = viewState as MapViewState;
@@ -76,6 +81,8 @@ export default function FlightTrackerMap() {
     })
   ];
 
+  if (!mounted) return null;
+
   return (
     <div className="relative w-full h-screen bg-gray-900">
       <DeckGL
@@ -83,9 +90,11 @@ export default function FlightTrackerMap() {
         controller={true}
         layers={layers}
         onViewStateChange={onViewStateChange}
+        viewState={viewState}
       >
         <Map
           mapStyle="https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json"
+          mapLib={import('maplibre-gl')}
         />
       </DeckGL>
       

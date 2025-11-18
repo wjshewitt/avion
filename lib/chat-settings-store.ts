@@ -56,7 +56,7 @@ const DEFAULT_SETTINGS = {
   showRawData: true,
   compactMode: false,
   showTimestamps: true,
-  showThinkingProcess: false,
+  showThinkingProcess: true,
   showUIElements: false,
   autoExpandWeather: false,
   autoExpandAirports: false,

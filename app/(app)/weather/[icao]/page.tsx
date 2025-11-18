@@ -38,6 +38,7 @@ import type { HazardFeatureNormalized, PilotReport } from "@/types/weather";
 import { getUserFriendlyErrorMessage } from "@/lib/utils/errors";
 import { toast } from "sonner";
 import { useAirportTemporalProfile } from "@/lib/tanstack/hooks/useTemporalProfile";
+import { calculateSolarVisualHour } from "@/components/weather/atmospheric/SkyEngine";
 
 const categoryClasses: Record<NonNullable<DecodedMetar["flight_category"]>, string> = {
   VFR: "bg-green-100 text-green-700 dark:bg-green-500/10 dark:text-green-200",

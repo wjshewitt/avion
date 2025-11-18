@@ -1,8 +1,10 @@
 'use client';
 
 import * as React from 'react';
-import { ExternalLink } from 'lucide-react';
+import { ExternalLink, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import * as CollapsiblePrimitive from '@radix-ui/react-collapsible';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export interface SourceItem {
   category?: string;
@@ -17,45 +19,69 @@ interface VerifiedSourcesProps {
 }
 
 /**
- * Verified Sources Grid - Avion Flight Deck Style
- * Displays sources as technical data tiles in a grid
+ * Verified Sources - Compact Data Strip (Avion Style)
+ * Displays sources as a minimal, collapsible strip
  */
 export function VerifiedSources({ sources, className }: VerifiedSourcesProps) {
+  const [isOpen, setIsOpen] = React.useState(false);
+
   if (!sources || sources.length === 0) return null;
 
   return (
-    <div className={cn("border-t border-white/10 bg-black/20 p-4 relative z-10", className)}>
-      <div className="flex items-center gap-2 mb-3">
-         <span className="text-[9px] font-mono uppercase tracking-widest text-zinc-500">
-           VERIFIED DATA SOURCES
-         </span>
-         <div className="h-px flex-1 bg-white/10" />
-      </div>
-      
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-        {sources.map((source, i) => (
-          <a 
-            key={i}
-            href={source.url || "#"} 
-            className="group/source flex items-start gap-3 p-3 rounded-sm border border-white/5 bg-white/5 hover:bg-white/10 hover:border-primary/50 transition-all"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <div className="mt-0.5 text-primary opacity-70 group-hover/source:opacity-100">
-              <ExternalLink size={12} strokeWidth={1.5} />
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="text-[11px] font-medium text-zinc-300 truncate group-hover/source:text-white">
-                {source.title || source.description}
+    <CollapsiblePrimitive.Root
+      open={isOpen}
+      onOpenChange={setIsOpen}
+      className={cn("border-t border-white/5 bg-black/10", className)}
+    >
+      {/* Header / Toggle */}
+      <CollapsiblePrimitive.Trigger className="w-full flex items-center justify-between px-4 py-2 hover:bg-white/5 transition-colors group">
+        <div className="flex items-center gap-3">
+           <span className="text-[9px] font-mono uppercase tracking-widest text-zinc-500 group-hover:text-zinc-400 transition-colors">
+             VERIFIED SOURCES
+           </span>
+           <span className="px-1.5 py-0.5 bg-white/10 rounded text-[9px] font-mono text-zinc-400">
+             {sources.length}
+           </span>
+        </div>
+        
+        <motion.div
+          animate={{ rotate: isOpen ? 180 : 0 }}
+          transition={{ duration: 0.2 }}
+        >
+          <ChevronDown size={12} className="text-zinc-600 group-hover:text-zinc-400" />
+        </motion.div>
+      </CollapsiblePrimitive.Trigger>
+
+      {/* Content */}
+      <CollapsiblePrimitive.Content className="overflow-hidden data-[state=open]:animate-slideDown data-[state=closed]:animate-slideUp">
+        <div className="px-4 pb-3 pt-1 grid grid-cols-1 gap-1">
+          {sources.map((source, i) => (
+            <a 
+              key={i}
+              href={source.url || "#"} 
+              className="flex items-center gap-3 px-2 py-1.5 rounded hover:bg-white/5 transition-colors group/item"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <span className="text-[9px] font-mono text-zinc-600 min-w-[16px]">
+                {String(i + 1).padStart(2, '0')}
+              </span>
+              <div className="flex-1 min-w-0 flex items-center gap-2">
+                <span className="text-[11px] text-zinc-400 truncate group-hover/item:text-zinc-200 transition-colors">
+                  {source.title || source.description}
+                </span>
+                {source.category && (
+                  <span className="text-[9px] font-mono text-zinc-600 uppercase hidden sm:inline-block">
+                    {source.category}
+                  </span>
+                )}
               </div>
-              <div className="text-[9px] font-mono text-zinc-500 uppercase mt-0.5 line-clamp-1">
-                {source.category ? `[${source.category}]` : ''} {source.description}
-              </div>
-            </div>
-          </a>
-        ))}
-      </div>
-    </div>
+              <ExternalLink size={10} className="text-zinc-700 group-hover/item:text-zinc-500" />
+            </a>
+          ))}
+        </div>
+      </CollapsiblePrimitive.Content>
+    </CollapsiblePrimitive.Root>
   );
 }
 

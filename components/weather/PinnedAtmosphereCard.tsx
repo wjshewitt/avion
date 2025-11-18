@@ -10,7 +10,7 @@ import { selectAtmosphereCard } from '@/lib/weather/avionAtmosphereMapping';
 import { deriveCloudLayerState } from '@/lib/weather/clouds';
 import { useAirportTemporalProfile } from '@/lib/tanstack/hooks/useTemporalProfile';
 import { generateWeatherSummary } from '@/lib/weather/natural-language';
-import type { WeatherCondition } from '@/components/weather/atmospheric/SkyEngine';
+import { calculateSolarVisualHour, type WeatherCondition } from '@/components/weather/atmospheric/SkyEngine';
 
 interface PinnedAtmosphereCardProps {
   icao: string;
@@ -70,6 +70,14 @@ export function PinnedAtmosphereCard({ icao }: PinnedAtmosphereCardProps) {
   
   // Parse Hour for SkyEngine (0-24)
   const hour = useMemo(() => {
+     if (temporalProfile?.clock.localIso && temporalProfile?.sun) {
+         return calculateSolarVisualHour(
+             temporalProfile.clock.localIso,
+             temporalProfile.sun.sunriseUtc,
+             temporalProfile.sun.sunsetUtc
+         );
+     }
+
      if (temporalProfile?.clock.localIso) {
          const date = new Date(temporalProfile.clock.localIso);
          if (!isNaN(date.getTime())) {

@@ -57,6 +57,7 @@ export function AtmosphereCard({
 
   // 1. Calculate Sky Gradient
   const gradient = useMemo(() => {
+    // For debugging purposes, ensure we are passing a valid hour if needed
     return SkyEngine.getGradient(hour, condition);
   }, [hour, condition]);
 

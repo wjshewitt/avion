@@ -1,6 +1,84 @@
 export type TimeOfDay = 'night' | 'dawn' | 'morning' | 'day' | 'sunset' | 'dusk';
 export type WeatherCondition = 'clear' | 'cloudy' | 'rain' | 'storm' | 'fog' | 'snow';
 
+export function calculateSolarVisualHour(
+  nowIso: string,
+  sunriseIso: string,
+  sunsetIso: string
+): number {
+  const now = new Date(nowIso).getTime();
+  const sunrise = new Date(sunriseIso).getTime();
+  const sunset = new Date(sunsetIso).getTime();
+
+  // Check for valid dates
+  if (isNaN(now) || isNaN(sunrise) || isNaN(sunset)) {
+    // Fallback to standard hour from current time if data is missing
+    const d = new Date(nowIso);
+    if (isNaN(d.getTime())) return 12;
+    return d.getHours() + d.getMinutes() / 60;
+  }
+
+  // Handle polar days/nights (sunrise/sunset might be same or invalid in some APIs)
+  // Assuming valid different timestamps for normal latitudes for now.
+
+  // 1. Determine if we are in Night (Pre-Sunrise), Day, or Night (Post-Sunset)
+  
+  // To handle "night" correctly, we need the previous sunset (for pre-sunrise)
+  // and next sunrise (for post-sunset).
+  // For this visual engine, we map:
+  // Sunrise -> 6.0
+  // Sunset -> 18.0
+  // Solar Noon -> 12.0 (approx)
+  
+  if (now < sunrise) {
+    // Night (Morning side)
+    // We ideally map midnight to sunrise as 0 -> 6
+    // Approximate "midnight" as start of this day or sunrise - 6 hours?
+    // Simple linear interpolation from midnight (00:00 local) to sunrise.
+    
+    // Let's use the day boundaries of 'now'
+    const dayStart = new Date(nowIso);
+    dayStart.setHours(0, 0, 0, 0);
+    const midnight = dayStart.getTime();
+    
+    // If now is before midnight (shouldn't happen if dayStart is derived from now), 
+    // but just in case standard safety:
+    if (now < midnight) return 0; 
+    
+    const nightDuration = sunrise - midnight;
+    if (nightDuration <= 0) return 6; // Edge case
+    
+    const ratio = (now - midnight) / nightDuration;
+    // Map 0..1 to 0..6
+    return ratio * 6;
+    
+  } else if (now > sunset) {
+    // Night (Evening side)
+    // Map sunset to midnight as 18 -> 24
+    
+    const dayEnd = new Date(nowIso);
+    dayEnd.setHours(23, 59, 59, 999);
+    const nextMidnight = dayEnd.getTime();
+    
+    const nightDuration = nextMidnight - sunset;
+    if (nightDuration <= 0) return 18;
+    
+    const ratio = (now - sunset) / nightDuration;
+    // Map 0..1 to 18..24
+    return 18 + (ratio * 6);
+    
+  } else {
+    // Daylight
+    // Map sunrise to sunset as 6 -> 18
+    const dayDuration = sunset - sunrise;
+    if (dayDuration <= 0) return 12;
+    
+    const ratio = (now - sunrise) / dayDuration;
+    // Map 0..1 to 6..18
+    return 6 + (ratio * 12);
+  }
+}
+
 export const SkyEngine = {
   getGradient: (hour: number, condition: WeatherCondition) => {
     // Normalize hour 0-24

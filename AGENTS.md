@@ -252,6 +252,7 @@ flightchat/
 • Every element justifies its existence
 • Function creates beauty, not decoration
 • Typography creates hierarchy naturally
+• **No decorative text** — Text must never be used for purely aesthetic effect (e.g., stylized "CURRENT CYCLE" banners). All text must be functional, readable, and standard.
 • Color conveys meaning, not decoration
 • Motion provides meaning, not entertainment
 

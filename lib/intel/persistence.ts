@@ -207,14 +207,33 @@ async function maybeUpdateAirportColumn(
     return;
   }
 
-  const updatePayload: AirportsUpdate = {
-    fbo_overview: summary,
-    intel_updated_at: new Date().toISOString(),
+  // We need to update the capability_data JSONB column in airport_cache
+  // because fbo_overview is a generated column from it.
+  
+  // 1. Fetch current capability_data
+  const { data: current } = await (supabase.from('airport_cache') as any)
+    .select('capability_data')
+    .eq('icao_code', airportIcao)
+    .single();
+
+  if (!current) return;
+
+  const newCapabilityData = {
+    ...(current.capability_data || {}),
+    fbo_overview: summary
   };
 
-  await (supabase.from('airports') as any)
-    .update(updatePayload)
-    .eq('icao', airportIcao);
+  // 2. Update airport_cache
+  await (supabase.from('airport_cache') as any)
+    .update({
+      capability_data: newCapabilityData,
+      // intel_updated_at is also generated from last_verified_at in the view,
+      // but we might want to track this specific update. 
+      // The migration defined intel_updated_at as GENERATED ALWAYS AS (last_verified_at).
+      // So we should update last_verified_at.
+      last_verified_at: new Date().toISOString(),
+    })
+    .eq('icao_code', airportIcao);
 }
 
 function inferPrimarySourceType(citations?: CitationLike[]): string | null {

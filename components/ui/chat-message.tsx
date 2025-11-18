@@ -3,7 +3,7 @@
 import React, { useMemo } from "react"
 import { cva, type VariantProps } from "class-variance-authority"
 import type { ToolUIPart } from "ai"
-import { Terminal, Cpu, ExternalLink } from "lucide-react"
+import { Cpu } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 import { FilePreview } from "@/components/ui/file-preview"
@@ -13,7 +13,7 @@ import { GenericToolUI } from "@/components/chat/GenericToolUI"
 import { useChatSettings } from "@/lib/chat-settings-store"
 import { ThinkingBlock } from "@/components/chat/ThinkingBlock"
 import { BriefingRenderer } from "@/components/chat/BriefingRenderer"
-import { VerifiedSources } from "@/components/ai/sources"
+import { VerifiedSources, type SourceItem } from "@/components/ai/sources"
 import {
   getFileParts,
   getMessageText,
@@ -33,12 +33,12 @@ function isBriefingDocument(content: string): boolean {
 /**
  * Extract sources from message content
  */
-function extractSources(content: string): Array<{ title: string; description: string }> | null {
+function extractSources(content: string): SourceItem[] | null {
   const sourcesMatch = content.match(/\*\*Sources:\*\*\n([\s\S]*?)(?:\n\n|$)/);
   if (!sourcesMatch) return null;
   
   const sourcesList = sourcesMatch[1];
-  const sources: Array<{ title: string; description: string }> = [];
+  const sources: SourceItem[] = [];
   
   const lines = sourcesList.split('\n').filter(l => l.trim().match(/^\d+\./));
   
@@ -179,6 +179,15 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
  hour:"2-digit",
  minute:"2-digit",
  })
+
+ // If content is empty AND no tool parts AND thinking is happening (or not), we should probably render NOTHING
+ // BUT, ChatMessage might be used for historical messages too.
+ // The key issue is the "empty box" when streaming starts but content hasn't arrived yet.
+ // `isThinkingOnly` handles the reasoning phase.
+ // But if `isThinkingOnly` is false (e.g. reasoning done, or no reasoning), and content is still empty...
+ 
+ const isEmpty = !isUser && !cleanContent?.trim() && toolParts.length === 0 && !reasoningText;
+ if (isEmpty) return null;
 
  // User messages are simple
  if (isUser) {

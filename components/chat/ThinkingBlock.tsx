@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { ChevronDown, ChevronUp, Brain, Zap, Clock } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useChatSettings } from "@/lib/chat-settings-store";
 import { MarkdownRenderer } from "@/components/ui/markdown-renderer";
@@ -114,77 +113,73 @@ export function ThinkingBlock({
   
   if (!showThinkingProcess || !content.trim()) return null;
   
-  return (
-    <div className="mb-2 w-full max-w-2xl">
-      {/* Container - straight edges, clean borders */}
-      <div className="border border-border overflow-hidden bg-muted/30">
-        
-        {/* Header Bar - clickable to expand/collapse */}
-        <button
-          onClick={() => {
-            // Cancel auto-close timer if user manually toggles
-            if (autoCloseTimerRef.current) {
-              clearTimeout(autoCloseTimerRef.current);
-              autoCloseTimerRef.current = null;
-            }
-            handleOpenChange(!expanded);
+  // Blue loading bars animation (Avion style)
+  const LoadingBars = () => (
+    <div className="flex items-end gap-1 h-4">
+      {[0, 1, 2].map((i) => (
+        <motion.div
+          key={i}
+          className="w-1.5 bg-blue-600 rounded-full"
+          animate={{
+            height: ["20%", "100%", "20%"],
           }}
-          className="w-full flex items-center justify-between px-3 py-2 hover:bg-muted/50 transition-colors"
-        >
-          <div className="flex items-center gap-2">
-            {isStreaming ? (
-              <Brain className="h-4 w-4 text-primary animate-pulse" />
-            ) : (
-              <Brain className="h-4 w-4 text-muted-foreground" />
-            )}
-            <span className="text-sm font-medium text-foreground">
-              {isStreaming ? "Thinking..." : "Thought process"}
-            </span>
-            {expanded ? (
-              <ChevronUp className="h-4 w-4 text-muted-foreground" />
-            ) : (
-              <ChevronDown className="h-4 w-4 text-muted-foreground" />
-            )}
-          </div>
-          
-          {/* Stats - right side */}
-          <div className="flex items-center gap-3 text-xs text-muted-foreground">
-            {duration > 0 && (
-              <div className="flex items-center gap-1">
-                <Clock className="h-3 w-3" />
-                <span>
-                  {isStreaming ? `${duration}s` : `Thought for ${duration}s`}
-                </span>
-              </div>
-            )}
-            {tokens > 0 && (
-              <div className="flex items-center gap-1">
-                <Zap className="h-3 w-3" />
-                <span>{tokens}</span>
-              </div>
-            )}
-          </div>
-        </button>
+          transition={{
+            duration: 1,
+            repeat: Infinity,
+            delay: i * 0.2,
+            ease: "easeInOut",
+          }}
+        />
+      ))}
+    </div>
+  );
+
+  return (
+    <div className="mb-6 w-full max-w-md">
+      {/* Main Status Display */}
+      <div 
+        onClick={() => handleOpenChange(!expanded)}
+        className="cursor-pointer group"
+      >
+        <div className="text-[10px] font-mono uppercase tracking-widest text-zinc-500 mb-2 group-hover:text-zinc-400 transition-colors">
+          THINKING
+        </div>
         
-        {/* Expandable Content */}
-        <AnimatePresence initial={false}>
-          {expanded && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.15, ease: "easeInOut" }}
-              className="overflow-hidden"
-            >
-              <div className="border-t border-border bg-card px-3 py-2">
-                <div className="prose prose-sm prose-invert max-w-none text-muted-foreground text-xs">
-                  <MarkdownRenderer>{content}</MarkdownRenderer>
-                </div>
-              </div>
-            </motion.div>
+        <div className="flex items-center gap-3">
+          {isStreaming ? (
+            <LoadingBars />
+          ) : (
+            <div className="flex items-end gap-1 h-4 opacity-50 grayscale">
+               <div className="w-1.5 h-1.5 bg-zinc-500 rounded-full" />
+               <div className="w-1.5 h-1.5 bg-zinc-500 rounded-full" />
+               <div className="w-1.5 h-1.5 bg-zinc-500 rounded-full" />
+            </div>
           )}
-        </AnimatePresence>
+          
+          <span className="text-sm font-mono text-zinc-400 group-hover:text-zinc-300 transition-colors">
+            {isStreaming ? "Parsing..." : `Processed (${duration}s)`}
+          </span>
+        </div>
       </div>
+
+      {/* Expandable Content (Reasoning Log) */}
+      <AnimatePresence initial={false}>
+        {expanded && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2, ease: "easeInOut" }}
+            className="overflow-hidden"
+          >
+            <div className="mt-4 pl-3 border-l border-zinc-800">
+              <div className="prose prose-sm prose-invert max-w-none text-zinc-500 text-xs font-mono leading-relaxed">
+                <MarkdownRenderer>{content}</MarkdownRenderer>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
