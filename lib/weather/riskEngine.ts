@@ -3,7 +3,7 @@ import { weatherCache, type WeatherCacheRecord } from "@/lib/weather/cache/index
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { Database, Flight } from "@/lib/supabase/types";
 import { determineFlightPhase, aggregateRisk } from "@/lib/weather/risk/aggregation";
-import type { AirportRiskParams, FlightRiskParams, RiskInputs } from "@/lib/weather/risk/types";
+import type { AirportRiskParams, FlightRiskParams, RiskInputs, RiskModelConfig } from "@/lib/weather/risk/types";
 import { assessSurfaceWind } from "@/lib/weather/risk/factors/surfaceWind";
 import { assessVisibility } from "@/lib/weather/risk/factors/visibility";
 import { assessCeilingClouds } from "@/lib/weather/risk/factors/ceilingClouds";
@@ -12,6 +12,8 @@ import { assessTrendStability } from "@/lib/weather/risk/factors/trendStability"
 import { assessHazardAdvisories } from "@/lib/weather/risk/factors/hazards";
 import { assessTemperature } from "@/lib/weather/risk/factors/temperature";
 import { buildMessaging } from "@/lib/weather/risk/messaging";
+import { resolveRiskConfig } from "@/lib/weather/risk/config";
+import { DEFAULT_RISK_CONFIG } from "@/lib/weather/risk/constants";
 import type { DecodedMetar, DecodedTaf } from "@/types/checkwx";
 import { getAwcWeatherService } from "@/lib/weather/awc";
 import type { HazardFeatureNormalized, PilotReport } from "@/types/weather";
@@ -317,7 +319,13 @@ export async function getAirportRisk(params: AirportRiskParams) {
     const missingInputsPenalty = datasetsAvailable >= 2 ? 0 : 0.15;
     const hasConflict = false; // placeholder for METAR/TAF conflict detection
 
-    const agg = aggregateRisk(normalizedIcao, phase, factors, datasetsAvailable, dataAgeHours, missingInputsPenalty, hasConflict);
+    // v2: Resolve Config (if accountId provided, though we'd need a user ID. For now use Default)
+    // In a real scenario, we would pass the user ID to getAirportRisk or fetch it.
+    // Assuming accountId might be userId or we use default.
+    // If params has a config injected, use it.
+    const config = (params as any).config ?? DEFAULT_RISK_CONFIG;
+
+    const agg = aggregateRisk(normalizedIcao, phase, factors, datasetsAvailable, dataAgeHours, missingInputsPenalty, hasConflict, config);
     const messaging = buildMessaging(agg);
 
     return {
@@ -351,12 +359,12 @@ export async function getFlightRisk(params: FlightRiskParams) {
     const now = params.now ?? new Date();
 
     type FlightSelection = Pick<Flight,
-      "id" | "origin_icao" | "destination_icao" | "scheduled_at" | "arrival_at" | "weather_data"
+      "id" | "user_id" | "origin_icao" | "destination_icao" | "scheduled_at" | "arrival_at" | "weather_data"
     >;
 
     const { data, error } = await admin
       .from("user_flights")
-      .select("id, origin_icao, destination_icao, scheduled_at, arrival_at, weather_data")
+      .select("id, user_id, origin_icao, destination_icao, scheduled_at, arrival_at, weather_data")
       .eq("id", flightId)
       .maybeSingle();
 
@@ -381,6 +389,9 @@ export async function getFlightRisk(params: FlightRiskParams) {
       throw new Error(`Flight ${flightId} is missing a valid destination ICAO code: ${flight.destination_icao}`);
     }
 
+    // v2: Fetch User Risk Config
+    const config = await resolveRiskConfig(flight.user_id);
+
     // Fetch risk for BOTH origin and destination
     let originRisk, destinationRisk;
     try {
@@ -391,6 +402,8 @@ export async function getFlightRisk(params: FlightRiskParams) {
           schedule: { departureUtc: flight.scheduled_at, arrivalUtc: flight.arrival_at },
           mode: "full",
           now,
+          // Inject config into params (casted via any above to avoid type breaking changes instantly)
+          ...({ config } as any)
         }),
         getAirportRisk({
           accountId,
@@ -398,6 +411,7 @@ export async function getFlightRisk(params: FlightRiskParams) {
           schedule: { departureUtc: flight.scheduled_at, arrivalUtc: flight.arrival_at },
           mode: "full",
           now,
+          ...({ config } as any)
         }),
       ]);
     } catch (riskError) {
@@ -442,6 +456,23 @@ export async function getFlightRisk(params: FlightRiskParams) {
       destinationRisk.result.confidence
     ) * 0.95; // Slight penalty for combining
 
+    // v2: Combined Disruption Metrics
+    // Union of delay prob; Conservative cancellation prob
+    const depDelay = originRisk.result.disruption?.delayProbability ?? 0;
+    const arrDelay = destinationRisk.result.disruption?.delayProbability ?? 0;
+    const depCancel = originRisk.result.disruption?.cancellationProbability ?? 0;
+    const arrCancel = destinationRisk.result.disruption?.cancellationProbability ?? 0;
+
+    const combinedDelayProb = 1 - (1 - depDelay) * (1 - arrDelay);
+    const combinedCancelProb = Math.max(depCancel, arrCancel);
+    
+    const combinedDisruption = {
+      delayProbability: parseFloat(combinedDelayProb.toFixed(2)),
+      cancellationProbability: parseFloat(combinedCancelProb.toFixed(2)),
+      expectedDelayMinutes: (originRisk.result.disruption?.expectedDelayMinutes ?? 0) + (destinationRisk.result.disruption?.expectedDelayMinutes ?? 0) || null,
+      notes: [...(originRisk.result.disruption?.notes ?? []), ...(destinationRisk.result.disruption?.notes ?? [])]
+    };
+
     const score = combinedScore;
     const tier = combinedTier;
 
@@ -468,18 +499,22 @@ export async function getFlightRisk(params: FlightRiskParams) {
             phase,
             weights: { origin: weights.origin, destination: weights.destination },
             evaluatedAt: riskTimestamp,
+            disruption: combinedDisruption, // v2
+            configProfile: config.profile, // v2
           },
           origin: {
             score: originRisk.result.score,
             tier: originRisk.result.tier,
             confidence: originRisk.result.confidence,
             isStale: originRisk.isStale,
+            disruption: originRisk.result.disruption, // v2
           },
           destination: {
             score: destinationRisk.result.score,
             tier: destinationRisk.result.tier,
             confidence: destinationRisk.result.confidence,
             isStale: destinationRisk.isStale,
+            disruption: destinationRisk.result.disruption, // v2
           },
           lastUpdated: riskTimestamp,
           expiresAt: weatherCacheExpires,
@@ -519,6 +554,7 @@ export async function getFlightRisk(params: FlightRiskParams) {
         confidence: combinedConfidence,
         status: "ok" as const,
         factorBreakdown: originRisk.result.factorBreakdown,
+        disruption: combinedDisruption,
       },
       messaging: originRisk.messaging,
       weatherData: originRisk.weatherData,

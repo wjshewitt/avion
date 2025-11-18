@@ -7,15 +7,18 @@ import { IdentityStep } from "./IdentityStep";
 import { VisualStep } from "./VisualStep";
 import { RoleStep } from "./RoleStep";
 import { CalibrationStep } from "./CalibrationStep";
+import { RiskPreferenceStep } from "./RiskPreferenceStep";
 import { InterfaceStep } from "./InterfaceStep";
 import { InitializationStep } from "./InitializationStep";
 import { MIN_USERNAME_LENGTH, USERNAME_REGEX } from "@/lib/utils/username";
+import type { RiskProfile } from "@/lib/weather/risk/types";
 
 interface OnboardingData {
   name: string;
   username: string;
   avatar: string | null;
   role: string;
+  riskProfile: RiskProfile;
   timezone: string;
   theme: string;
   hqLocation: string;
@@ -29,7 +32,7 @@ interface OnboardingWizardProps {
 const LOCAL_STORAGE_KEY = "avion:onboarding:v1";
 
 export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
-  const totalSteps = 6;
+  const totalSteps = 7; // Increased for Risk Step
 
   const [step, setStep] = useState(1);
   const [data, setData] = useState<OnboardingData>({
@@ -37,6 +40,7 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
     username: "",
     avatar: null,
     role: "",
+    riskProfile: "standard", // Default
     timezone: "",
     theme: "ceramic",
     hqLocation: "",
@@ -129,10 +133,14 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
     if (step === 3 && data.role === "") {
       errors.push("Select a primary role.");
     }
-    if (step === 4 && data.timezone === "") {
+    if (step === 4 && data.riskProfile === undefined) {
+        // Should have default, but safety check
+        errors.push("Select a risk profile.");
+    }
+    if (step === 5 && data.timezone === "") {
       errors.push("Choose a main operations timezone.");
     }
-    if (step === 5 && data.theme === "") {
+    if (step === 6 && data.theme === "") {
       errors.push("Choose an interface theme.");
     }
     return errors;
@@ -177,6 +185,8 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
       case 3:
         return <RoleStep role={data.role} updateData={updateData} />;
       case 4:
+        return <RiskPreferenceStep profile={data.riskProfile} updateData={updateData} />;
+      case 5:
         return (
           <CalibrationStep
             timezone={data.timezone}
@@ -185,9 +195,9 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
             updateData={updateData}
           />
         );
-      case 5:
-        return <InterfaceStep theme={data.theme} updateData={updateData} />;
       case 6:
+        return <InterfaceStep theme={data.theme} updateData={updateData} />;
+      case 7:
         return (
           <InitializationStep
             onComplete={() => {
@@ -203,7 +213,7 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
     }
   };
 
-  const isCalibrationStep = step === 4;
+  const isCalibrationStep = step === 5;
 
   return (
     <div 
@@ -214,7 +224,7 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
         <div className="w-10 h-10 bg-zinc-900 dark:bg-zinc-50 text-white dark:text-zinc-900 flex items-center justify-center font-bold tracking-tighter shadow-md mb-3 transition-colors border border-[var(--accent-primary)]">
           Av
         </div>
-        {step < 6 && (
+        {step < 7 && (
           <div className="text-xs font-mono tracking-widest flex items-center gap-2">
             <span className="text-zinc-500 dark:text-zinc-400">ONBOARDING</span>
             <span className="h-px w-6 bg-[var(--accent-primary)]" />
@@ -225,9 +235,9 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
       {/* Main Card */}
       <div className="ceramic-card overflow-hidden relative min-h-[480px] flex flex-col">
         {/* Progress Rail (Top) */}
-        {step < 6 && (
+        {step < 7 && (
           <div className="h-1 w-full bg-zinc-100 dark:bg-zinc-800 flex">
-            {[...Array(5)].map((_, i) => (
+            {[...Array(6)].map((_, i) => (
               <div key={i} className="flex-1 relative">
                 <motion.div
                   className="absolute inset-0 bg-[var(--accent-primary)]"
@@ -263,7 +273,7 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
           </div>
 
           {/* Navigation Footer */}
-          {step < 6 && (
+          {step < 7 && (
             <div className="mt-8 pt-6 border-t border-zinc-100 dark:border-zinc-700 flex justify-between items-center">
               <button
                 onClick={prevStep}
@@ -284,9 +294,10 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
                     !isStepValid() ? "opacity-80" : ""
                   }`}
                 >
-                  <span>{step === 5 ? "Initialize" : "Confirm"}</span>
+                  <span>{step === 6 ? "Initialize" : "Confirm"}</span>
                   <ArrowRight size={14} strokeWidth={1.5} />
                 </button>
+
 
                 <AnimatePresence>
                   {stepErrors.length > 0 && (

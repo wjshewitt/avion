@@ -13,7 +13,7 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json()
-    const { name, username, avatar, role, timezone, theme, hqLocation, hqTimezoneSameAsMain } = body
+    const { name, username, avatar, role, riskProfile, timezone, theme, hqLocation, hqTimezoneSameAsMain } = body
 
     // Basic username validation (format/length), but no availability check
     const { valid, error: validationError } = validateUsername(username)
@@ -52,14 +52,26 @@ export async function POST(request: Request) {
       .eq('user_id', user.id)
       .single())
 
-    let mergedPreferences: any = existingProfile?.preferences || null
+    let mergedPreferences: any = existingProfile?.preferences || {}
+    
+    // Merge HQ Location
     if (hqLocation || typeof hqTimezoneSameAsMain === 'boolean') {
       mergedPreferences = {
-        ...(mergedPreferences || {}),
+        ...mergedPreferences,
         ...(hqLocation ? { hq_location: hqLocation } : {}),
         ...(typeof hqTimezoneSameAsMain === 'boolean'
           ? { hq_timezone_same_as_main: hqTimezoneSameAsMain }
           : {}),
+      }
+    }
+
+    // Merge Risk Profile (v2)
+    if (riskProfile) {
+      mergedPreferences = {
+        ...mergedPreferences,
+        risk_model_v2: {
+          profile: riskProfile
+        }
       }
     }
 
