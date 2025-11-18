@@ -19,16 +19,6 @@ export class AirplanesLiveClient {
     const w = Math.min(180, Math.max(-180, west));
 
     try {
-      const url = `${BASE_URL}/point/${n}/${w}/${s}/${e}`; // Note: API might use different path structure, checking docs...
-      // Docs say: /point/lat/lon/radius OR we can use the generic /mil /all etc if bounds are large.
-      // Wait, typical ADS-B Exchange / Airplanes.live style is often just a global JSON or keyed.
-      // Let's use the documented "point" or regional endpoints if available.
-      // Actually, Airplanes.live documentation mentions:
-      // GET /v2/point/{lat}/{lon}/{dist}
-      // GET /v2/hex/{hex}
-      // GET /v2/callsign/{callsign}
-      // GET /v2/reg/{reg}
-      
       // For a map view, we usually want a center + radius.
       // Let's simulate bounds by finding center and max radius.
       
@@ -36,21 +26,32 @@ export class AirplanesLiveClient {
       const centerLon = (e + w) / 2;
       
       // Rough approximation of radius in NM
+      // 1 degree lat ~= 60 NM
       const latDiff = Math.abs(n - s) * 60;
+      // Longitude degrees shrink by cos(lat)
       const lonDiff = Math.abs(e - w) * 60 * Math.cos(centerLat * Math.PI / 180);
+      
+      // Use the larger dimension to ensure coverage, but cap strictly to avoid API errors
+      // Airplanes.live usually limits radius to 250nm
       const radius = Math.max(latDiff, lonDiff) / 2;
-      const radiusInt = Math.min(250, Math.ceil(radius)); // Cap at 250nm for performance
+      const radiusInt = Math.min(250, Math.max(10, Math.ceil(radius))); 
+
+      const url = `${BASE_URL}/point/${centerLat.toFixed(4)}/${centerLon.toFixed(4)}/${radiusInt}`;
+      console.log(`[AirplanesLive] Fetching: ${url}`);
 
       const response = await fetch(
-        `${BASE_URL}/point/${centerLat}/${centerLon}/${radiusInt}`, 
+        url, 
         { next: { revalidate: 0 } } // No cache for live data
       );
 
       if (!response.ok) {
-        throw new Error(`Airplanes.live API error: ${response.statusText}`);
+        throw new Error(`Airplanes.live API error: ${response.status} ${response.statusText}`);
       }
 
       const data: AirplanesLiveResponse = await response.json();
+      
+      // Log count for debugging
+      // console.log(`[AirplanesLive] Found ${data.aircraft?.length || 0} aircraft`);
 
       return this.transformResponse(data);
 

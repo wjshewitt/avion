@@ -21,7 +21,11 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  const traffic = await AirplanesLiveClient.getTrafficInBounds(north, south, east, west);
-
-  return NextResponse.json(traffic);
+  try {
+    const traffic = await AirplanesLiveClient.getTrafficInBounds(north, south, east, west);
+    return NextResponse.json(traffic);
+  } catch (error) {
+    console.error('Live tracking API error:', error);
+    return NextResponse.json({ error: 'Failed to fetch traffic' }, { status: 500 });
+  }
 }
