@@ -4,11 +4,15 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import useSWR from 'swr';
 import { TrackedAircraft } from '@/lib/adsb/types';
 import { debounce } from 'lodash';
+import { useTrafficFilterStore } from '@/lib/adsb/filter-store';
+import { filterTraffic } from '@/lib/adsb/filter-logic';
 
 const fetcher = (url: string) => fetch(url).then(res => res.json());
 
 export function useLiveTraffic(bounds: { north: number, south: number, east: number, west: number } | null) {
+  const { filters } = useTrafficFilterStore();
   const [trafficMap, setTrafficMap] = useState<Map<string, TrackedAircraft>>(new Map());
+  const [filteredTraffic, setFilteredTraffic] = useState<TrackedAircraft[]>([]);
   const [debouncedBounds, setDebouncedBounds] = useState(bounds);
   
   // Debounce the bounds update to prevent excessive fetching during pan/zoom
@@ -39,6 +43,7 @@ export function useLiveTraffic(bounds: { north: number, south: number, east: num
     }
   );
 
+  // 1. Merge new data into master map (Persistence Layer)
   useEffect(() => {
     if (data) {
       setTrafficMap(prev => {
@@ -73,8 +78,15 @@ export function useLiveTraffic(bounds: { north: number, south: number, east: num
     }
   }, [data]);
 
+  // 2. Apply filters to the master map (Presentation Layer)
+  useEffect(() => {
+    const allTraffic = Array.from(trafficMap.values());
+    const filtered = filterTraffic(allTraffic, filters);
+    setFilteredTraffic(filtered);
+  }, [trafficMap, filters]);
+
   return {
-    traffic: Array.from(trafficMap.values()),
+    traffic: filteredTraffic,
     isLoading: !data && !error,
     error
   };

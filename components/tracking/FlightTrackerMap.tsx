@@ -10,6 +10,8 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 import { useLiveTraffic } from '@/hooks/useLiveTraffic';
 import { TrackedAircraft, AdsbDbAircraft } from '@/lib/adsb/types';
 import { SelectedAircraftCard } from './SelectedAircraftCard';
+import { TrafficFilterPanel } from './TrafficFilterPanel';
+import { SlidersHorizontal } from 'lucide-react';
 
 // Aircraft icon mapping
 // Using a simple SVG icon for now, loaded directly
@@ -33,6 +35,7 @@ export default function FlightTrackerMap() {
   const [selectedAircraft, setSelectedAircraft] = useState<TrackedAircraft | null>(null);
   const [aircraftDetails, setAircraftDetails] = useState<AdsbDbAircraft | null>(null);
   const [loadingDetails, setLoadingDetails] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
   
   useEffect(() => {
     setMounted(true);
@@ -134,6 +137,24 @@ export default function FlightTrackerMap() {
           terrain={{ source: 'terrain', exaggeration: 1.5 }}
         />
       </DeckGL>
+      
+      {/* Filter Toggle Button */}
+      <button
+        onClick={() => setShowFilters(!showFilters)}
+        className={`absolute top-4 right-4 z-10 p-2 rounded border backdrop-blur transition-all ${
+          showFilters 
+            ? 'bg-orange-500 text-white border-orange-600' 
+            : 'bg-black/50 text-gray-300 border-gray-700 hover:bg-black/70 hover:text-white'
+        }`}
+        title="Filter Traffic"
+      >
+        <SlidersHorizontal size={20} />
+      </button>
+
+      {/* Filter Panel */}
+      {showFilters && (
+        <TrafficFilterPanel onClose={() => setShowFilters(false)} />
+      )}
       
       {/* Selected Aircraft Card */}
       {selectedAircraft && (
