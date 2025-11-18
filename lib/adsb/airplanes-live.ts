@@ -51,7 +51,8 @@ export class AirplanesLiveClient {
       const data: AirplanesLiveResponse = await response.json();
       
       // Log count for debugging
-      // console.log(`[AirplanesLive] Found ${data.aircraft?.length || 0} aircraft`);
+      const count = (data.aircraft || (data as any).ac || []).length;
+      console.log(`[AirplanesLive] Found ${count} aircraft. Keys: ${Object.keys(data).join(',')}`);
 
       return this.transformResponse(data);
 
@@ -83,9 +84,15 @@ export class AirplanesLiveClient {
   }
 
   private static transformResponse(data: AirplanesLiveResponse): TrackedAircraft[] {
-    if (!data.aircraft) return [];
+    // Support both 'aircraft' and 'ac' keys (Airplanes.live sometimes uses 'ac')
+    const list = data.aircraft || (data as any).ac || [];
+    
+    if (!Array.isArray(list)) {
+      console.warn('[AirplanesLive] Unexpected data format:', data);
+      return [];
+    }
 
-    return data.aircraft.map(a => ({
+    return list.map((a: any) => ({
       icao24: a.hex,
       callsign: a.flight?.trim() || '',
       registration: a.r,
@@ -99,6 +106,6 @@ export class AirplanesLiveClient {
       onGround: a.alt_baro === 'ground',
       squawk: a.squawk,
       lastContact: data.now
-    })).filter(a => a.lat && a.lon); // Filter out positionless aircraft
+    })).filter((a: any) => typeof a.lat === 'number' && typeof a.lon === 'number'); 
   }
 }
