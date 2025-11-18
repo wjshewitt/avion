@@ -1,31 +1,75 @@
 -- Enable PostGIS extension
 CREATE EXTENSION IF NOT EXISTS postgis;
 
--- 1. Update airports table with geography column
-ALTER TABLE public.airports ADD COLUMN IF NOT EXISTS geog geography(POINT, 4326);
+-- 1. Update airport_cache table with geography column
+-- Note: 'airports' is now a view pointing to 'airport_cache'
+-- We must add the physical column to the underlying table
+ALTER TABLE public.airport_cache ADD COLUMN IF NOT EXISTS geog geography(POINT, 4326);
 
--- Create index for spatial queries
-CREATE INDEX IF NOT EXISTS idx_airports_geog ON public.airports USING GIST (geog);
+-- Create index for spatial queries on the cache
+CREATE INDEX IF NOT EXISTS idx_airport_cache_geog ON public.airport_cache USING GIST (geog);
 
--- Update existing rows (assuming latitude and longitude exist)
-UPDATE public.airports 
-SET geog = ST_SetSRID(ST_MakePoint(longitude, latitude), 4326)::geography 
-WHERE geog IS NULL AND latitude IS NOT NULL AND longitude IS NOT NULL;
+-- Update existing rows by extracting lat/lon from the generated columns or core_data
+UPDATE public.airport_cache 
+SET geog = ST_SetSRID(ST_MakePoint(
+  COALESCE(longitude, (core_data->'location'->>'longitude')::double precision), 
+  COALESCE(latitude, (core_data->'location'->>'latitude')::double precision)
+), 4326)::geography 
+WHERE geog IS NULL 
+  AND (longitude IS NOT NULL OR core_data->'location'->>'longitude' IS NOT NULL)
+  AND (latitude IS NOT NULL OR core_data->'location'->>'latitude' IS NOT NULL);
 
--- Trigger to automatically update geog when lat/lon changes
-CREATE OR REPLACE FUNCTION update_geog_column()
+-- Trigger to automatically update geog when core_data changes
+CREATE OR REPLACE FUNCTION update_airport_cache_geog()
 RETURNS TRIGGER AS $$
+DECLARE
+  lat double precision;
+  lon double precision;
 BEGIN
-  NEW.geog := ST_SetSRID(ST_MakePoint(NEW.longitude, NEW.latitude), 4326)::geography;
+  -- Extract coordinates from the new core_data
+  lat := (NEW.core_data->'location'->>'latitude')::double precision;
+  lon := (NEW.core_data->'location'->>'longitude')::double precision;
+  
+  IF lat IS NOT NULL AND lon IS NOT NULL THEN
+    NEW.geog := ST_SetSRID(ST_MakePoint(lon, lat), 4326)::geography;
+  END IF;
+  
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
 
-DROP TRIGGER IF EXISTS update_airports_geog ON public.airports;
-CREATE TRIGGER update_airports_geog
-  BEFORE INSERT OR UPDATE OF latitude, longitude ON public.airports
+DROP TRIGGER IF EXISTS update_airport_cache_geog_trigger ON public.airport_cache;
+CREATE TRIGGER update_airport_cache_geog_trigger
+  BEFORE INSERT OR UPDATE OF core_data ON public.airport_cache
   FOR EACH ROW
-  EXECUTE FUNCTION update_geog_column();
+  EXECUTE FUNCTION update_airport_cache_geog();
+
+-- Update the airports view to include the geog column
+-- We need to redefine the view to expose the new column
+DROP VIEW IF EXISTS public.airports;
+CREATE OR REPLACE VIEW public.airports AS
+SELECT
+  ac.icao_code AS icao,
+  ac.iata_code AS iata,
+  ac.name,
+  ac.city,
+  ac.state,
+  ac.country,
+  ac.latitude,
+  ac.longitude,
+  ac.timezone,
+  ac.elevation_ft,
+  ac.runways,
+  ac.frequencies,
+  ac.raw,
+  ac.fbo_overview,
+  ac.intel_updated_at,
+  ac.updated_at,
+  ac.geog  -- Expose geography column
+FROM public.airport_cache ac;
+
+GRANT SELECT ON public.airports TO anon, authenticated;
+
 
 
 -- 2. Create aircraft table (Metadata)
