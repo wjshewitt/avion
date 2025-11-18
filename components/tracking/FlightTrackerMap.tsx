@@ -8,7 +8,8 @@ import Map, { MapRef } from 'react-map-gl/maplibre';
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { useLiveTraffic } from '@/hooks/useLiveTraffic';
-import { TrackedAircraft } from '@/lib/adsb/types';
+import { TrackedAircraft, AdsbDbAircraft } from '@/lib/adsb/types';
+import { SelectedAircraftCard } from './SelectedAircraftCard';
 
 // Aircraft icon mapping (could be sprite sheet in production)
 // For now using a simple SVGs or Deck.gl's default icon support
@@ -29,10 +30,41 @@ export default function FlightTrackerMap() {
   const [mounted, setMounted] = useState(false);
   const [viewState, setViewState] = useState<MapViewState>(INITIAL_VIEW_STATE);
   const [bounds, setBounds] = useState<{ north: number, south: number, east: number, west: number } | null>(null);
+  const [selectedAircraft, setSelectedAircraft] = useState<TrackedAircraft | null>(null);
+  const [aircraftDetails, setAircraftDetails] = useState<AdsbDbAircraft | null>(null);
+  const [loadingDetails, setLoadingDetails] = useState(false);
   
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Fetch metadata when an aircraft is selected
+  useEffect(() => {
+    if (!selectedAircraft) {
+      setAircraftDetails(null);
+      return;
+    }
+
+    async function fetchDetails() {
+      if (!selectedAircraft) return;
+      setLoadingDetails(true);
+      try {
+        const res = await fetch(`/api/aircraft/${selectedAircraft.icao24}`);
+        if (res.ok) {
+          const data = await res.json();
+          setAircraftDetails(data);
+        } else {
+          setAircraftDetails(null);
+        }
+      } catch (error) {
+        console.error('Failed to fetch aircraft details:', error);
+      } finally {
+        setLoadingDetails(false);
+      }
+    }
+
+    fetchDetails();
+  }, [selectedAircraft?.icao24]);
 
   // Update bounds when view state changes
   const onViewStateChange = ({ viewState }: { viewState: any }) => {
@@ -75,8 +107,9 @@ export default function FlightTrackerMap() {
       },
       onClick: ({ object }) => {
         if (object) {
-          console.log('Clicked aircraft:', object.callsign || object.icao24);
-          // Here we would trigger the metadata fetch via adsbdb
+          setSelectedAircraft(object);
+        } else {
+          setSelectedAircraft(null);
         }
       }
     })
@@ -100,6 +133,16 @@ export default function FlightTrackerMap() {
           attributionControl={false}
         />
       </DeckGL>
+      
+      {/* Selected Aircraft Card */}
+      {selectedAircraft && (
+        <SelectedAircraftCard
+          aircraft={selectedAircraft}
+          details={aircraftDetails}
+          loadingDetails={loadingDetails}
+          onClose={() => setSelectedAircraft(null)}
+        />
+      )}
       
       {/* Status Overlay */}
       <div className="absolute top-4 left-4 bg-black/80 text-white p-4 rounded-lg backdrop-blur z-10">
