@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Cloud, Wind, Eye, Thermometer, AlertTriangle, Loader2, ArrowLeftRight, MapPin } from 'lucide-react';
 import { useCompleteWeather, useMetar } from "@/lib/tanstack/hooks/useWeather";
@@ -143,10 +143,12 @@ export default function WeatherPage() {
 
       <div className="mt-8">
         {selectedTab === 'airport' && (
-          <AirportWeatherTab
-            isSimplified={isSimplified}
-            weatherUnits={weatherUnits}
-          />
+          <Suspense fallback={<LoadingState />}>
+            <AirportWeatherTab
+              isSimplified={isSimplified}
+              weatherUnits={weatherUnits}
+            />
+          </Suspense>
         )}
         {selectedTab === 'route' && (
           <RouteWeatherTab
