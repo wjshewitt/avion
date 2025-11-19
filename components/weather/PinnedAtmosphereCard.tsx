@@ -42,8 +42,10 @@ export function PinnedAtmosphereCard({ icao }: PinnedAtmosphereCardProps) {
   const variant = useMemo(() => {
     if (!atmosphere) return 'sunny' as const;
     if (!cloudState) return atmosphere.variant;
+    
+    // Override clear/sunny variants if we have actual clouds
     if (
-      atmosphere.variant === 'sunny' &&
+      (atmosphere.variant === 'sunny' || atmosphere.variant === 'clear-night') &&
       cloudState.category !== 'clear' &&
       cloudState.category !== 'high-thin'
     ) {

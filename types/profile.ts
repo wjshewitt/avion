@@ -35,6 +35,8 @@ export interface UserPreferences {
   use_24_hour_time?: boolean;
   // Airports: show minute airport/runway technical details (default: false)
   airports_show_minute_details?: boolean;
+  // Pinned weather cards (airport ICAOs)
+  pinned_airports?: string[];
   // UI layout: keep mission control sidebar expanded by default on load
   sidebar_expanded_default?: boolean;
   dashboard_modules?: Record<string, {

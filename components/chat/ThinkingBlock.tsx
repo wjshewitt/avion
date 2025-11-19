@@ -111,7 +111,10 @@ export function ThinkingBlock({
     };
   }, [isStreaming, handleOpenChange]);
   
-  if (!showThinkingProcess || !content.trim()) return null;
+  if (!showThinkingProcess) return null;
+  
+  // Allow rendering if streaming, even if content is empty (initial "Thinking..." state)
+  if (!content.trim() && !isStreaming) return null;
   
   // Blue loading bars animation (Avion style)
   const LoadingBars = () => (

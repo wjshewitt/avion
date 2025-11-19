@@ -162,7 +162,7 @@ export function WeatherArtifact({ data }: WeatherArtifactProps) {
               </span>
             </div>
 
-            <div className="space-y-0 relative ml-2 pl-8 border-l border-border">
+            <div className="space-y-0 relative ml-4 pl-8 border-l border-border">
               {taf.forecast?.map((period, i) => {
                 const fromTime = typeof period.timestamp === 'string' ? period.timestamp : period.timestamp?.from;
                 
@@ -177,8 +177,8 @@ export function WeatherArtifact({ data }: WeatherArtifactProps) {
                   )} />
                   
                   {/* Time Label */}
-                  <div className="absolute -left-[38px] top-5 text-[10px] font-mono text-muted-foreground w-8 text-right">
-                    {fromTime ? formatTimestamp(fromTime).split(' ')[1] : ''}
+                  <div className="absolute -left-[52px] top-0 text-[10px] font-mono text-muted-foreground w-12 text-right leading-3">
+                    {fromTime ? new Date(fromTime).toLocaleTimeString('en-US', {hour: '2-digit', minute:'2-digit', hour12: false}) : ''}
                   </div>
                   
                   <div className="bg-muted/20 hover:bg-muted/40 transition-colors rounded-sm p-4 border border-border/50">
@@ -199,14 +199,27 @@ export function WeatherArtifact({ data }: WeatherArtifactProps) {
                       <div className="flex items-center gap-3">
                         <Wind size={14} className="text-muted-foreground shrink-0" />
                         <span className="text-sm font-mono">
-                          {period.wind?.degrees}° @ {period.wind?.speed_kts}kt
-                          {period.wind?.gust_kts && <span className="text-muted-foreground ml-1">G{period.wind.gust_kts}</span>}
+                          {period.wind?.speed_kts !== undefined ? (
+                            <>
+                              {period.wind.degrees !== undefined ? period.wind.degrees.toString().padStart(3, '0') : '///'}° @ {period.wind.speed_kts}kt
+                              {period.wind.gust_kts && <span className="text-muted-foreground ml-1">G{period.wind.gust_kts}</span>}
+                            </>
+                          ) : (
+                            <span className="text-muted-foreground">--</span>
+                          )}
                         </span>
                       </div>
                       
                       <div className="flex items-center gap-3">
                         <Eye size={14} className="text-muted-foreground shrink-0" />
-                        <span className="text-sm font-mono">{period.visibility?.miles_float || period.visibility?.meters} SM</span>
+                        <span className="text-sm font-mono">
+                          {period.visibility?.miles_float !== undefined 
+                            ? `${period.visibility.miles_float} SM` 
+                            : period.visibility?.meters !== undefined
+                                ? `${period.visibility.meters}m`
+                                : <span className="text-muted-foreground">--</span>
+                          }
+                        </span>
                       </div>
 
                       {period.clouds && period.clouds.length > 0 && (

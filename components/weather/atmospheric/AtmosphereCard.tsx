@@ -7,6 +7,7 @@ import { SkyEngine, type WeatherCondition } from './SkyEngine';
 import { PrecipitationCanvas } from './PrecipitationCanvas';
 import { FogLayer } from './FogLayer';
 import { CloudLayer } from './CloudLayer';
+import { StarryBackground } from '@/components/ui/starry-background';
 import type { CloudLayerState } from "@/lib/weather/clouds";
 import type { NaturalLanguageSummary } from "@/lib/weather/natural-language";
 
@@ -71,6 +72,9 @@ export function AtmosphereCard({
     if (onUnpin) onUnpin(icao);
   };
 
+  const isNight = hour < 6 || hour > 18;
+  const showStars = condition === 'clear' && isNight;
+
   return (
     <div
       className="group relative h-64 rounded-sm overflow-hidden transition-all duration-300 shadow-lg hover:shadow-xl"
@@ -84,9 +88,16 @@ export function AtmosphereCard({
         style={{ background: gradient }}
       />
 
+      {/* --- LAYER 0.5: STARS (New) --- */}
+      {showStars && (
+        <div className="absolute inset-0 z-[1]">
+          <StarryBackground />
+        </div>
+      )}
+
       {/* --- LAYER 1: CELESTIAL BODIES --- */}
       <div 
-        className="absolute rounded-full blur-2xl z-0 transition-all duration-1000 ease-linear"
+        className="absolute rounded-full blur-2xl z-[2] transition-all duration-1000 ease-linear"
         style={{
           top: celestialPos.top,
           left: celestialPos.left,
@@ -116,10 +127,8 @@ export function AtmosphereCard({
 
       {/* --- LAYER 2: ATMOSPHERIC EFFECTS --- */}
       
-      {/* Clouds */}
-      {(condition === 'cloudy' || condition === 'rain' || condition === 'storm' || condition === 'snow') && (
-         <CloudLayer cloud={cloudState} />
-      )}
+      {/* Clouds - always render, it handles its own visibility based on count */}
+      <CloudLayer cloud={cloudState} />
       
       {/* Rain */}
       {condition === 'rain' && <PrecipitationCanvas type="rain" intensity={1} />}

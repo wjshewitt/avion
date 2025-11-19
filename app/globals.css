@@ -289,6 +289,24 @@ body {
  line-height: 1.5;
  -webkit-font-smoothing: antialiased;
  -moz-osx-font-smoothing: grayscale;
+ transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, fill 0.3s ease, stroke 0.3s ease;
+}
+
+/* Smooth transitions for common theme-dependent elements */
+.glass-panel, 
+.ceramic-card, 
+.groove-input, 
+.btn-primary, 
+.tactile-option, 
+.avion-route-map,
+header, nav, aside, main, footer,
+.bg-background,
+.bg-card,
+.bg-popover,
+.bg-muted,
+.bg-accent,
+.bg-secondary {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, fill 0.3s ease, stroke 0.3s ease;
 }
 
 /* Remove conflicting OS-level dark preference override (let next-themes control) */
@@ -991,6 +1009,10 @@ body {
       transform: translateX(0) translateY(0) rotate(-45deg) scale(1);
       opacity: 1;
     }
+    5% {
+      transform: translateX(-200px) translateY(200px) rotate(-45deg) scale(0.1);
+      opacity: 0;
+    }
     100% {
       transform: translateX(-200px) translateY(200px) rotate(-45deg) scale(0.1);
       opacity: 0;
@@ -998,7 +1020,7 @@ body {
   }
 
   .animate-shooting-star {
-    animation: shooting-star 2s ease-out infinite;
+    animation: shooting-star 12s ease-out infinite;
   }
 }
 

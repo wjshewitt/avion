@@ -36,11 +36,12 @@ export function StarryBackground() {
     setStars(newStars);
 
     // Generate shooting stars
-    const newShootingStars = Array.from({ length: 3 }).map((_, i) => ({
+    // Reduced to 1 with random longer delays to prevent barrage
+    const newShootingStars = Array.from({ length: 1 }).map((_, i) => ({
       id: i,
       top: `${Math.random() * 50}%`,
       left: `${Math.random() * 100}%`,
-      delay: Math.random() * 15 + 5, // Longer delay between shooting stars
+      delay: Math.random() * 10 + 2, // Initial delay
     }));
     setShootingStars(newShootingStars);
   }, []);

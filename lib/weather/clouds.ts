@@ -2,6 +2,7 @@ import type { DecodedMetar, CloudLayer, WindData } from "@/types/checkwx";
 
 export type CloudCoverageCategory =
   | "clear"
+  | "few"
   | "scattered"
   | "broken"
   | "overcast"
@@ -29,6 +30,7 @@ const COVERAGE_RANK: Record<string, number> = {
 
 const OPACITY_BY_CATEGORY: Record<CloudCoverageCategory, number> = {
   clear: 0.06,
+  "few": 0.12,
   "high-thin": 0.12,
   scattered: 0.18,
   broken: 0.26,
@@ -89,6 +91,11 @@ function deriveCoverageCategory(clouds?: CloudLayer[]): {
 
   if (maxRank >= COVERAGE_RANK.SCT) {
     return { category: "scattered", baseFt };
+  }
+
+  // Handle FEW (Rank 1) - previously was clear
+  if (maxRank >= COVERAGE_RANK.FEW) {
+    return { category: "few", baseFt };
   }
 
   return { category: "clear", baseFt };

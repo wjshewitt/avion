@@ -60,12 +60,20 @@ export function DashboardAtmosphereCard({
   const variant = useMemo(() => {
     if (!atmosphere) return 'sunny' as const;
     if (!cloudState) return atmosphere.variant;
+    
+    // Override clear/sunny variants if we have actual clouds
     if (
-      atmosphere.variant === 'sunny' &&
-      cloudState.category !== 'clear' &&
-      cloudState.category !== 'high-thin'
+      (atmosphere.variant === 'sunny' || atmosphere.variant === 'clear-night')
     ) {
-      return 'cloudy' as const;
+      if (cloudState.category === 'few' || cloudState.category === 'scattered') {
+        return 'partly-cloudy' as const;
+      }
+      if (
+        cloudState.category !== 'clear' &&
+        cloudState.category !== 'high-thin'
+      ) {
+        return 'cloudy' as const;
+      }
     }
     return atmosphere.variant;
   }, [atmosphere, cloudState]);
@@ -75,6 +83,7 @@ export function DashboardAtmosphereCard({
     switch (variant) {
       case 'sunny': return 'clear';
       case 'clear-night': return 'clear';
+      case 'partly-cloudy': return 'partly-cloudy';
       case 'cloudy': return 'cloudy';
       case 'heavy-rain': return 'rain';
       case 'thunderstorm': return 'storm';

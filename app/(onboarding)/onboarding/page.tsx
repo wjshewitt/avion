@@ -64,7 +64,7 @@ export default function OnboardingPage() {
       <div className="fixed inset-0 pointer-events-none">
         {/* Light mode dots */}
         <div
-          className="absolute inset-0 dark:hidden opacity-50"
+          className="absolute inset-0 opacity-50 dark:opacity-0 transition-opacity duration-300"
           style={{
             backgroundImage: "radial-gradient(#737373 1px, transparent 1px)",
             backgroundSize: "24px 24px",
@@ -72,7 +72,7 @@ export default function OnboardingPage() {
         />
         {/* Dark mode dots */}
         <div
-          className="absolute inset-0 hidden dark:block opacity-20"
+          className="absolute inset-0 opacity-0 dark:opacity-20 transition-opacity duration-300"
           style={{
             backgroundImage: "radial-gradient(#525252 1px, transparent 1px)",
             backgroundSize: "24px 24px",

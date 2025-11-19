@@ -1,5 +1,5 @@
 export type TimeOfDay = 'night' | 'dawn' | 'morning' | 'day' | 'sunset' | 'dusk';
-export type WeatherCondition = 'clear' | 'cloudy' | 'rain' | 'storm' | 'fog' | 'snow';
+export type WeatherCondition = 'clear' | 'partly-cloudy' | 'cloudy' | 'rain' | 'storm' | 'fog' | 'snow';
 
 export function calculateSolarVisualHour(
   nowIso: string,
@@ -87,9 +87,9 @@ export const SkyEngine = {
     // Base palettes
     let top, bottom;
 
-    if (h < 5 || h > 21) { // NIGHT
+    if (h < 5.5 || h > 21) { // NIGHT (Strict Night) - Expanded range to prevent early dawn
       top = '#020204'; bottom = '#11141c';
-    } else if (h >= 5 && h < 7) { // DAWN
+    } else if (h >= 5.5 && h < 7) { // DAWN (Very short window around sunrise)
       top = '#1e1b2e'; bottom = '#8a4b38';
     } else if (h >= 7 && h < 9) { // MORNING
       top = '#2c5364'; bottom = '#bdc3c7';
@@ -105,9 +105,17 @@ export const SkyEngine = {
     if (condition === 'storm') {
       top = '#0f0c29'; bottom = '#302b63'; // Deep purple/black
     } else if (condition === 'rain') {
-      top = '#1F1F24'; bottom = '#4A4A52'; // Flat Slate
+      if (h < 5.5 || h > 21) { // Rainy night
+        top = '#08080a'; bottom = '#1a1a1e';
+      } else {
+        top = '#1F1F24'; bottom = '#4A4A52'; // Flat Slate
+      }
     } else if (condition === 'fog') {
-      top = '#373B44'; bottom = '#606c88'; // Muted Grey
+      if (h < 5.5 || h > 21) { // Foggy night
+        top = '#0f1114'; bottom = '#202329';
+      } else {
+        top = '#373B44'; bottom = '#606c88'; // Muted Grey
+      }
     } else if (condition === 'snow') {
       if (h < 5 || h > 21) {
         top = '#0B1026'; bottom = '#2B32B2'; // Night snow
@@ -119,6 +127,14 @@ export const SkyEngine = {
          top = '#1a1a1a'; bottom = '#2c3e50'; // Night clouds
       } else {
          top = '#5D6D7E'; bottom = '#BDC3C7'; // Day clouds
+      }
+    } else if (condition === 'partly-cloudy') {
+      if (h < 5.5 || h > 21) {
+         top = '#05070a'; bottom = '#1c2333'; // Slightly lighter night
+      } else if (h >= 5.5 && h < 7) {
+         top = '#2c2742'; bottom = '#9e5643'; // Partly cloudy dawn
+      } else {
+         top = '#3a7bd5'; bottom = '#82e4fa'; // Slightly softer day blue
       }
     }
 
@@ -138,7 +154,8 @@ export const SkyEngine = {
     }
     
     const percentOfDay = (hour - 6) / 14; // 0 to 1
-    const x = 20 + (percentOfDay * 60); // 20% to 80%
+    // Widen the arc: 5% to 95% (was 20% to 80%)
+    const x = 5 + (percentOfDay * 90); 
     const y = 80 - (Math.sin(percentOfDay * Math.PI) * 70); // Arc
     
     // Sun color changes (White at noon, Orange at edges)

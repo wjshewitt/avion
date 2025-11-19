@@ -1,93 +1,130 @@
-import { useEffect, useRef, useState } from"react"
-
-import { recordAudio } from"@/lib/audio-utils"
+import { useEffect, useRef, useState, useCallback } from "react"
+import { recordAudio } from "@/lib/audio-utils"
 
 interface UseAudioRecordingOptions {
- transcribeAudio?: (blob: Blob) => Promise<string>
- onTranscriptionComplete?: (text: string) => void
+  transcribeAudio?: (blob: Blob) => Promise<string>
+  onTranscriptionComplete?: (text: string) => void
 }
 
 export function useAudioRecording({
- transcribeAudio,
- onTranscriptionComplete,
+  transcribeAudio,
+  onTranscriptionComplete,
 }: UseAudioRecordingOptions) {
- const [isListening, setIsListening] = useState(false)
- const [isSpeechSupported, setIsSpeechSupported] = useState(!!transcribeAudio)
- const [isRecording, setIsRecording] = useState(false)
- const [isTranscribing, setIsTranscribing] = useState(false)
- const [audioStream, setAudioStream] = useState<MediaStream | null>(null)
- const activeRecordingRef = useRef<any>(null)
+  const [isListening, setIsListening] = useState(false)
+  const [isSpeechSupported, setIsSpeechSupported] = useState(false)
+  const [isRecording, setIsRecording] = useState(false)
+  const [isTranscribing, setIsTranscribing] = useState(false)
+  const [audioStream, setAudioStream] = useState<MediaStream | null>(null)
+  
+  const activeRecordingRef = useRef<Promise<Blob> | null>(null)
+  const isMounted = useRef(true)
 
- useEffect(() => {
- const checkSpeechSupport = async () => {
- const hasMediaDevices = !!(
- navigator.mediaDevices && navigator.mediaDevices.getUserMedia
- )
- setIsSpeechSupported(hasMediaDevices && !!transcribeAudio)
- }
+  useEffect(() => {
+    isMounted.current = true
+    return () => {
+      isMounted.current = false
+    }
+  }, [])
 
- checkSpeechSupport()
- }, [transcribeAudio])
+  useEffect(() => {
+    const checkSpeechSupport = async () => {
+      const hasMediaDevices = !!(
+        navigator.mediaDevices && navigator.mediaDevices.getUserMedia
+      )
+      if (isMounted.current) {
+        setIsSpeechSupported(hasMediaDevices && !!transcribeAudio)
+      }
+    }
 
- const stopRecording = async () => {
- setIsRecording(false)
- setIsTranscribing(true)
- try {
- // First stop the recording to get the final blob
- recordAudio.stop()
- // Wait for the recording promise to resolve with the final blob
- const recording = await activeRecordingRef.current
- if (transcribeAudio) {
- const text = await transcribeAudio(recording)
- onTranscriptionComplete?.(text)
- }
- } catch (error) {
- console.error("Error transcribing audio:", error)
- } finally {
- setIsTranscribing(false)
- setIsListening(false)
- if (audioStream) {
- audioStream.getTracks().forEach((track) => track.stop())
- setAudioStream(null)
- }
- activeRecordingRef.current = null
- }
- }
+    checkSpeechSupport()
+  }, [transcribeAudio])
 
- const toggleListening = async () => {
- if (!isListening) {
- try {
- setIsListening(true)
- setIsRecording(true)
- // Get audio stream first
- const stream = await navigator.mediaDevices.getUserMedia({
- audio: true,
- })
- setAudioStream(stream)
+  const stopRecording = useCallback(async () => {
+    if (isMounted.current) {
+      setIsRecording(false)
+      setIsTranscribing(true)
+    }
+    
+    try {
+      // First stop the recording to get the final blob
+      recordAudio.stop()
+      
+      // Wait for the recording promise to resolve with the final blob
+      if (activeRecordingRef.current) {
+        const recording = await activeRecordingRef.current
+        if (transcribeAudio && isMounted.current) {
+          const text = await transcribeAudio(recording)
+          onTranscriptionComplete?.(text)
+        }
+      }
+    } catch (error) {
+      console.error("Error transcribing audio:", error)
+    } finally {
+      if (isMounted.current) {
+        setIsTranscribing(false)
+        setIsListening(false)
+        if (audioStream) {
+          audioStream.getTracks().forEach((track) => track.stop())
+          setAudioStream(null)
+        }
+      }
+      activeRecordingRef.current = null
+    }
+  }, [transcribeAudio, onTranscriptionComplete, audioStream])
 
- // Start recording with the stream
- activeRecordingRef.current = recordAudio(stream)
- } catch (error) {
- console.error("Error recording audio:", error)
- setIsListening(false)
- setIsRecording(false)
- if (audioStream) {
- audioStream.getTracks().forEach((track) => track.stop())
- setAudioStream(null)
- }
- }
- } else {
- await stopRecording()
- }
- }
+  const toggleListening = useCallback(async () => {
+    if (!isListening) {
+      try {
+        if (isMounted.current) {
+          setIsListening(true)
+          setIsRecording(true)
+        }
+        // Get audio stream first
+        const stream = await navigator.mediaDevices.getUserMedia({
+          audio: true,
+        })
+        
+        if (!isMounted.current) {
+           stream.getTracks().forEach(track => track.stop())
+           return
+        }
 
- return {
- isListening,
- isSpeechSupported,
- isRecording,
- isTranscribing,
- audioStream,
- toggleListening,
- stopRecording,
- }
+        setAudioStream(stream)
+
+        // Start recording with the stream
+        activeRecordingRef.current = recordAudio(stream)
+      } catch (error) {
+        console.error("Error recording audio:", error)
+        if (isMounted.current) {
+          setIsListening(false)
+          setIsRecording(false)
+          if (audioStream) {
+             audioStream.getTracks().forEach(track => track.stop())
+             setAudioStream(null)
+          }
+        }
+      }
+    } else {
+      await stopRecording()
+    }
+  }, [isListening, stopRecording, audioStream])
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (audioStream) {
+        audioStream.getTracks().forEach((track) => track.stop())
+      }
+    }
+  }, [audioStream])
+
+  return {
+    isListening,
+    isSpeechSupported,
+    isRecording,
+    isTranscribing,
+    audioStream,
+    toggleListening,
+    stopRecording,
+  }
 }

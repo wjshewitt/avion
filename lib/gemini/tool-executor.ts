@@ -5,11 +5,11 @@
 
 import { createClient } from '@/lib/supabase/server';
 import { AirportService } from '@/lib/airports/airport-service';
-import { analyzeRunways } from '@/lib/airports/runway-analyzer';
 import { AIRCRAFT_REQUIREMENTS } from '@/lib/airports/runway-analyzer';
 import type { Flight } from '@/lib/supabase/types';
 import { fetchAirportIntel } from '@/lib/intel/fetch-intel';
 import { getAirportTemporalProfile } from '@/lib/time/authority';
+import type { ProcessedAirportData } from '@/types/airportdb';
 
 interface ToolCallArgs {
   [key: string]: any;
@@ -226,7 +226,7 @@ async function executeGetAirportCapabilities(args: ToolCallArgs) {
       Math.max(max, r.width_ft || 0), 0) || 0;
     
     // Check data completeness
-    const hasRunwayData = airport.runways?.count > 0;
+    const hasRunwayData = (airport.runways?.count || 0) > 0;
     const hasLengthData = (airport.runways?.longest_ft || 0) > 0;
     const hasDetailedData = airport.runways?.details && airport.runways.details.length > 0;
     const missingData: string[] = [];
@@ -318,7 +318,7 @@ async function executeGetAirportCapabilities(args: ToolCallArgs) {
 /**
  * Assess if an aircraft can operate at an airport
  */
-function assessAircraftSuitability(airport: any, aircraftType: string): any {
+function assessAircraftSuitability(airport: ProcessedAirportData, aircraftType: string): any {
   // Map common aircraft types to requirements
   const aircraftLower = aircraftType.toLowerCase();
   let requirements = AIRCRAFT_REQUIREMENTS.business_jets; // default
@@ -332,9 +332,11 @@ function assessAircraftSuitability(airport: any, aircraftType: string): any {
   }
   
   const longestRunway = airport.runways?.longest_ft || 0;
-  const widestRunway = airport.runways?.widest_ft || 0;
+  const widestRunway = airport.runways?.details?.reduce((max, r) => 
+    Math.max(max, r.width_ft || 0), 0) || 0;
+  
   const hasPavedRunway = airport.runways?.surface_types?.some((s: string) => 
-    s === 'ASP' || s === 'CON'
+    s === 'ASP' || s === 'CON' || s === 'Asphalt' || s === 'Concrete'
   ) || false;
   const hasILS = airport.runways?.ils_equipped || false;
   const hasLighting = airport.runways?.all_lighted || false;

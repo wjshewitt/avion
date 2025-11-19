@@ -2,8 +2,9 @@
 
 import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronDown, Search, MessageSquare } from 'lucide-react';
+import { ChevronDown, Search, MessageSquare, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useDeleteConversation } from '@/lib/tanstack/hooks/useDeleteConversation';
 
 interface Conversation {
   id: string;
@@ -27,6 +28,7 @@ export function ConversationSidebar({
 }: ConversationSidebarProps) {
   const [isExpanded, setIsExpanded] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const deleteConversation = useDeleteConversation();
 
   const filteredConversations = useMemo(() => {
     if (!searchQuery.trim()) return conversations;
@@ -37,6 +39,17 @@ export function ConversationSidebar({
       return title.includes(query) || firstMessage.includes(query);
     });
   }, [conversations, searchQuery]);
+
+  const handleDelete = (e: React.MouseEvent, conversationId: string) => {
+    e.stopPropagation(); // Prevent selecting the conversation
+    
+    // If deleting active conversation, trigger new chat
+    if (conversationId === activeConversationId) {
+      onNewChat();
+    }
+    
+    deleteConversation.mutate({ conversationId });
+  };
 
   return (
     <aside className="w-[300px] border-r border-border bg-background flex flex-col">
@@ -118,11 +131,11 @@ export function ConversationSidebar({
               'New conversation';
 
             return (
-              <button
+              <div
                 key={conv.id}
                 onClick={() => onSelectConversation(conv.id)}
                 className={cn(
-                  'w-full text-left px-4 py-3 transition-all duration-150 border-b border-border group relative',
+                  'w-full text-left px-4 py-3 transition-all duration-150 border-b border-border group relative cursor-pointer flex items-start justify-between gap-2',
                   isActive
                     ? 'bg-accent/50'
                     : 'bg-background hover:bg-accent/30'
@@ -132,7 +145,7 @@ export function ConversationSidebar({
                   <div className="absolute left-0 top-0 bottom-0 w-[2px] bg-[#F04E30]" />
                 )}
                 
-                <div className="flex flex-col gap-1">
+                <div className="flex flex-col gap-1 flex-1 min-w-0">
                   <div className="flex justify-between items-center w-full">
                     <span className={cn(
                       'text-xs font-medium truncate max-w-[180px]', 
@@ -152,7 +165,15 @@ export function ConversationSidebar({
                     </span>
                   )}
                 </div>
-              </button>
+                
+                <button
+                  onClick={(e) => handleDelete(e, conv.id)}
+                  className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 p-1 hover:bg-destructive/10 rounded-sm"
+                  title="Delete conversation"
+                >
+                  <Trash2 size={14} className="text-muted-foreground hover:text-destructive transition-colors" />
+                </button>
+              </div>
             );
           })
         )}

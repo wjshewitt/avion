@@ -8,6 +8,7 @@ import type { NaturalLanguageSummary } from "@/lib/weather/natural-language";
 
 export type AtmosphereVariant =
   | "sunny"
+  | "partly-cloudy"
   | "cloudy"
   | "heavy-rain"
   | "thunderstorm"
@@ -596,6 +597,12 @@ export function AvionAtmosphereCard({
       return (
         <WeatherContainer label="Low Vis / Fog" {...commonProps}>
           <FogEffect />
+        </WeatherContainer>
+      );
+    case "partly-cloudy":
+      return (
+        <WeatherContainer label="Partly Cloudy" {...commonProps}>
+          <CloudEffect cloud={cloudState} />
         </WeatherContainer>
       );
     case "cloudy":

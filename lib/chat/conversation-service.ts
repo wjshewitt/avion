@@ -214,38 +214,45 @@ export async function persistChatExchange({
 
     timings.persistStart = performance.now();
 
-    await supabase
-      .from('chat_messages')
-      // @ts-ignore - Supabase generated types
-      .insert(payloads);
-
     const costUsd = calculateCost({
       promptTokens: inputTokens,
       completionTokens: outputTokens,
     });
 
-    await supabase
-      .from('gemini_usage_logs')
-      // @ts-ignore - Supabase generated types
-      .insert({
-        conversation_id: conversationId,
-        flight_id: null,
-        input_tokens: inputTokens,
-        output_tokens: outputTokens,
-        cost_usd: costUsd,
-        model: modelId,
-        diagnostics: {
-          provider,
-          supportsThinking,
-          thinkingTokens: reasoningTokens,
-        },
-      });
+    // Parallelize all database writes to minimize blocking time
+    await Promise.all([
+      // 1. Insert messages
+      supabase
+        .from('chat_messages')
+        // @ts-ignore - Supabase generated types
+        .insert(payloads),
 
-    await supabase
-      .from('chat_conversations')
-      // @ts-ignore - Supabase generated types
-      .update({ updated_at: new Date().toISOString() })
-      .eq('id', conversationId);
+      // 2. Insert usage logs
+      supabase
+        .from('gemini_usage_logs')
+        // @ts-ignore - Supabase generated types
+        .insert({
+          conversation_id: conversationId,
+          flight_id: null,
+          input_tokens: inputTokens,
+          output_tokens: outputTokens,
+          cost_usd: costUsd,
+          model: modelId,
+          diagnostics: {
+            provider,
+            supportsThinking,
+            thinkingTokens: reasoningTokens,
+          },
+        }),
+
+      // 3. Update conversation timestamp
+      supabase
+        .from('chat_conversations')
+        // @ts-ignore - Supabase generated types
+        .update({ updated_at: new Date().toISOString() })
+        .eq('id', conversationId)
+    ]);
+
   } catch (error) {
     console.error('❌ Error persisting chat messages:', error);
   } finally {

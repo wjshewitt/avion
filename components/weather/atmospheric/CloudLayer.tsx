@@ -1,5 +1,6 @@
 'use client';
 
+import { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import type { CloudLayerState, CloudMotion, CloudCoverageCategory } from "@/lib/weather/clouds";
 
@@ -7,145 +8,159 @@ interface CloudEffectProps {
   cloud?: CloudLayerState;
 }
 
+interface CloudProps {
+  x: number;
+  y: number;
+  scale: number;
+  opacity: number;
+  seed: number;
+  duration: number;
+  delay: number;
+  amplitude: number;
+  type: 'cumulus' | 'cirrus' | 'storm';
+}
+
+const SVGCloud = ({ x, y, scale, opacity, seed, duration, delay, amplitude, type }: CloudProps) => {
+  // Filter parameters based on cloud type
+  const filterId = `cloud-filter-${seed}-${type}`;
+  
+  let baseFreq = "0.012";
+  let octaves = "4";
+  let displacementScale = "180";
+  
+  if (type === 'cirrus') {
+    baseFreq = "0.025";
+    octaves = "3"; 
+    displacementScale = "120";
+  } else if (type === 'storm') {
+    baseFreq = "0.008";
+    octaves = "5";
+    displacementScale = "220";
+  }
+
+  return (
+    <motion.div
+      className="absolute pointer-events-none"
+      style={{ 
+        left: `${x}%`, 
+        top: `${y}%`,
+        width: '400px',
+        height: '200px',
+        transform: `translate(-50%, -50%) scale(${scale})`,
+        opacity: opacity,
+        filter: `url(#${filterId})`
+      }}
+      animate={{
+        x: [0, amplitude, 0],
+      }}
+      transition={{
+        duration: duration,
+        repeat: Infinity,
+        ease: "easeInOut",
+        delay: delay,
+      }}
+    >
+      <svg width="0" height="0" style={{ position: 'absolute' }}>
+        <filter id={filterId}>
+          <feTurbulence 
+            type="fractalNoise" 
+            baseFrequency={baseFreq} 
+            numOctaves={octaves} 
+            seed={seed} 
+            result="noise" 
+          />
+          <feDisplacementMap 
+            in="SourceGraphic" 
+            in2="noise" 
+            scale={displacementScale} 
+          />
+          <feGaussianBlur stdDeviation="6" />
+          <feComposite operator="in" in2="SourceGraphic" />
+        </filter>
+      </svg>
+      
+      {/* Base shape that gets distorted by the filter */}
+      <div 
+        className={`w-full h-full rounded-[50%] blur-xl ${
+            type === 'storm' 
+            ? 'bg-slate-800 dark:bg-slate-900' 
+            : 'bg-white'
+        }`}
+        style={{
+            background: type === 'storm' 
+                ? 'radial-gradient(circle at 30% 30%, #475569 0%, #1e293b 100%)'
+                : 'radial-gradient(circle at 30% 30%, #ffffff 0%, #f1f5f9 100%)'
+        }}
+      />
+    </motion.div>
+  );
+};
+
 export const CloudLayer = ({ cloud }: CloudEffectProps) => {
   const cloudMotion: CloudMotion = cloud?.motion ?? "calm";
   const category: CloudCoverageCategory = cloud?.category ?? "scattered";
-  const baseOpacity = cloud?.opacity ?? 0.18;
-
-  const motionConfig = (() => {
-    if (cloudMotion === "windy") {
-      return { amplitude: 40, durationBase: 14 };
-    }
-    if (cloudMotion === "breezy") {
-      return { amplitude: 28, durationBase: 18 };
-    }
-    return { amplitude: 18, durationBase: 24 };
-  })();
-
-  const densityMultiplier = (() => {
+  
+  // Determine cloud count based on METAR category
+  const config = useMemo(() => {
     switch (category) {
-      case "overcast":
-        return 1.6;
-      case "broken":
-        return 1.3;
-      case "storm":
-        return 1.8;
-      case "high-thin":
-        return 0.7;
-      case "clear":
-        return 0.4;
-      default:
-        return 1;
+      case 'clear': return { count: 0, type: 'cumulus' as const, baseOpacity: 0 };
+      case 'few': return { count: 2, type: 'cumulus' as const, baseOpacity: 0.25 };
+      case 'high-thin': return { count: 6, type: 'cirrus' as const, baseOpacity: 0.25 };
+      case 'scattered': return { count: 4, type: 'cumulus' as const, baseOpacity: 0.3 };
+      case 'broken': return { count: 8, type: 'cumulus' as const, baseOpacity: 0.4 };
+      case 'overcast': return { count: 12, type: 'cumulus' as const, baseOpacity: 0.45 };
+      case 'storm': return { count: 15, type: 'storm' as const, baseOpacity: 0.6 };
+      default: return { count: 3, type: 'cumulus' as const, baseOpacity: 0.3 }; // Fallback for few/etc
     }
-  })();
+  }, [category]);
 
-  const effectiveOpacity = Math.min(baseOpacity * densityMultiplier, 0.7);
+  const motionParams = useMemo(() => {
+    if (cloudMotion === "windy") return { amplitude: 50, durationBase: 15 };
+    if (cloudMotion === "breezy") return { amplitude: 30, durationBase: 25 };
+    return { amplitude: 15, durationBase: 40 };
+  }, [cloudMotion]);
 
-  // Define 4 cloud groups with varied sizes, shapes, and properties
-  const clouds = [
-    // Large elongated cloud - top area, stretched wide
-    { 
-      size: 140, 
-      top: '10%', 
-      left: '5%', 
-      duration: 25, 
-      delay: 0, 
-      opacity: 0.18,
-      widthRatio: 1.4,
-      puffs: [
-        { scale: 0.5, left: '0%', top: '35%', aspectRatio: 1.3, roundness: '60% 40% 45% 55%' }, // Horizontal oval
-        { scale: 0.75, left: '25%', top: '10%', aspectRatio: 1.0, roundness: '50%' }, // Circle
-        { scale: 0.65, left: '50%', top: '0%', aspectRatio: 0.8, roundness: '45% 55% 50% 50%' }, // Vertical oval
-        { scale: 0.7, left: '75%', top: '25%', aspectRatio: 1.4, roundness: '55% 45% 60% 40%' }, // Wide oval
-      ]
-    },
-    // Medium puffy cloud - middle right
-    { 
-      size: 110, 
-      top: '40%', 
-      left: '55%', 
-      duration: 20, 
-      delay: 2, 
-      opacity: 0.22,
-      widthRatio: 1.2,
-      puffs: [
-        { scale: 0.6, left: '0%', top: '30%', aspectRatio: 1.2, roundness: '50% 50% 40% 60%' }, // Squashed oval
-        { scale: 0.8, left: '30%', top: '0%', aspectRatio: 0.9, roundness: '60% 40% 50% 50%' }, // Slightly tall
-        { scale: 0.65, left: '60%', top: '20%', aspectRatio: 1.1, roundness: '45% 55% 55% 45%' }, // Irregular round
-      ]
-    },
-    // Large wispy cloud - bottom left area, very wide
-    { 
-      size: 130, 
-      top: '60%', 
-      left: '10%', 
-      duration: 22, 
-      delay: 4, 
-      opacity: 0.2,
-      widthRatio: 1.5,
-      puffs: [
-        { scale: 0.55, left: '0%', top: '25%', aspectRatio: 1.5, roundness: '50% 50% 35% 65%' }, // Very wide
-        { scale: 0.7, left: '35%', top: '5%', aspectRatio: 1.2, roundness: '55% 45% 40% 60%' }, // Wide oval
-        { scale: 0.6, left: '70%', top: '30%', aspectRatio: 1.3, roundness: '40% 60% 50% 50%' }, // Elongated
-      ]
-    },
-    // Small dense cloud - middle area for depth
-    { 
-      size: 90, 
-      top: '30%', 
-      left: '30%', 
-      duration: 18, 
-      delay: 6, 
-      opacity: 0.25,
-      widthRatio: 1.0,
-      puffs: [
-        { scale: 0.65, left: '10%', top: '40%', aspectRatio: 0.85, roundness: '50% 50% 60% 40%' }, // Slightly tall
-        { scale: 0.85, left: '35%', top: '0%', aspectRatio: 1.0, roundness: '50%' }, // Perfect circle
-        { scale: 0.7, left: '65%', top: '25%', aspectRatio: 1.25, roundness: '60% 40% 40% 60%' }, // Horizontal oval
-      ]
-    },
-  ];
+  // Generate consistent random clouds based on category to prevent hydration mismatch or jitter
+  // In a real app with SSR, we'd use a seedable random or useEffect to set these
+  // For now using useMemo with category as dependency to act as "seed"
+  const clouds = useMemo(() => {
+    return Array.from({ length: config.count }).map((_, i) => {
+      // Pseudo-random based on index
+      const r1 = (i * 1337 + 42) % 100 / 100;
+      const r2 = (i * 91 + 12) % 100 / 100;
+      const r3 = (i * 55 + 7) % 100 / 100;
+      
+      return {
+        id: i,
+        x: 10 + (r1 * 80), // 10% to 90% width
+        y: 5 + (r2 * 60),  // 5% to 65% height (keep them mostly in upper sky)
+        scale: 0.6 + (r3 * 0.8), // 0.6 to 1.4 scale
+        opacity: config.baseOpacity * (0.7 + r1 * 0.6), // Vary opacity slightly
+        seed: i * 100, // Filter seed
+        delay: r2 * 5,
+        duration: motionParams.durationBase + (r3 * 10),
+      };
+    });
+  }, [config, motionParams]);
+
+  if (config.count === 0) return null;
 
   return (
-    <>
-      {clouds.map((cloud, idx) => (
-        <motion.div
-          key={idx}
-          className="absolute pointer-events-none"
-          style={{
-            top: cloud.top,
-            left: cloud.left,
-          }}
-          animate={{
-            x: [0, motionConfig.amplitude, 0],
-            scale: [1, 1.02, 1],
-          }}
-          transition={{
-            duration: cloud.duration + motionConfig.durationBase,
-            repeat: Infinity,
-            ease: "easeInOut",
-            delay: cloud.delay,
-          }}
-        >
-          {/* Cloud made of varied overlapping shapes (ovals, ellipses, circles) for organic appearance */}
-          <div className="relative" style={{ width: cloud.size * cloud.widthRatio, height: cloud.size * 0.5 }}>
-            {cloud.puffs.map((puff, puffIdx) => (
-              <div 
-                key={puffIdx}
-                className="absolute bg-gradient-to-br from-zinc-300/45 to-zinc-400/35 dark:from-zinc-500/55 dark:to-zinc-400/45 backdrop-blur-[3px]"
-                style={{
-                  width: cloud.size * puff.scale * puff.aspectRatio,
-                  height: cloud.size * puff.scale,
-                  left: puff.left,
-                  top: puff.top,
-                  opacity: effectiveOpacity,
-                  borderRadius: puff.roundness,
-                }}
-              />
-            ))}
-          </div>
-        </motion.div>
-      ))}
-    </>
+    <div className="absolute inset-0 overflow-hidden pointer-events-none z-10">
+       {clouds.map(c => (
+         <SVGCloud
+            key={`${category}-${c.id}`}
+            type={config.type}
+            x={c.x}
+            y={c.y}
+            scale={c.scale}
+            opacity={c.opacity}
+            seed={c.seed}
+            duration={c.duration}
+            delay={c.delay}
+            amplitude={motionParams.amplitude}
+         />
+       ))}
+    </div>
   );
 };

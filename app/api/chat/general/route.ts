@@ -176,6 +176,7 @@ export async function POST(req: NextRequest) {
 
     // ✅ CRITICAL FIX: Pass new conversation ID to client via metadata & header
     const response = result.toUIMessageStreamResponse({
+      sendReasoning: true,
       originalMessages: uiMessages,
       messageMetadata: () => buildMessageMetadata({
         conversationId: convId,

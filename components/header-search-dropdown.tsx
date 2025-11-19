@@ -128,7 +128,7 @@ export default function HeaderSearchDropdown({
       return (
         <div
           ref={dropdownRef}
-          className="absolute z-50 w-full mt-2"
+          className="absolute z-50 w-full mt-2 bg-card/95 backdrop-blur-md"
         >
           <div className="mx-auto max-w-xl rounded-sm border border-border bg-card shadow-[0_8px_24px_rgba(0,0,0,0.18)] overflow-hidden">
             <div className="p-4 text-center text-xs text-muted-foreground">
@@ -150,7 +150,7 @@ export default function HeaderSearchDropdown({
       role="listbox"
       aria-label="Search results"
     >
-      <div className="mx-auto max-w-xl rounded-sm border border-border bg-card shadow-[0_8px_24px_rgba(0,0,0,0.18)] max-h-96 overflow-y-auto">
+      <div className="mx-auto max-w-xl rounded-sm border border-border bg-card shadow-[0_8px_24px_rgba(0,0,0,0.18)] max-h-96 overflow-y-auto relative z-50">
         {isLoading && (
           <div className="p-4 flex items-center justify-center gap-3 text-xs text-muted-foreground border-b border-border/80">
             <ScannerLoader size="sm" color="text-blue" />

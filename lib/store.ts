@@ -38,6 +38,7 @@ interface AppState {
 
   // Weather pins
   pinnedAirports: string[];
+  setPinnedAirports: (icaos: string[]) => void;
   pinAirport: (icao: string) => void;
   unpinAirport: (icao: string) => void;
   isPinned: (icao: string) => boolean;
@@ -84,6 +85,7 @@ const createStore: StateCreator<AppState> = (set, get) => ({
 
   // Weather pins
   pinnedAirports: [],
+  setPinnedAirports: (icaos) => set({ pinnedAirports: icaos }),
   pinAirport: (icao) =>
     set((state) => ({
       pinnedAirports: state.pinnedAirports.includes(icao)
@@ -103,7 +105,6 @@ export const useAppStore = create<AppState>()(
     partialize: (state) => ({
       favoriteAirports: state.favoriteAirports,
       recentAirports: state.recentAirports,
-      pinnedAirports: state.pinnedAirports,
       aiChatOpen: state.aiChatOpen,
       mapCollapsed: state.mapCollapsed,
     }),

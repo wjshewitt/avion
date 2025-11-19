@@ -1,47 +1,37 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from 'react';
-import useSWR from 'swr';
+import { useState, useEffect, useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { TrackedAircraft } from '@/lib/adsb/types';
-import { debounce } from 'lodash';
+import { useDebounce } from '@/hooks/use-debounce';
 import { useTrafficFilterStore } from '@/lib/adsb/filter-store';
 import { filterTraffic } from '@/lib/adsb/filter-logic';
 
-const fetcher = (url: string) => fetch(url).then(res => res.json());
+const fetcher = async (url: string) => {
+  const res = await fetch(url);
+  if (!res.ok) throw new Error('Failed to fetch traffic');
+  return res.json() as Promise<TrackedAircraft[]>;
+};
 
 export function useLiveTraffic(bounds: { north: number, south: number, east: number, west: number } | null) {
   const { filters } = useTrafficFilterStore();
   const [trafficMap, setTrafficMap] = useState<Map<string, TrackedAircraft>>(new Map());
-  const [filteredTraffic, setFilteredTraffic] = useState<TrackedAircraft[]>([]);
-  const [debouncedBounds, setDebouncedBounds] = useState(bounds);
   
-  // Debounce the bounds update to prevent excessive fetching during pan/zoom
-  const updateBounds = useCallback(
-    debounce((newBounds) => {
-      setDebouncedBounds(newBounds);
-    }, 500), 
-    []
-  );
+  // Debounce the bounds to prevent excessive fetching
+  const debouncedBounds = useDebounce(bounds, 500);
 
-  useEffect(() => {
-    if (bounds) updateBounds(bounds);
-  }, [bounds, updateBounds]);
-
-  // Only fetch if bounds are available
-  const shouldFetch = debouncedBounds 
+  // Construct URL only when bounds are valid
+  const url = debouncedBounds 
     ? `/api/tracking/live?bounds=${debouncedBounds.north},${debouncedBounds.south},${debouncedBounds.east},${debouncedBounds.west}` 
     : null;
 
-  const { data, error } = useSWR<TrackedAircraft[]>(
-    shouldFetch,
-    fetcher,
-    {
-      refreshInterval: 2000, // Poll every 2 seconds
-      dedupingInterval: 1000,
-      keepPreviousData: true,
-      revalidateOnFocus: false
-    }
-  );
+  const { data, error, isLoading } = useQuery({
+    queryKey: ['live-traffic', debouncedBounds],
+    queryFn: () => fetcher(url!),
+    enabled: !!url,
+    refetchInterval: 2000,
+    staleTime: 1000,
+  });
 
   // 1. Merge new data into master map (Persistence Layer)
   useEffect(() => {
@@ -52,23 +42,22 @@ export function useLiveTraffic(bounds: { north: number, south: number, east: num
         
         // Merge new data
         data.forEach(aircraft => {
-          // Preserve existing data if needed, or overwrite
-          // We can also smooth data here if we wanted to lerp
+          // Normalize timestamp if it looks like seconds (year 1970-2286)
+          let lastContact = aircraft.lastContact || now;
+          if (lastContact < 10000000000) {
+             lastContact *= 1000;
+          }
+
           next.set(aircraft.icao24, {
             ...aircraft,
-            // Ensure we keep the latest timestamp
-            lastContact: Math.max(aircraft.lastContact || 0, now) 
+            // Keep the latest timestamp, ensuring we don't regress
+            lastContact: Math.max(lastContact, now) 
           });
         });
 
         // Cleanup stale aircraft (older than 60 seconds)
         for (const [id, aircraft] of next.entries()) {
-          // lastContact from API is usually epoch seconds or ms
-          // Let's assume the API returns consistent time. 
-          // If it's missing, we use 'now' from when we received it.
-          const lastSeen = aircraft.lastContact || now;
-          // 60s timeout
-          if (now - lastSeen > 60000) {
+          if (now - aircraft.lastContact > 60000) {
             next.delete(id);
           }
         }
@@ -78,16 +67,15 @@ export function useLiveTraffic(bounds: { north: number, south: number, east: num
     }
   }, [data]);
 
-  // 2. Apply filters to the master map (Presentation Layer)
-  useEffect(() => {
-    const allTraffic = Array.from(trafficMap.values());
-    const filtered = filterTraffic(allTraffic, filters);
-    setFilteredTraffic(filtered);
+  // 2. Apply filters
+  const filteredTraffic = useMemo(() => {
+     const allTraffic = Array.from(trafficMap.values());
+     return filterTraffic(allTraffic, filters);
   }, [trafficMap, filters]);
 
   return {
     traffic: filteredTraffic,
-    isLoading: !data && !error,
+    isLoading: isLoading && trafficMap.size === 0, // Only show loading if we have no data at all
     error
   };
 }

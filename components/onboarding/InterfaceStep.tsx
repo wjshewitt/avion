@@ -1,11 +1,25 @@
 "use client";
 
+import { useTheme } from "next-themes";
+
 interface InterfaceStepProps {
   theme: string;
   updateData: (data: { theme: string }) => void;
 }
 
 export function InterfaceStep({ theme, updateData }: InterfaceStepProps) {
+  const { setTheme } = useTheme();
+
+  const handleThemeChange = (newTheme: string) => {
+    updateData({ theme: newTheme });
+    // Map internal theme names to next-themes values
+    if (newTheme === "ceramic") {
+      setTheme("light");
+    } else if (newTheme === "tungsten") {
+      setTheme("dark");
+    }
+  };
+
   return (
     <div className="space-y-8">
       <div className="text-center space-y-2">
@@ -18,7 +32,7 @@ export function InterfaceStep({ theme, updateData }: InterfaceStepProps) {
       <div className="flex gap-4 justify-center">
         {/* Ceramic (Light) - Blue accent */}
         <button
-          onClick={() => updateData({ theme: "ceramic" })}
+          onClick={() => handleThemeChange("ceramic")}
           className={`group relative w-32 h-40 rounded-lg border-2 transition-all ${
             theme === "ceramic"
               ? "border-[#2563EB] shadow-lg scale-105"
@@ -43,7 +57,7 @@ export function InterfaceStep({ theme, updateData }: InterfaceStepProps) {
 
         {/* Tungsten (Dark) - Orange accent */}
         <button
-          onClick={() => updateData({ theme: "tungsten" })}
+          onClick={() => handleThemeChange("tungsten")}
           className={`group relative w-32 h-40 rounded-lg border-2 transition-all ${
             theme === "tungsten"
               ? "border-[#F04E30] shadow-lg scale-105"
